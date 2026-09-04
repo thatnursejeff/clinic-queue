@@ -8,12 +8,14 @@
 </head>
 <body class="bg-gray-100 font-sans p-6">
 
+  <!-- Top Navigation Tabs -->
   <div class="flex justify-center space-x-4 mb-6">
     <button onclick="switchTab('register')" id="btn-register" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
     <button onclick="switchTab('nurse')" id="btn-nurse" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
     <button onclick="switchTab('display')" id="btn-display" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
   </div>
 
+  <!-- SCREEN 1: REGISTRATION -->
   <div id="screen-register" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-sm border">
     <h2 class="text-xl font-bold text-gray-800 mb-1">Register New Arrival</h2>
     <p class="text-sm text-gray-500 mb-6">Enter ticket details to add client to the live queue.</p>
@@ -29,6 +31,7 @@
         <select id="service" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none bg-white">
           <option value="Vaccination">Vaccination</option>
           <option value="STI screening and care">STI screening and care</option>
+          <option value="Flu Shot">Flu Shot</option>
           <option value="General Consultation">General Consultation</option>
         </select>
       </div>
@@ -55,9 +58,11 @@
       <button type="submit" id="submitBtn" class="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition">
         Issue ticket and add to queue
       </button>
+      <p id="alertMsg" class="text-sm font-bold text-green-600 hidden text-center mt-2">✓ Patient added to queue!</p>
     </form>
   </div>
 
+  <!-- SCREEN 2: NURSE QUEUE -->
   <div id="screen-nurse" class="hidden max-w-4xl mx-auto space-y-6">
     <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between">
       <span class="text-sm font-semibold text-gray-700">Your Station:</span>
@@ -92,6 +97,7 @@
     </div>
   </div>
 
+  <!-- SCREEN 3: PUBLIC DISPLAY -->
   <div id="screen-display" class="hidden fixed inset-0 bg-white flex flex-col items-center justify-center">
     <p class="text-2xl font-semibold text-gray-400 uppercase tracking-widest mb-4">Now Serving</p>
     <div id="display-number" class="text-[18vw] font-black tracking-tight text-black leading-none">
@@ -100,17 +106,24 @@
   </div>
 
   <script>
-    // GOOGLE APPS SCRIPT DEPLOYMENT URL HERE
-    const API_URL = "https://script.google.com/macros/s/AKfycbxBEAGiSzxw6lp8BvxzDgkJ-GnEmBXve-OMdC5qq8eyVcraq68NKPKY4gI-WkZjQSWCDQ/exec";
+    //API SCRIPT HERE
+    const API_URL = "https://script.google.com/macros/s/AKfycbzFERiN6WqTFbsUsWsvTAG8J4ZE6EU7YQNoqHJwviahJGPCtrOo-bpyxOjq9jF40aug/exec
+";
 
-    function switchTab(tab) {
-      document.getElementById('screen-register').classList.add('hidden');
-      document.getElementById('screen-nurse').classList.add('hidden');
-      document.getElementById('screen-display').classList.add('hidden');
+    function switchTab(tabName) {
+      document.getElementById('screen-register').style.display = 'none';
+      document.getElementById('screen-nurse').style.display = 'none';
+      document.getElementById('screen-display').style.display = 'none';
 
-      if (tab === 'register') document.getElementById('screen-register').classList.remove('hidden');
-      if (tab === 'nurse') document.getElementById('screen-nurse').classList.remove('hidden');
-      if (tab === 'display') document.getElementById('screen-display').classList.remove('hidden');
+      if (tabName === 'register') {
+        document.getElementById('screen-register').style.display = 'block';
+      } else if (tabName === 'nurse') {
+        document.getElementById('screen-nurse').style.display = 'block';
+        fetchQueue();
+      } else if (tabName === 'display') {
+        document.getElementById('screen-display').style.display = 'flex';
+        fetchQueue();
+      }
     }
 
     async function fetchQueue() {
@@ -119,13 +132,13 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        // Update Stat Counters
-        const waiting = data.filter(r => r.Status === 'Waiting');
+        // Filter Rows
+        const waiting = data.filter(r => (r.Status || '').trim() === 'Waiting');
         document.getElementById('count-waiting').innerText = waiting.length;
-        document.getElementById('count-nurse').innerText = data.filter(r => r.Status === 'With Nurse').length;
-        document.getElementById('count-completed').innerText = data.filter(r => r.Status === 'Completed').length;
+        document.getElementById('count-nurse').innerText = data.filter(r => (r.Status || '').trim() === 'With Nurse').length;
+        document.getElementById('count-completed').innerText = data.filter(r => (r.Status || '').trim() === 'Completed').length;
 
-        // Render Nurse Queue Items
+        // Render Nurse List
         const queueList = document.getElementById('queue-list');
         queueList.innerHTML = '';
 
@@ -136,13 +149,13 @@
             queueList.innerHTML += `
               <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border">
                 <div class="flex items-center space-x-4">
-                  <span class="text-2xl font-black text-black">${item.TicketNumber}</span>
+                  <span class="text-2xl font-black text-black">${item.TicketNumber || item.Ticketnumber}</span>
                   <div>
                     <p class="font-bold text-gray-800 text-sm">${item.Service}</p>
-                    <p class="text-xs text-gray-500">${item.ApptType} ${item.ApptTime ? '• ' + item.ApptTime : ''}</p>
+                    <p class="text-xs text-gray-500">${item.ApptType || ''} ${item.ApptTime ? '• ' + item.ApptTime : ''}</p>
                   </div>
                 </div>
-                <button onclick="callPatient('${item.TicketNumber}')" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
+                <button onclick="callPatient('${item.TicketNumber || item.Ticketnumber}')" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
                   Call Patient
                 </button>
               </div>
@@ -150,10 +163,10 @@
           });
         }
 
-        // Render TV Screen Number
-        const lastCalled = data.filter(r => r.Status === 'With Nurse').pop();
+        // Render Public Display Screen
+        const lastCalled = data.filter(r => (r.Status || '').trim() === 'With Nurse').pop();
         if (lastCalled) {
-          document.getElementById('display-number').innerText = `${lastCalled.TicketNumber} - ${lastCalled.StationID || 'A'}`;
+          document.getElementById('display-number').innerText = `${lastCalled.TicketNumber || lastCalled.Ticketnumber} - ${lastCalled.StationID || 'A'}`;
         }
       } catch (err) {
         console.error("Fetch error:", err);
@@ -163,6 +176,7 @@
     async function submitRegistration(e) {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
+      const alertMsg = document.getElementById('alertMsg');
       btn.innerText = "Adding...";
       btn.disabled = true;
 
@@ -174,31 +188,37 @@
         appTime: document.getElementById('appTime').value
       };
 
+      // POST with mode: 'no-cors' prevents browser blocks on Google Apps Script redirects
       await fetch(API_URL, {
         method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
 
       document.getElementById('regForm').reset();
       btn.innerText = "Issue ticket and add to queue";
       btn.disabled = false;
-      switchTab('nurse');
-      fetchQueue();
+
+      // Confirmation message without switching screens
+      alertMsg.classList.remove('hidden');
+      setTimeout(() => alertMsg.classList.add('hidden'), 3000);
     }
 
     async function callPatient(ticketNum) {
       const station = document.getElementById('stationSelect').value;
       await fetch(API_URL, {
         method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
       });
-      fetchQueue();
+      setTimeout(fetchQueue, 1000);
     }
 
-    // Default to Registration tab & set auto-refresh
+    // Initialize View
     switchTab('register');
     setInterval(fetchQueue, 3000);
-    fetchQueue();
   </script>
 </body>
 </html>
