@@ -8,14 +8,12 @@
 </head>
 <body class="bg-gray-100 font-sans p-6">
 
-  <!-- Top Navigation Tabs -->
   <div class="flex justify-center space-x-4 mb-6">
     <button onclick="switchTab('register')" id="btn-register" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
     <button onclick="switchTab('nurse')" id="btn-nurse" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
     <button onclick="switchTab('display')" id="btn-display" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
   </div>
 
-  <!-- SCREEN 1: REGISTRATION -->
   <div id="screen-register" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-sm border">
     <h2 class="text-xl font-bold text-gray-800 mb-1">Register New Arrival</h2>
     <p class="text-sm text-gray-500 mb-6">Enter ticket details to add client to the live queue.</p>
@@ -62,7 +60,6 @@
     </form>
   </div>
 
-  <!-- SCREEN 2: NURSE QUEUE -->
   <div id="screen-nurse" class="hidden max-w-4xl mx-auto space-y-6">
     <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between">
       <span class="text-sm font-semibold text-gray-700">Your Station:</span>
@@ -97,7 +94,6 @@
     </div>
   </div>
 
-  <!-- SCREEN 3: PUBLIC DISPLAY -->
   <div id="screen-display" class="hidden fixed inset-0 bg-white flex flex-col items-center justify-center">
     <p class="text-2xl font-semibold text-gray-400 uppercase tracking-widest mb-4">Now Serving</p>
     <div id="display-number" class="text-[18vw] font-black tracking-tight text-black leading-none">
@@ -106,9 +102,8 @@
   </div>
 
   <script>
-    //API SCRIPT HERE
-    const API_URL = "https://script.google.com/macros/s/AKfycbzFERiN6WqTFbsUsWsvTAG8J4ZE6EU7YQNoqHJwviahJGPCtrOo-bpyxOjq9jF40aug/exec
-";
+    // Make sure your Google Apps Script URL is placed inside the quotes below:
+    const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     function switchTab(tabName) {
       document.getElementById('screen-register').style.display = 'none';
@@ -132,13 +127,11 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        // Filter Rows
-        const waiting = data.filter(r => (r.Status || '').trim() === 'Waiting');
+        const waiting = data.filter(r => (r.Status || '').toString().trim() === 'Waiting');
         document.getElementById('count-waiting').innerText = waiting.length;
-        document.getElementById('count-nurse').innerText = data.filter(r => (r.Status || '').trim() === 'With Nurse').length;
-        document.getElementById('count-completed').innerText = data.filter(r => (r.Status || '').trim() === 'Completed').length;
+        document.getElementById('count-nurse').innerText = data.filter(r => (r.Status || '').toString().trim() === 'With Nurse').length;
+        document.getElementById('count-completed').innerText = data.filter(r => (r.Status || '').toString().trim() === 'Completed').length;
 
-        // Render Nurse List
         const queueList = document.getElementById('queue-list');
         queueList.innerHTML = '';
 
@@ -146,16 +139,17 @@
           queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
         } else {
           waiting.forEach(item => {
+            const ticket = item.TicketNumber || item.Ticketnumber || '';
             queueList.innerHTML += `
               <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border">
                 <div class="flex items-center space-x-4">
-                  <span class="text-2xl font-black text-black">${item.TicketNumber || item.Ticketnumber}</span>
+                  <span class="text-2xl font-black text-black">${ticket}</span>
                   <div>
-                    <p class="font-bold text-gray-800 text-sm">${item.Service}</p>
+                    <p class="font-bold text-gray-800 text-sm">${item.Service || ''}</p>
                     <p class="text-xs text-gray-500">${item.ApptType || ''} ${item.ApptTime ? '• ' + item.ApptTime : ''}</p>
                   </div>
                 </div>
-                <button onclick="callPatient('${item.TicketNumber || item.Ticketnumber}')" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
+                <button onclick="callPatient('${ticket}')" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
                   Call Patient
                 </button>
               </div>
@@ -163,10 +157,10 @@
           });
         }
 
-        // Render Public Display Screen
-        const lastCalled = data.filter(r => (r.Status || '').trim() === 'With Nurse').pop();
+        const lastCalled = data.filter(r => (r.Status || '').toString().trim() === 'With Nurse').pop();
         if (lastCalled) {
-          document.getElementById('display-number').innerText = `${lastCalled.TicketNumber || lastCalled.Ticketnumber} - ${lastCalled.StationID || 'A'}`;
+          const calledTicket = lastCalled.TicketNumber || lastCalled.Ticketnumber || '';
+          document.getElementById('display-number').innerText = `${calledTicket} - ${lastCalled.StationID || 'A'}`;
         }
       } catch (err) {
         console.error("Fetch error:", err);
@@ -188,37 +182,42 @@
         appTime: document.getElementById('appTime').value
       };
 
-      // POST with mode: 'no-cors' prevents browser blocks on Google Apps Script redirects
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error("Submit error:", err);
+      }
 
       document.getElementById('regForm').reset();
       btn.innerText = "Issue ticket and add to queue";
       btn.disabled = false;
 
-      // Confirmation message without switching screens
       alertMsg.classList.remove('hidden');
       setTimeout(() => alertMsg.classList.add('hidden'), 3000);
     }
 
     async function callPatient(ticketNum) {
       const station = document.getElementById('stationSelect').value;
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
-      });
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
+        });
+      } catch (err) {
+        console.error("Call error:", err);
+      }
       setTimeout(fetchQueue, 1000);
     }
 
-    // Initialize View
     switchTab('register');
     setInterval(fetchQueue, 3000);
   </script>
 </body>
-
+</html>
