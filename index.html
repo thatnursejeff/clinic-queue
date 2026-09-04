@@ -2,101 +2,203 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>PHMU-Q</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinic Queue Management</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans p-6">
 
   <div class="flex justify-center space-x-4 mb-6">
-    <button onclick="showTab('register')" class="px-4 py-2 bg-white shadow rounded-lg font-bold">Registration</button>
-    <button onclick="showTab('nurse')" class="px-4 py-2 bg-white shadow rounded-lg font-bold">Nurse Queue</button>
-    <button onclick="showTab('tv')" class="px-4 py-2 bg-white shadow rounded-lg font-bold">Public Display</button>
+    <button onclick="switchTab('register')" id="btn-register" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
+    <button onclick="switchTab('nurse')" id="btn-nurse" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
+    <button onclick="switchTab('display')" id="btn-display" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
   </div>
 
-  <div id="nurse-tab" class="max-w-5xl mx-auto space-y-6">
+  <div id="screen-register" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-sm border">
+    <h2 class="text-xl font-bold text-gray-800 mb-1">Register New Arrival</h2>
+    <p class="text-sm text-gray-500 mb-6">Enter ticket details to add client to the live queue.</p>
+
+    <form id="regForm" onsubmit="submitRegistration(event)" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Ticket Number</label>
+        <input type="text" id="ticketNum" required placeholder="e.g. 101" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none">
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Service Required</label>
+        <select id="service" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none bg-white">
+          <option value="Vaccination">Vaccination</option>
+          <option value="STI screening and care">STI screening and care</option>
+          <option value="Flu Shot">Flu Shot</option>
+          <option value="General Consultation">General Consultation</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Appointment Type</label>
+        <div class="flex space-x-4 mt-1">
+          <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+            <input type="radio" name="appType" value="Booked appointment" checked class="w-4 h-4 text-black">
+            <span>Booked appointment</span>
+          </label>
+          <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+            <input type="radio" name="appType" value="Drop-in walk-in" class="w-4 h-4 text-black">
+            <span>Drop-in walk-in</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Appointment Time</label>
+        <input type="time" id="appTime" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none">
+      </div>
+
+      <button type="submit" id="submitBtn" class="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition">
+        Issue ticket and add to queue
+      </button>
+    </form>
+  </div>
+
+  <div id="screen-nurse" class="hidden max-w-4xl mx-auto space-y-6">
+    <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between">
+      <span class="text-sm font-semibold text-gray-700">Your Station:</span>
+      <select id="stationSelect" class="p-2 border rounded-lg font-bold text-gray-800 bg-gray-50 outline-none">
+        <option value="Station A">Station A</option>
+        <option value="Station B">Station B</option>
+        <option value="Station C">Station C</option>
+      </select>
+    </div>
+
     <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white p-4 rounded-xl shadow">
-        <p class="text-sm text-gray-500">Waiting</p>
-        <p id="count-waiting" class="text-3xl font-bold">0</p>
+      <div class="bg-white p-4 rounded-xl shadow-sm border">
+        <p class="text-xs text-gray-500 font-semibold uppercase">Waiting</p>
+        <p id="count-waiting" class="text-3xl font-bold text-gray-900 mt-1">0</p>
       </div>
-      <div class="bg-white p-4 rounded-xl shadow">
-        <p class="text-sm text-gray-500">With Nurses</p>
-        <p id="count-nurse" class="text-3xl font-bold">0</p>
+      <div class="bg-white p-4 rounded-xl shadow-sm border">
+        <p class="text-xs text-gray-500 font-semibold uppercase">With Nurses</p>
+        <p id="count-nurse" class="text-3xl font-bold text-gray-900 mt-1">0</p>
       </div>
-      <div class="bg-white p-4 rounded-xl shadow">
-        <p class="text-sm text-gray-500">Completed</p>
-        <p id="count-completed" class="text-3xl font-bold">0</p>
+      <div class="bg-white p-4 rounded-xl shadow-sm border">
+        <p class="text-xs text-gray-500 font-semibold uppercase">Completed</p>
+        <p id="count-completed" class="text-3xl font-bold text-gray-900 mt-1">0</p>
       </div>
     </div>
 
-    <div class="bg-white p-6 rounded-xl shadow">
-      <h2 class="text-xl font-bold mb-4">Waiting Clients</h2>
-      <div id="queue-list" class="space-y-3"></div>
+    <div class="bg-white p-6 rounded-2xl shadow-sm border">
+      <h3 class="text-lg font-bold text-gray-800 mb-1">Waiting Clients</h3>
+      <p class="text-xs text-gray-500 mb-4">Booked appointments appear first, followed by drop-ins.</p>
+      <div id="queue-list" class="space-y-3">
+        <p class="text-sm text-gray-400">Loading queue...</p>
+      </div>
     </div>
   </div>
 
-  <div id="tv-tab" class="hidden fixed inset-0 bg-white flex items-center justify-center">
-    <div id="tv-number" class="text-[18vw] font-extrabold tracking-tight text-black">
+  <div id="screen-display" class="hidden fixed inset-0 bg-white flex flex-col items-center justify-center">
+    <p class="text-2xl font-semibold text-gray-400 uppercase tracking-widest mb-4">Now Serving</p>
+    <div id="display-number" class="text-[18vw] font-black tracking-tight text-black leading-none">
       --
     </div>
   </div>
 
   <script>
+    // GOOGLE APPS SCRIPT DEPLOYMENT URL HERE
     const API_URL = "https://script.google.com/macros/s/AKfycbzFERiN6WqTFbsUsWsvTAG8J4ZE6EU7YQNoqHJwviahJGPCtrOo-bpyxOjq9jF40aug/exec
 ";
 
+    function switchTab(tab) {
+      document.getElementById('screen-register').classList.add('hidden');
+      document.getElementById('screen-nurse').classList.add('hidden');
+      document.getElementById('screen-display').classList.add('hidden');
+
+      if (tab === 'register') document.getElementById('screen-register').classList.remove('hidden');
+      if (tab === 'nurse') document.getElementById('screen-nurse').classList.remove('hidden');
+      if (tab === 'display') document.getElementById('screen-display').classList.remove('hidden');
+    }
+
     async function fetchQueue() {
-      const res = await fetch(API_URL);
-      const data = await res.json();
+      if (!API_URL || API_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) return;
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
 
-      // Update Stat Counts
-      document.getElementById('count-waiting').innerText = data.filter(r => r.Status === 'Waiting').length;
-      document.getElementById('count-nurse').innerText = data.filter(r => r.Status === 'With Nurse').length;
-      document.getElementById('count-completed').innerText = data.filter(r => r.Status === 'Completed').length;
+        // Update Stat Counters
+        const waiting = data.filter(r => r.Status === 'Waiting');
+        document.getElementById('count-waiting').innerText = waiting.length;
+        document.getElementById('count-nurse').innerText = data.filter(r => r.Status === 'With Nurse').length;
+        document.getElementById('count-completed').innerText = data.filter(r => r.Status === 'Completed').length;
 
-      // Render Nurse Queue
-      const queueList = document.getElementById('queue-list');
-      queueList.innerHTML = '';
+        // Render Nurse Queue Items
+        const queueList = document.getElementById('queue-list');
+        queueList.innerHTML = '';
 
-      data.filter(r => r.Status === 'Waiting').forEach(item => {
-        queueList.innerHTML += `
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-            <div>
-              <span class="text-2xl font-bold mr-4">${item.TicketNumber}</span>
-              <span class="text-gray-700 font-medium">${item.Service}</span>
-              <span class="text-sm text-gray-400 ml-2">(${item.ApptType})</span>
-            </div>
-            <button onclick="callPatient('${item.TicketNumber}')" class="bg-black text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800">
-              Call to Station A
-            </button>
-          </div>
-        `;
-      });
+        if (waiting.length === 0) {
+          queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
+        } else {
+          waiting.forEach(item => {
+            queueList.innerHTML += `
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border">
+                <div class="flex items-center space-x-4">
+                  <span class="text-2xl font-black text-black">${item.TicketNumber}</span>
+                  <div>
+                    <p class="font-bold text-gray-800 text-sm">${item.Service}</p>
+                    <p class="text-xs text-gray-500">${item.ApptType} ${item.ApptTime ? '• ' + item.ApptTime : ''}</p>
+                  </div>
+                </div>
+                <button onclick="callPatient('${item.TicketNumber}')" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
+                  Call Patient
+                </button>
+              </div>
+            `;
+          });
+        }
 
-      // Render Public Display TV Number (Latest Called)
-      const lastCalled = data.filter(r => r.Status === 'With Nurse').pop();
-      if (lastCalled) {
-        document.getElementById('tv-number').innerText = `${lastCalled.TicketNumber} - ${lastCalled.StationID || 'A'}`;
+        // Render TV Screen Number
+        const lastCalled = data.filter(r => r.Status === 'With Nurse').pop();
+        if (lastCalled) {
+          document.getElementById('display-number').innerText = `${lastCalled.TicketNumber} - ${lastCalled.StationID || 'A'}`;
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
       }
     }
 
-    async function callPatient(ticketNum) {
+    async function submitRegistration(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.innerText = "Adding...";
+      btn.disabled = true;
+
+      const payload = {
+        action: 'add',
+        ticketNum: document.getElementById('ticketNum').value,
+        service: document.getElementById('service').value,
+        appType: document.querySelector('input[name="appType"]:checked').value,
+        appTime: document.getElementById('appTime').value
+      };
+
       await fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: 'Station A' })
+        body: JSON.stringify(payload)
+      });
+
+      document.getElementById('regForm').reset();
+      btn.innerText = "Issue ticket and add to queue";
+      btn.disabled = false;
+      switchTab('nurse');
+      fetchQueue();
+    }
+
+    async function callPatient(ticketNum) {
+      const station = document.getElementById('stationSelect').value;
+      await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
       });
       fetchQueue();
     }
 
-    function showTab(tab) {
-      if (tab === 'tv') {
-        document.getElementById('tv-tab').classList.remove('hidden');
-      } else {
-        document.getElementById('tv-tab').classList.add('hidden');
-      }
-    }
-
-    // Auto Refresh Queue Data every 3 seconds
+    // Default to Registration tab & set auto-refresh
+    switchTab('register');
     setInterval(fetchQueue, 3000);
     fetchQueue();
   </script>
