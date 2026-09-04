@@ -101,37 +101,40 @@ E<!DOCTYPE html>
     </div>
   </div>
 
-  <script>
-    // API HERE
-    const API_URL = "https://script.google.com/macros/s/AKfycbzFERiN6WqTFbsUsWsvTAG8J4ZE6EU7YQNoqHJwviahJGPCtrOo-bpyxOjq9jF40aug/exec
-";
+    <script>
+    const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     function switchTab(tabName) {
+      // 1. Force hide all screens using inline style overrides
       document.getElementById('screen-register').style.display = 'none';
       document.getElementById('screen-nurse').style.display = 'none';
       document.getElementById('screen-display').style.display = 'none';
 
+      // 2. Display selected screen
       if (tabName === 'register') {
         document.getElementById('screen-register').style.display = 'block';
       } else if (tabName === 'nurse') {
         document.getElementById('screen-nurse').style.display = 'block';
-        fetchQueue();
+        try { fetchQueue(); } catch(e) { console.error(e); }
       } else if (tabName === 'display') {
         document.getElementById('screen-display').style.display = 'flex';
-        fetchQueue();
+        try { fetchQueue(); } catch(e) { console.error(e); }
       }
     }
 
     async function fetchQueue() {
       if (!API_URL || API_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) return;
+      
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        const waiting = data.filter(r => (r.Status || '').toString().trim() === 'Waiting');
+        // Safe filtering (handles missing or null values gracefully)
+        const waiting = data.filter(r => r && String(r.Status || '').trim() === 'Waiting');
+        
         document.getElementById('count-waiting').innerText = waiting.length;
-        document.getElementById('count-nurse').innerText = data.filter(r => (r.Status || '').toString().trim() === 'With Nurse').length;
-        document.getElementById('count-completed').innerText = data.filter(r => (r.Status || '').toString().trim() === 'Completed').length;
+        document.getElementById('count-nurse').innerText = data.filter(r => r && String(r.Status || '').trim() === 'With Nurse').length;
+        document.getElementById('count-completed').innerText = data.filter(r => r && String(r.Status || '').trim() === 'Completed').length;
 
         const queueList = document.getElementById('queue-list');
         queueList.innerHTML = '';
@@ -140,14 +143,18 @@ E<!DOCTYPE html>
           queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
         } else {
           waiting.forEach(item => {
-            const ticket = item.TicketNumber || item.Ticketnumber || '';
+            const ticket = item.TicketNumber || item.Ticketnumber || 'N/A';
+            const service = item.Service || 'General';
+            const appt = item.ApptType || '';
+            const time = item.ApptTime ? '• ' + item.ApptTime : '';
+
             queueList.innerHTML += `
               <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border">
                 <div class="flex items-center space-x-4">
                   <span class="text-2xl font-black text-black">${ticket}</span>
                   <div>
-                    <p class="font-bold text-gray-800 text-sm">${item.Service || ''}</p>
-                    <p class="text-xs text-gray-500">${item.ApptType || ''} ${item.ApptTime ? '• ' + item.ApptTime : ''}</p>
+                    <p class="font-bold text-gray-800 text-sm">${service}</p>
+                    <p class="text-xs text-gray-500">${appt} ${time}</p>
                   </div>
                 </div>
                 <button onclick="callPatient('${ticket}')" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
@@ -158,13 +165,13 @@ E<!DOCTYPE html>
           });
         }
 
-        const lastCalled = data.filter(r => (r.Status || '').toString().trim() === 'With Nurse').pop();
+        const lastCalled = data.filter(r => r && String(r.Status || '').trim() === 'With Nurse').pop();
         if (lastCalled) {
           const calledTicket = lastCalled.TicketNumber || lastCalled.Ticketnumber || '';
           document.getElementById('display-number').innerText = `${calledTicket} - ${lastCalled.StationID || 'A'}`;
         }
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.warn("Queue update pending API response...", err);
       }
     }
 
@@ -190,8 +197,8 @@ E<!DOCTYPE html>
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify(payload)
         });
-      } catch (err) {
-        console.error("Submit error:", err);
+      } catch(err) {
+        console.error(err);
       }
 
       document.getElementById('regForm').reset();
@@ -211,14 +218,16 @@ E<!DOCTYPE html>
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
         });
-      } catch (err) {
-        console.error("Call error:", err);
+      } catch(err) {
+        console.error(err);
       }
       setTimeout(fetchQueue, 1000);
     }
 
+    // Set view immediately on load
     switchTab('register');
-    setInterval(fetchQueue, 3000);
+    setInterval(fetchQueue, 4000);
   </script>
+
 </body>
 </html>
