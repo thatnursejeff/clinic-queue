@@ -470,10 +470,21 @@
     }
 
     function recallCurrentPatient() {
-      if (!activePatient) return;
-      const ticket = activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum;
-      callPatient(ticket);
-    }
+  if (!activePatient) return;
+  
+  // Safely extract ticket number regardless of letter casing
+  const ticket = activePatient.TicketNumber || 
+                 activePatient.ticketNumber || 
+                 activePatient.Ticketnumber || 
+                 activePatient.ticketNum || 
+                 activePatient.ticketnum;
+
+  if (ticket) {
+    callPatient(ticket);
+  } else {
+    console.error("Could not find ticket number on active patient:", activePatient);
+  }
+}
 
     async function completeCurrentPatient() {
       if (!activePatient) return;
