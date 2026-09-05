@@ -144,293 +144,300 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwcLsuz147a8DUXcRtMSqfVOmlBAOgeKzShTEoEK-5ySbX_ck9bYh7G-dgwhLOPAE2_gQ/exec";
-    let activePatient = null;
-    let lastAnnouncedTicket = null;
+  const API_URL = "https://script.google.com/macros/s/AKfycbx5OfXYDVdktrvjLv3F7NblPDIFe7FBY84dQ-220F04JQLOcrWq6eX8zA6SRY8GXwYUVA/exec";
+  let activePatient = null;
+  let lastAnnouncedTicket = null;
 
-    // Play Chime & Announce using Female Voice
-    function playChimeAndAnnounce(ticketNum, stationId) {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const playTone = (freq, start, duration) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.frequency.value = freq;
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(audioCtx.currentTime + start);
-          gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + start + duration);
-          osc.stop(audioCtx.currentTime + start + duration);
-        };
-        playTone(523.25, 0, 0.6);
-        playTone(659.25, 0.3, 0.8);
-
-        setTimeout(() => {
-          if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const text = `Now serving number ${ticketNum} at ${stationId}`;
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 0.9;
-
-            // Select Female Voice
-            const voices = window.speechSynthesis.getVoices();
-            const femaleVoice = voices.find(v => 
-              v.lang.startsWith('en') && 
-              (v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Zira') || v.name.includes('Karen') || v.name.includes('Female'))
-            ) || voices.find(v => v.lang.startsWith('en'));
-
-            if (femaleVoice) utterance.voice = femaleVoice;
-            window.speechSynthesis.speak(utterance);
-          }
-        }, 1000);
-      } catch (e) {
-        console.error("Audio playback error:", e);
-      }
-    }
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
-    }
-
-    function switchTab(tabName) {
-      document.getElementById('screen-register').style.display = 'none';
-      document.getElementById('screen-nurse').style.display = 'none';
-      document.getElementById('screen-display').style.display = 'none';
-
-      if (tabName === 'register') {
-        document.getElementById('screen-register').style.display = 'block';
-      } else if (tabName === 'nurse') {
-        document.getElementById('screen-nurse').style.display = 'block';
-        fetchQueue();
-      } else if (tabName === 'display') {
-        document.getElementById('screen-display').style.display = 'flex';
-        fetchQueue();
-      }
-    }
-
-    function setSafeText(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.innerText = value;
-    }
-
-    async function fetchQueue() {
-      if (!API_URL) return;
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-
-        const waiting = data.filter(r => r && String(r.Status || '').trim() === 'Waiting');
-        
-        setSafeText('count-waiting', waiting.length);
-        setSafeText('count-nurse', data.filter(r => r && String(r.Status || '').trim() === 'With Nurse').length);
-        setSafeText('count-completed', data.filter(r => r && String(r.Status || '').trim() === 'Completed').length);
-
-        const stationEl = document.getElementById('stationSelect');
-        const currentStation = stationEl ? stationEl.value : 'Station A';
-        
-        // Find active patient matching THIS SPECIFIC STATION
-        const myActive = data.find(r => 
-          r && 
-          String(r.Status || '').trim() === 'With Nurse' && 
-          String(r.StationID || '').trim().toLowerCase() === currentStation.trim().toLowerCase()
-        );
-
-        const activeBox = document.getElementById('active-client-box');
-        if (myActive) {
-          activePatient = myActive;
-          const ticket = myActive.TicketNumber || myActive.Ticketnumber || 'N/A';
-          setSafeText('active-station-label', `Currently Serving at ${currentStation}`);
-          setSafeText('active-ticket-num', ticket);
-          setSafeText('active-service', myActive.Service || '');
-          setSafeText('active-appt-info', `${myActive.ApptType || ''} ${myActive.ApptTime ? '• ' + myActive.ApptTime : ''}`);
-          if (activeBox) activeBox.classList.remove('hidden');
-        } else {
-          activePatient = null;
-          if (activeBox) activeBox.classList.add('hidden');
-        }
-
-        const queueList = document.getElementById('queue-list');
-        if (queueList) {
-          queueList.innerHTML = '';
-          if (waiting.length === 0) {
-            queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
-          } else {
-            waiting.forEach(item => {
-              const ticket = item.TicketNumber || item.Ticketnumber || 'N/A';
-              const service = item.Service || '';
-              const apptType = item.ApptType || '';
-              const apptTime = item.ApptTime ? ' • ' + item.ApptTime : '';
-
-              const row = document.createElement('div');
-              row.className = "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
-              row.innerHTML = `
-                <div class="flex items-center space-x-4">
-                  <span class="text-2xl font-black text-black">${ticket}</span>
-                  <div>
-                    <p class="font-bold text-gray-800 text-sm">${service}</p>
-                    <p class="text-xs text-gray-500">${apptType}${apptTime}</p>
-                  </div>
-                </div>
-                <button type="button" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
-                  Call Patient
-                </button>
-              `;
-              
-              row.querySelector('button').onclick = function() {
-                callPatient(ticket);
-              };
-
-              queueList.appendChild(row);
-            });
-          }
-        }
-
-        const calledPatients = data
-          .filter(r => r && String(r.Status || '').trim() === 'With Nurse')
-          .reverse();
-
-        const primaryBox = document.getElementById('display-primary');
-        const sec1 = document.getElementById('display-secondary-1');
-        const sec2 = document.getElementById('display-secondary-2');
-
-        const displayScreen = document.getElementById('screen-display');
-        const isDisplayActive = displayScreen && displayScreen.style.display !== 'none';
-
-        if (primaryBox) {
-          if (calledPatients[0]) {
-            const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || '';
-            const s0 = calledPatients[0].StationID || 'Station A';
-            primaryBox.innerHTML = `
-              <span class="text-8xl font-black tracking-tight leading-none">${t0}</span>
-              <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
-            `;
-
-            if (lastAnnouncedTicket !== t0 && isDisplayActive) {
-              lastAnnouncedTicket = t0;
-              playChimeAndAnnounce(t0, s0);
-            }
-          } else {
-            primaryBox.innerHTML = `<span class="text-6xl font-black text-gray-600">--</span>`;
-          }
-        }
-
-        if (sec1) {
-          if (calledPatients[1]) {
-            const t1 = calledPatients[1].TicketNumber || calledPatients[1].Ticketnumber || '';
-            const s1 = calledPatients[1].StationID || '';
-            sec1.innerHTML = `
-              <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-              <span class="text-3xl font-black">${t1}</span>
-              <p class="text-xs text-gray-400 font-bold">${s1}</p>
-            `;
-          } else {
-            sec1.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
-          }
-        }
-
-        if (sec2) {
-          if (calledPatients[2]) {
-            const t2 = calledPatients[2].TicketNumber || calledPatients[2].Ticketnumber || '';
-            const s2 = calledPatients[2].StationID || '';
-            sec2.innerHTML = `
-              <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-              <span class="text-3xl font-black">${t2}</span>
-              <p class="text-xs text-gray-400 font-bold">${s2}</p>
-            `;
-          } else {
-            sec2.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
-          }
-        }
-
-      } catch (err) {
-        console.error("Fetch error:", err);
-      }
-    }
-
-    async function submitRegistration(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      const alertMsg = document.getElementById('alertMsg');
-      if (btn) {
-        btn.innerText = "Adding...";
-        btn.disabled = true;
-      }
-
-      const payload = {
-        action: 'add',
-        ticketNum: document.getElementById('ticketNum').value,
-        service: document.getElementById('service').value,
-        appType: document.querySelector('input[name="appType"]:checked').value,
-        appTime: document.getElementById('appTime').value
+  // Play Chime & Announce using Female Voice
+  function playChimeAndAnnounce(ticketNum, stationId) {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const playTone = (freq, start, duration) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + start);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + start + duration);
+        osc.stop(audioCtx.currentTime + start + duration);
       };
+      playTone(523.25, 0, 0.6);
+      playTone(659.25, 0.3, 0.8);
 
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify(payload)
-        });
-      } catch (err) {
-        console.error("Submission error:", err);
-      }
+      setTimeout(() => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const text = `Now serving number ${ticketNum} at ${stationId}`;
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 0.9;
 
-      document.getElementById('regForm').reset();
-      if (btn) {
-        btn.innerText = "Issue ticket and add to queue";
-        btn.disabled = false;
-      }
+          // Select Female Voice
+          const voices = window.speechSynthesis.getVoices();
+          const femaleVoice = voices.find(v => 
+            v.lang.startsWith('en') && 
+            (v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Zira') || v.name.includes('Karen') || v.name.includes('Female'))
+          ) || voices.find(v => v.lang.startsWith('en'));
 
-      if (alertMsg) {
-        alertMsg.classList.remove('hidden');
-        setTimeout(() => alertMsg.classList.add('hidden'), 3000);
-      }
-      setTimeout(fetchQueue, 1000);
+          if (femaleVoice) utterance.voice = femaleVoice;
+          window.speechSynthesis.speak(utterance);
+        }
+      }, 1000);
+    } catch (e) {
+      console.error("Audio playback error:", e);
     }
+  }
 
-    async function callPatient(ticketNum) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+  }
+
+  function switchTab(tabName) {
+    document.getElementById('screen-register').style.display = 'none';
+    document.getElementById('screen-nurse').style.display = 'none';
+    document.getElementById('screen-display').style.display = 'none';
+
+    if (tabName === 'register') {
+      document.getElementById('screen-register').style.display = 'block';
+    } else if (tabName === 'nurse') {
+      document.getElementById('screen-nurse').style.display = 'block';
+      fetchQueue();
+    } else if (tabName === 'display') {
+      document.getElementById('screen-display').style.display = 'flex';
+      fetchQueue();
+    }
+  }
+
+  function setSafeText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = value;
+  }
+
+  async function fetchQueue() {
+    if (!API_URL) return;
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+
+      const waiting = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting');
+      
+      setSafeText('count-waiting', waiting.length);
+      setSafeText('count-nurse', data.filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse').length);
+      setSafeText('count-completed', data.filter(r => r && String(r.Status || r.status || '').trim() === 'Completed').length);
+
       const stationEl = document.getElementById('stationSelect');
-      const station = stationEl ? stationEl.value : 'Station A';
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
-        });
-      } catch (err) {
-        console.error("Call error:", err);
-      }
-      setTimeout(fetchQueue, 1000);
-    }
+      const currentStation = stationEl ? stationEl.value : 'Station A';
+      
+      // Find active patient matching THIS SPECIFIC STATION
+      const myActive = data.find(r => {
+        if (!r) return false;
+        const status = String(r.Status || r.status || '').trim().toLowerCase();
+        const station = String(r.StationID || r.stationId || r.Station || r.station || '').trim().toLowerCase();
+        return status === 'with nurse' && station === currentStation.trim().toLowerCase();
+      });
 
-    function recallCurrentPatient() {
-      if (!activePatient) return;
-      const ticket = activePatient.TicketNumber || activePatient.Ticketnumber;
-      lastAnnouncedTicket = null;
-      callPatient(ticket);
-    }
-
-    async function completeCurrentPatient() {
-      if (!activePatient) return;
-      const ticket = activePatient.TicketNumber || activePatient.Ticketnumber;
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'complete', ticketNum: ticket, ticketNo: ticket })
-        });
-      } catch (err) {
-        console.error("Completion error:", err);
-      }
       const activeBox = document.getElementById('active-client-box');
-      if (activeBox) activeBox.classList.add('hidden');
-      activePatient = null;
-      setTimeout(fetchQueue, 1000);
+      if (myActive) {
+        activePatient = myActive;
+        const ticket = myActive.TicketNumber || myActive.Ticketnumber || myActive.ticketNum || 'N/A';
+        setSafeText('active-station-label', `Currently Serving at ${currentStation}`);
+        setSafeText('active-ticket-num', ticket);
+        setSafeText('active-service', myActive.Service || myActive.service || '');
+        setSafeText('active-appt-info', `${myActive.ApptType || myActive.appType || ''} ${myActive.ApptTime ? '• ' + myActive.ApptTime : ''}`);
+        if (activeBox) activeBox.classList.remove('hidden');
+      } else {
+        activePatient = null;
+        if (activeBox) activeBox.classList.add('hidden');
+      }
+
+      const queueList = document.getElementById('queue-list');
+      if (queueList) {
+        queueList.innerHTML = '';
+        if (waiting.length === 0) {
+          queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
+        } else {
+          waiting.forEach(item => {
+            const ticket = item.TicketNumber || item.Ticketnumber || item.ticketNum || 'N/A';
+            const service = item.Service || item.service || '';
+            const apptType = item.ApptType || item.appType || '';
+            const apptTime = item.ApptTime ? ' • ' + item.ApptTime : '';
+
+            const row = document.createElement('div');
+            row.className = "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
+            row.innerHTML = `
+              <div class="flex items-center space-x-4">
+                <span class="text-2xl font-black text-black">${ticket}</span>
+                <div>
+                  <p class="font-bold text-gray-800 text-sm">${service}</p>
+                  <p class="text-xs text-gray-500">${apptType}${apptTime}</p>
+                </div>
+              </div>
+              <button type="button" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
+                Call Patient
+              </button>
+            `;
+            
+            row.querySelector('button').onclick = function() {
+              callPatient(ticket);
+            };
+
+            queueList.appendChild(row);
+          });
+        }
+      }
+
+      const calledPatients = data
+        .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
+        .reverse();
+
+      const primaryBox = document.getElementById('display-primary');
+      const sec1 = document.getElementById('display-secondary-1');
+      const sec2 = document.getElementById('display-secondary-2');
+
+      const displayScreen = document.getElementById('screen-display');
+      const isDisplayActive = displayScreen && displayScreen.style.display !== 'none';
+
+      if (primaryBox) {
+        if (calledPatients[0]) {
+          const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
+          const s0 = calledPatients[0].StationID || calledPatients[0].stationId || 'Station A';
+          primaryBox.innerHTML = `
+            <span class="text-8xl font-black tracking-tight leading-none">${t0}</span>
+            <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
+          `;
+
+          if (lastAnnouncedTicket !== t0 && isDisplayActive) {
+            lastAnnouncedTicket = t0;
+            playChimeAndAnnounce(t0, s0);
+          }
+        } else {
+          primaryBox.innerHTML = `<span class="text-6xl font-black text-gray-600">--</span>`;
+        }
+      }
+
+      if (sec1) {
+        if (calledPatients[1]) {
+          const t1 = calledPatients[1].TicketNumber || calledPatients[1].Ticketnumber || calledPatients[1].ticketNum || '';
+          const s1 = calledPatients[1].StationID || calledPatients[1].stationId || '';
+          sec1.innerHTML = `
+            <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
+            <span class="text-3xl font-black">${t1}</span>
+            <p class="text-xs text-gray-400 font-bold">${s1}</p>
+          `;
+        } else {
+          sec1.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
+        }
+      }
+
+      if (sec2) {
+        if (calledPatients[2]) {
+          const t2 = calledPatients[2].TicketNumber || calledPatients[2].Ticketnumber || calledPatients[2].ticketNum || '';
+          const s2 = calledPatients[2].StationID || calledPatients[2].stationId || '';
+          sec2.innerHTML = `
+            <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
+            <span class="text-3xl font-black">${t2}</span>
+            <p class="text-xs text-gray-400 font-bold">${s2}</p>
+          `;
+        } else {
+          sec2.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
+        }
+      }
+
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  }
+
+  async function submitRegistration(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const alertMsg = document.getElementById('alertMsg');
+    if (btn) {
+      btn.innerText = "Adding...";
+      btn.disabled = true;
     }
 
-    setInterval(fetchQueue, 3000);
-  </script>
+    const payload = {
+      action: 'add',
+      ticketNum: document.getElementById('ticketNum').value,
+      service: document.getElementById('service').value,
+      appType: document.querySelector('input[name="appType"]:checked').value,
+      appTime: document.getElementById('appTime').value
+    };
+
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.error("Submission error:", err);
+    }
+
+    document.getElementById('regForm').reset();
+    if (btn) {
+      btn.innerText = "Issue ticket and add to queue";
+      btn.disabled = false;
+    }
+
+    if (alertMsg) {
+      alertMsg.classList.remove('hidden');
+      setTimeout(() => alertMsg.classList.add('hidden'), 3000);
+    }
+    setTimeout(fetchQueue, 500);
+  }
+
+  async function callPatient(ticketNum) {
+    const stationEl = document.getElementById('stationSelect');
+    const station = stationEl ? stationEl.value : 'Station A';
+    
+    // Force public screen to re-announce upon recall
+    lastAnnouncedTicket = null;
+
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
+      });
+    } catch (err) {
+      console.error("Call error:", err);
+    }
+    setTimeout(fetchQueue, 500);
+  }
+
+  function recallCurrentPatient() {
+    if (!activePatient) return;
+    const ticket = activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum;
+    callPatient(ticket);
+  }
+
+  async function completeCurrentPatient() {
+    if (!activePatient) return;
+    const ticket = activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum;
+
+    // Immediately hide card & clear local active state
+    const activeBox = document.getElementById('active-client-box');
+    if (activeBox) activeBox.classList.add('hidden');
+    activePatient = null;
+
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: 'complete', ticketNum: ticket })
+      });
+    } catch (err) {
+      console.error("Completion error:", err);
+    }
+    setTimeout(fetchQueue, 500);
+  }
+
+  setInterval(fetchQueue, 3000);
+</script>
 </body>
 </html>
