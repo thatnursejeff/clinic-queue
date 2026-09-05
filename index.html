@@ -1,154 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clinic Queue Management</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 font-sans p-6">
-
-  <!-- Navigation -->
-  <div class="flex justify-center space-x-4 mb-6">
-    <button type="button" onclick="switchTab('register')" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
-    <button type="button" onclick="switchTab('nurse')" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
-    <button type="button" onclick="switchTab('display')" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
-  </div>
-
-  <!-- SCREEN 1: REGISTRATION -->
-  <div id="screen-register" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-sm border">
-    <h2 class="text-xl font-bold text-gray-800 mb-1">Register New Arrival</h2>
-    <p class="text-sm text-gray-500 mb-6">Enter ticket details to add client to the live queue.</p>
-
-    <form id="regForm" onsubmit="submitRegistration(event)" class="space-y-4">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Ticket Number</label>
-        <input type="text" id="ticketNum" required placeholder="e.g. 101" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none">
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Service Required</label>
-        <select id="service" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none bg-white">
-          <option value="Vaccination">Vaccination</option>
-          <option value="STI screening and care">STI screening and care</option>
-          <option value="General Consultation">General Consultation</option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Appointment Type</label>
-        <div class="flex space-x-4 mt-1">
-          <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
-            <input type="radio" name="appType" value="Booked appointment" checked class="w-4 h-4 text-black">
-            <span>Booked appointment</span>
-          </label>
-          <label class="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
-            <input type="radio" name="appType" value="Drop-in walk-in" class="w-4 h-4 text-black">
-            <span>Drop-in walk-in</span>
-          </label>
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Appointment Time</label>
-        <input type="time" id="appTime" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none">
-      </div>
-
-      <button type="submit" id="submitBtn" class="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition">
-        Issue ticket and add to queue
-      </button>
-      <p id="alertMsg" class="text-sm font-bold text-green-600 hidden text-center mt-2">✓ Patient added to queue!</p>
-    </form>
-  </div>
-
-  <!-- SCREEN 2: NURSE QUEUE -->
-  <div id="screen-nurse" style="display: none;" class="max-w-4xl mx-auto space-y-6">
-    <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between">
-      <span class="text-sm font-semibold text-gray-700">Your Station:</span>
-      <select id="stationSelect" onchange="fetchQueue()" class="p-2 border rounded-lg font-bold text-gray-800 bg-gray-50 outline-none">
-        <option value="Station A">Station A</option>
-        <option value="Station B">Station B</option>
-        <option value="Station C">Station C</option>
-        <option value="Station D">Station D</option>
-        <option value="Station E">Station E</option>
-        <option value="Station F">Station F</option>
-        <option value="Station G">Station G</option>
-        <option value="Station H">Station H</option>
-      </select>
-    </div>
-
-    <!-- Active Client Card -->
-    <div id="active-client-box" class="bg-blue-50 border-2 border-blue-500 p-6 rounded-2xl shadow-sm hidden">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Currently Serving at Station</span>
-          <h3 id="active-ticket-num" class="text-4xl font-black text-gray-900 mt-1">--</h3>
-        </div>
-        <div class="text-right">
-          <p id="active-service" class="font-bold text-gray-800 text-lg">--</p>
-          <p id="active-appt-info" class="text-sm text-gray-600">--</p>
-        </div>
-      </div>
-      <div class="flex space-x-3">
-        <button onclick="recallCurrentPatient()" class="flex-1 bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition shadow-sm">
-          🔔 Call Patient Again
-        </button>
-        <button onclick="completeCurrentPatient()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-sm">
-          ✓ Complete & Release Client
-        </button>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white p-4 rounded-xl shadow-sm border">
-        <p class="text-xs text-gray-500 font-semibold uppercase">Waiting</p>
-        <p id="count-waiting" class="text-3xl font-bold text-gray-900 mt-1">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl shadow-sm border">
-        <p class="text-xs text-gray-500 font-semibold uppercase">With Nurses</p>
-        <p id="count-nurse" class="text-3xl font-bold text-gray-900 mt-1">0</p>
-      </div>
-      <div class="bg-white p-4 rounded-xl shadow-sm border">
-        <p class="text-xs text-gray-500 font-semibold uppercase">Completed</p>
-        <p id="count-completed" class="text-3xl font-bold text-gray-900 mt-1">0</p>
-      </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-2xl shadow-sm border">
-      <h3 class="text-lg font-bold text-gray-800 mb-1">Waiting Clients</h3>
-      <p class="text-xs text-gray-500 mb-4">Booked appointments appear first, followed by drop-ins.</p>
-      <div id="queue-list" class="space-y-3">
-        <p class="text-sm text-gray-400">Loading queue...</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCREEN 3: PUBLIC DISPLAY -->
-  <div id="screen-display" style="display: none;" class="fixed inset-0 bg-gray-100 flex-col items-center justify-center p-8 space-y-6">
-    <p class="text-xl font-bold text-gray-500 uppercase tracking-widest">Now Serving</p>
-
-    <div id="display-primary" class="w-full max-w-2xl bg-black text-white rounded-3xl p-10 text-center shadow-2xl flex flex-col items-center justify-center min-h-[250px]">
-      <span class="text-8xl font-black tracking-tight leading-none">--</span>
-    </div>
-
-    <div class="w-full max-w-2xl grid grid-cols-2 gap-4 mt-4">
-      <div id="display-secondary-1" class="bg-black text-white rounded-2xl p-6 text-center shadow-md">
-        <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-        <span class="text-3xl font-black">--</span>
-      </div>
-      <div id="display-secondary-2" class="bg-black text-white rounded-2xl p-6 text-center shadow-md">
-        <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-        <span class="text-3xl font-black">--</span>
-      </div>
-    </div>
-  </div>
-
-  <script>
+<script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwcLsuz147a8DUXcRtMSqfVOmlBAOgeKzShTEoEK-5ySbX_ck9bYh7G-dgwhLOPAE2_gQ/exec";
     let activePatient = null;
     let lastAnnouncedTicket = null;
 
-    // Audio Chime & Speech Synthesis
+    // Audio Chime & Speech Synthesis (Only triggered by Public Display view)
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -265,6 +120,8 @@
         const sec1 = document.getElementById('display-secondary-1');
         const sec2 = document.getElementById('display-secondary-2');
 
+        const isDisplayActive = document.getElementById('screen-display').style.display !== 'none';
+
         if (calledPatients[0]) {
           const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || '';
           const s0 = calledPatients[0].StationID || 'Station A';
@@ -273,7 +130,8 @@
             <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
           `;
 
-          if (lastAnnouncedTicket !== t0 && document.getElementById('screen-display').style.display !== 'none') {
+          // Trigger audio ONLY if the Public Display screen is active on this tab/device
+          if (lastAnnouncedTicket !== t0 && isDisplayActive) {
             lastAnnouncedTicket = t0;
             playChimeAndAnnounce(t0, s0);
           }
@@ -347,7 +205,6 @@
 
     async function callPatient(ticketNum) {
       const station = document.getElementById('stationSelect').value;
-      playChimeAndAnnounce(ticketNum, station);
       try {
         await fetch(API_URL, {
           method: 'POST',
@@ -364,7 +221,7 @@
     function recallCurrentPatient() {
       if (!activePatient) return;
       const ticket = activePatient.TicketNumber || activePatient.Ticketnumber;
-      const station = document.getElementById('stationSelect').value;
+      lastAnnouncedTicket = null;
       callPatient(ticket);
     }
 
@@ -388,5 +245,3 @@
 
     setInterval(fetchQueue, 3000);
   </script>
-</body>
-</html>
