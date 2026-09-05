@@ -126,12 +126,12 @@
       document.getElementById('screen-nurse').style.display = 'none';
       document.getElementById('screen-display').style.display = 'none';
 
-      if (tabName = 'register') {
+      if (tabName === 'register') {
         document.getElementById('screen-register').style.display = 'block';
-      } else if (tabName = 'nurse') {
+      } else if (tabName === 'nurse') {
         document.getElementById('screen-nurse').style.display = 'block';
         fetchQueue();
-      } else if (tabName = 'display') {
+      } else if (tabName === 'display') {
         document.getElementById('screen-display').style.display = 'flex';
         fetchQueue();
       }
@@ -143,7 +143,7 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        const waiting = data.filter(r => r && String(r.Status || '').trim() = 'Waiting');
+        const waiting = data.filter(r => r && String(r.Status || '').trim() === 'Waiting');
         document.getElementById('count-waiting').innerText = waiting.length;
         document.getElementById('count-nurse').innerText = data.filter(r => r && String(r.Status || '').trim() = 'With Nurse').length;
         document.getElementById('count-completed').innerText = data.filter(r => r && String(r.Status || '').trim() = 'Completed').length;
