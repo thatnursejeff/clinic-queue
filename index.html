@@ -564,58 +564,60 @@
     }
 
     async function callPatient(ticketNum) {
-      const stationEl = document.getElementById('stationSelect');
-      const station = stationEl ? stationEl.value : 'Station A';
+  const stationEl = document.getElementById('stationSelect');
+  const station = stationEl ? stationEl.value : 'Station A';
 
-      playChimeAndAnnounce(ticketNum, station);
-      activePatient = null;
+  playChimeAndAnnounce(ticketNum, station);
 
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
-        });
-      } catch (err) {
-        console.error("Call error:", err);
-      }
-      setTimeout(fetchQueue, 300);
-    }
+  try {
+    // Await full backend execution so Google Sheets completes write operations
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
+    });
+  } catch (err) {
+    console.error("Call error:", err);
+  }
+  
+  // Re-fetch queue state only AFTER the POST completes
+  await fetchQueue();
+}
 
-    async function recallCurrentPatient() {
-      let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
-      
-      if (!ticket) {
-        const domTicket = document.getElementById('active-ticket-num');
-        if (domTicket) ticket = domTicket.innerText.trim();
-      }
+async function recallCurrentPatient() {
+  let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
+  
+  if (!ticket || ticket === 'N/A' || ticket === '--') {
+    const domTicket = document.getElementById('active-ticket-num');
+    if (domTicket) ticket = domTicket.innerText.trim();
+  }
 
-      const stationSelect = document.getElementById('stationSelect');
-      const station = stationSelect ? stationSelect.value : 'Station A';
+  const stationSelect = document.getElementById('stationSelect');
+  const station = stationSelect ? stationSelect.value : 'Station A';
 
-      if (!ticket || ticket === 'N/A' || ticket === '--') return;
+  if (!ticket || ticket === 'N/A' || ticket === '--') return;
 
-      playChimeAndAnnounce(ticket, station);
+  playChimeAndAnnounce(ticket, station);
 
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({
-            action: 'call',
-            ticketNum: ticket,
-            stationId: station
-          })
-        });
-      } catch (err) {
-        console.error("Error sending recall request:", err);
-      }
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'call',
+        ticketNum: ticket,
+        stationId: station
+      })
+    });
+  } catch (err) {
+    console.error("Error sending recall request:", err);
+  }
 
-      setTimeout(fetchQueue, 300);
-    }
-
+  // Await fetchQueue so the board updates synchronously with the server state
+  await fetchQueue();
+}
     async function completeCurrentPatient() {
       let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
       
