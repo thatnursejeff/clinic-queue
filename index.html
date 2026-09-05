@@ -79,6 +79,27 @@
             Issue ticket and add to queue
           </button>
         </form>
+        <div class="mt-8 pt-6 border-t border-gray-200">
+  <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Overall Clinic Status</h3>
+  <div class="grid grid-cols-3 gap-4">
+    
+    <div class="bg-gray-50 border rounded-2xl p-4 text-center">
+      <p class="text-xs font-semibold text-gray-500 uppercase">Waiting</p>
+      <p id="count-waiting-reg" class="text-3xl font-black text-black mt-1">0</p>
+    </div>
+
+    <div class="bg-gray-50 border rounded-2xl p-4 text-center">
+      <p class="text-xs font-semibold text-gray-500 uppercase">With Nurse</p>
+      <p id="count-nurse-reg" class="text-3xl font-black text-black mt-1">0</p>
+    </div>
+
+    <div class="bg-gray-50 border rounded-2xl p-4 text-center">
+      <p class="text-xs font-semibold text-gray-500 uppercase">Completed</p>
+      <p id="count-completed-reg" class="text-3xl font-black text-black mt-1">0</p>
+    </div>
+
+  </div>
+</div>
       </div>
     </section>
 
@@ -339,11 +360,19 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        const waiting = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting');
-        
-        setSafeText('count-waiting', waiting.length);
-        setSafeText('count-nurse', data.filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse').length);
-        setSafeText('count-completed', data.filter(r => r && String(r.Status || r.status || '').trim() === 'Completed').length);
+        const waitingCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting').length;
+        const nurseCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse').length;
+        const completedCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Completed').length;
+
+        // Update Nurse Screen Counts
+        setSafeText('count-waiting', waitingCount);
+        setSafeText('count-nurse', nurseCount);
+        setSafeText('count-completed', completedCount);
+
+        // Update Registration Screen Counts
+        setSafeText('count-waiting-reg', waitingCount);
+        setSafeText('count-nurse-reg', nurseCount);
+        setSafeText('count-completed-reg', completedCount);
 
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
@@ -381,10 +410,11 @@
         const queueList = document.getElementById('queue-list');
         if (queueList) {
           queueList.innerHTML = '';
-          if (waiting.length === 0) {
+          if (waitingCount === 0) {
             queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
           } else {
-            waiting.forEach(item => {
+            const waitingList = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting');
+            waitingList.forEach(item => {
               const ticket = item.TicketNumber || item.Ticketnumber || item.ticketNum || 'N/A';
               const service = item.Service || item.service || '';
               const apptType = item.ApptType || item.appType || '';
