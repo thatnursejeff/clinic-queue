@@ -180,10 +180,11 @@
 
   </main>
 
-  <script>
+ <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbztETrvoCtDxzKrViGnhNW2UVT0IR8IUa0x6ryobw-SzLtyMr4Bh9_CEG-BZYMBU6RXSQ/exec";
     let activePatient = null;
     let lastAnnouncedTicket = null;
+    let forceRecallTicket = null; // Stores ticket during an active recall event
 
     // TAB SWITCHING FUNCTION
     function switchTab(tabName) {
@@ -367,8 +368,10 @@
               <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
             `;
 
-            if (lastAnnouncedTicket !== t0 && isDisplayActive) {
+            // Announce if it's a new ticket OR if explicitly re-called
+            if ((lastAnnouncedTicket !== t0 || forceRecallTicket === t0) && isDisplayActive) {
               lastAnnouncedTicket = t0;
+              forceRecallTicket = null; // Clear recall trigger
               playChimeAndAnnounce(t0, s0);
             }
           } else {
@@ -470,10 +473,7 @@
     }
 
     async function recallCurrentPatient() {
-      if (!activePatient) {
-        console.warn("Recall attempted, but no active patient found in state.");
-        return;
-      }
+      if (!activePatient) return;
 
       const ticket = String(
         activePatient.TicketNumber || 
@@ -489,18 +489,12 @@
                       activePatient.stationId || 
                       (stationSelect ? stationSelect.value : 'Station A');
 
-      if (!ticket) {
-        console.error("Unable to recall: Ticket number is missing on activePatient", activePatient);
-        return;
-      }
+      if (!ticket) return;
 
-      // 1. Reset audio lock so the chime and voice re-trigger on the Display tab
+      // Set recall flags to trigger audio playback during fetchQueue
+      forceRecallTicket = ticket;
       lastAnnouncedTicket = null;
 
-      // 2. Play audio immediately if this local screen is currently open
-      playChimeAndAnnounce(ticket, station);
-
-      // 3. Post 'call' to Google Sheets so public display instances refresh & announce
       try {
         await fetch(API_URL, {
           method: 'POST',
@@ -518,7 +512,7 @@
         console.error("Error sending recall request:", err);
       }
 
-      setTimeout(fetchQueue, 500);
+      setTimeout(fetchQueue, 300);
     }
 
     async function completeCurrentPatient() {
