@@ -574,34 +574,31 @@
     }
 
     async function resetQueue() {
-      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from the Database and Jeff doesn't have time to save you from yourself if you don't know what you are doing and ignore this warning.");
+      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from the Database and Jeff may be too busy to save you from yourself if you aren't sure what you're doing and ignore this warning.");
       
       if (!confirmed) return;
 
       const regForm = document.getElementById('regForm');
       if (regForm) regForm.reset();
 
-      // Append ?action=clear directly to URL
-      const clearUrl = API_URL.includes('?') 
-        ? `${API_URL}&action=clear` 
-        : `${API_URL}?action=clear`;
+      // Build target URL with query string
+      const clearUrl = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=clear&t=' + Date.now();
 
+      // Method A: Standard Fetch
       try {
-        await fetch(clearUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'clear' })
-        });
-        
-        alert("Queue cleared!");
-      } catch (err) {
-        console.error("Error resetting queue:", err);
-        alert("Could not clear queue.");
+        fetch(clearUrl, { mode: 'no-cors' });
+      } catch (e) {
+        console.log("Fetch clear attempt completed.");
       }
 
+      // Method B: Image Beacon Fallback (Guarantees execution even if CORS blocks fetch)
+      const img = new Image();
+      img.src = clearUrl;
+
+      alert("Queue reset signal sent!");
+
       activePatient = null;
-      setTimeout(fetchQueue, 1000);
+      setTimeout(fetchQueue, 1200);
     }
 
     async function recallCurrentPatient() {
