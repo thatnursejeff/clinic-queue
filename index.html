@@ -469,21 +469,59 @@
       setTimeout(fetchQueue, 500);
     }
 
-    function recallCurrentPatient() {
-  if (!activePatient) return;
-  
-  // Safely extract ticket number regardless of letter casing
-  const ticket = activePatient.TicketNumber || 
-                 activePatient.ticketNumber || 
-                 activePatient.Ticketnumber || 
-                 activePatient.ticketNum || 
-                 activePatient.ticketnum;
-
-  if (ticket) {
-    callPatient(ticket);
-  } else {
-    console.error("Could not find ticket number on active patient:", activePatient);
+    async function recallCurrentPatient() {
+  if (!activePatient) {
+    console.warn("Recall attempted, but no active patient found in state.");
+    return;
   }
+
+  // 1. Extract Ticket Number (handles any column header capitalization)
+  const ticket = String(
+    activePatient.TicketNumber || 
+    activePatient.ticketNumber || 
+    activePatient.Ticketnumber || 
+    activePatient.ticketNum || 
+    activePatient.ticketnum || 
+    ''
+  ).trim();
+
+  // 2. Extract Station ID (uses active dropdown value if stationId isn't on the object)
+  const stationSelect = document.getElementById('stationId');
+  const station = activePatient.StationID || 
+                  activePatient.stationId || 
+                  (stationSelect ? stationSelect.value : '');
+
+  if (!ticket) {
+    console.error("Unable to recall: Ticket number is missing on activePatient", activePatient);
+    return;
+  }
+
+  // 3. Force announce audio locally/immediately if audio functions are enabled
+  if (typeof lastAnnouncedTicket !== 'undefined') {
+    lastAnnouncedTicket = null; // Clear lock so sound/speech triggers
+  }
+
+  // 4. Directly post the 'call' action to Google Sheets
+  try {
+    await fetch(API_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'call',
+        ticketNum: ticket,
+        TicketNumber: ticket,
+        stationId: station,
+        StationID: station
+      })
+    });
+    console.log(`Recall payload sent successfully for ticket ${ticket} at station ${station}`);
+  } catch (err) {
+    console.error("Error sending recall request:", err);
+  }
+
+  // 5. Trigger immediate queue refresh
+  setTimeout(fetchQueue, 300);
 }
 
     async function completeCurrentPatient() {
