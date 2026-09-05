@@ -181,9 +181,54 @@
   </main>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your deployment URL
+    const API_URL = "YOUR_DEPLOYMENT_URL_HERE"; // Keep your active deployment URL
     let activePatient = null;
     let lastProcessedCallId = null; 
+
+    // HELPER: Formats timestamps or time strings to 24-hour format (HH:mm)
+    function formatTo24HourTime(timeStr) {
+      if (!timeStr) return '';
+      const str = String(timeStr).trim();
+      
+      // ISO timestamp string (e.g., 1899-12-30T21:47:24.000Z or full ISO dates)
+      if (str.includes('T')) {
+        const dateObj = new Date(str);
+        if (!isNaN(dateObj.getTime())) {
+          const hours = String(dateObj.getHours()).padStart(2, '0');
+          const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+          return `${hours}:${minutes}`;
+        }
+      }
+      
+      // Standard 12-hour format with AM/PM (e.g. "9:47 PM")
+      const ampmMatch = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)/i);
+      if (ampmMatch) {
+        let hours = parseInt(ampmMatch[1], 10);
+        const minutes = ampmMatch[2];
+        const period = ampmMatch[3].toUpperCase();
+        
+        if (period === 'PM' && hours < 12) hours += 12;
+        if (period === 'AM' && hours === 12) hours = 0;
+        
+        return `${String(hours).padStart(2, '0')}:${minutes}`;
+      }
+
+      // Already HH:mm
+      const rawMatch = str.match(/(\d{1,2}):(\d{2})/);
+      if (rawMatch) {
+        return `${rawMatch[1].padStart(2, '0')}:${rawMatch[2]}`;
+      }
+
+      return str; 
+    }
+
+    // Helper to get current local time in HH:mm
+    function getCurrent24HourTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
 
     // TAB SWITCHING FUNCTION
     function switchTab(tabName) {
@@ -268,6 +313,26 @@
       if (el) el.innerText = value;
     }
 
+    // Helper to format the queue details string for triage
+    function buildTimeDisplay(apptType, rawApptTime, rawRegTime) {
+      const typeStr = String(apptType || '').trim();
+      const isDropIn = typeStr.toLowerCase().includes('drop');
+      
+      const formattedApptTime = formatTo24HourTime(rawApptTime);
+      const formattedRegTime = formatTo24HourTime(rawRegTime);
+
+      if (isDropIn) {
+        // Drop-ins only show arrival time
+        const arrival = formattedRegTime || formattedApptTime || getCurrent24HourTime();
+        return `${typeStr} • Arrived: ${arrival}`;
+      } else {
+        // Pre-booked shows both Appt Time and Arrival Time
+        const appt = formattedApptTime || '--:--';
+        const arrival = formattedRegTime ? ` (Arrived: ${formattedRegTime})` : '';
+        return `${typeStr} • Appt: ${appt}${arrival}`;
+      }
+    }
+
     async function fetchQueue() {
       if (!API_URL) return;
       try {
@@ -283,7 +348,7 @@
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
         
-        // Find current patient assigned to this station
+        // Find patient currently serving at this station
         const myActive = data.find(r => {
           if (!r) return false;
           const status = String(r.Status || r.status || '').trim().toLowerCase();
@@ -297,19 +362,22 @@
           const ticket = myActive.TicketNumber || myActive.Ticketnumber || myActive.ticketNum || 'N/A';
           const service = myActive.Service || myActive.service || '';
           const apptType = myActive.ApptType || myActive.appType || '';
-          const apptTime = myActive.ApptTime ? ' • ' + myActive.ApptTime : '';
+          const rawApptTime = myActive.ApptTime || myActive.appTime || '';
+          const rawRegTime = myActive.Timestamp || myActive.timestamp || '';
+          
+          const timeSummary = buildTimeDisplay(apptType, rawApptTime, rawRegTime);
 
           setSafeText('active-station-label', `Currently Serving at ${currentStation}`);
           setSafeText('active-ticket-num', ticket);
           setSafeText('active-service', service);
-          setSafeText('active-appt-info', `${apptType}${apptTime}`);
+          setSafeText('active-appt-info', timeSummary);
           if (activeBox) activeBox.classList.remove('hidden');
         } else {
           activePatient = null;
           if (activeBox) activeBox.classList.add('hidden');
         }
 
-        // Render queue list
+        // Render Waiting Queue List
         const queueList = document.getElementById('queue-list');
         if (queueList) {
           queueList.innerHTML = '';
@@ -320,7 +388,10 @@
               const ticket = item.TicketNumber || item.Ticketnumber || item.ticketNum || 'N/A';
               const service = item.Service || item.service || '';
               const apptType = item.ApptType || item.appType || '';
-              const apptTime = item.ApptTime ? ' • ' + item.ApptTime : '';
+              const rawApptTime = item.ApptTime || item.appTime || '';
+              const rawRegTime = item.Timestamp || item.timestamp || '';
+
+              const timeSummary = buildTimeDisplay(apptType, rawApptTime, rawRegTime);
 
               const row = document.createElement('div');
               row.className = "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
@@ -329,7 +400,7 @@
                   <span class="text-2xl font-black text-black">${ticket}</span>
                   <div>
                     <p class="font-bold text-gray-800 text-sm">${service}</p>
-                    <p class="text-xs text-gray-500">${apptType}${apptTime}</p>
+                    <p class="text-xs text-gray-500 font-medium">${timeSummary}</p>
                   </div>
                 </div>
                 <button type="button" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
@@ -370,7 +441,6 @@
               <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
             `;
 
-            // Auto-trigger announcement on display screen when new call ID arrives
             if (lastProcessedCallId !== callId && isDisplayActive) {
               lastProcessedCallId = callId;
               playChimeAndAnnounce(t0, s0);
@@ -422,12 +492,21 @@
         btn.disabled = true;
       }
 
+      const selectedAppType = document.querySelector('input[name="appType"]:checked')?.value || 'Drop-in';
+      const inputTime = document.getElementById('appTime')?.value || '';
+
+      // Triage logic for submission: if Drop-in, default to current time
+      let finalAppTime = inputTime;
+      if (selectedAppType.toLowerCase().includes('drop') || !inputTime) {
+        finalAppTime = getCurrent24HourTime();
+      }
+
       const payload = {
         action: 'add',
         ticketNum: document.getElementById('ticketNum').value,
         service: document.getElementById('service').value,
-        appType: document.querySelector('input[name="appType"]:checked').value,
-        appTime: document.getElementById('appTime').value
+        appType: selectedAppType,
+        appTime: finalAppTime
       };
 
       try {
@@ -458,10 +537,7 @@
       const stationEl = document.getElementById('stationSelect');
       const station = stationEl ? stationEl.value : 'Station A';
 
-      // 1. Instantly trigger audio locally
       playChimeAndAnnounce(ticketNum, station);
-
-      // 2. Clear local active patient hold so interface updates immediately
       activePatient = null;
 
       try {
@@ -478,7 +554,6 @@
     }
 
     async function recallCurrentPatient() {
-      // Find ticket from active patient or DOM directly
       let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
       
       if (!ticket) {
@@ -491,10 +566,8 @@
 
       if (!ticket || ticket === 'N/A' || ticket === '--') return;
 
-      // 1. Play voice/chime immediately
       playChimeAndAnnounce(ticket, station);
 
-      // 2. Post update to backend
       try {
         await fetch(API_URL, {
           method: 'POST',
