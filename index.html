@@ -470,59 +470,56 @@
     }
 
     async function recallCurrentPatient() {
-  if (!activePatient) {
-    console.warn("Recall attempted, but no active patient found in state.");
-    return;
-  }
+      if (!activePatient) {
+        console.warn("Recall attempted, but no active patient found in state.");
+        return;
+      }
 
-  // 1. Extract Ticket Number (handles any column header capitalization)
-  const ticket = String(
-    activePatient.TicketNumber || 
-    activePatient.ticketNumber || 
-    activePatient.Ticketnumber || 
-    activePatient.ticketNum || 
-    activePatient.ticketnum || 
-    ''
-  ).trim();
+      const ticket = String(
+        activePatient.TicketNumber || 
+        activePatient.ticketNumber || 
+        activePatient.Ticketnumber || 
+        activePatient.ticketNum || 
+        activePatient.ticketnum || 
+        ''
+      ).trim();
 
-  // 2. Extract Station ID (uses active dropdown value if stationId isn't on the object)
-  const stationSelect = document.getElementById('stationId');
-  const station = activePatient.StationID || 
-                  activePatient.stationId || 
-                  (stationSelect ? stationSelect.value : '');
+      const stationSelect = document.getElementById('stationSelect');
+      const station = activePatient.StationID || 
+                      activePatient.stationId || 
+                      (stationSelect ? stationSelect.value : 'Station A');
 
-  if (!ticket) {
-    console.error("Unable to recall: Ticket number is missing on activePatient", activePatient);
-    return;
-  }
+      if (!ticket) {
+        console.error("Unable to recall: Ticket number is missing on activePatient", activePatient);
+        return;
+      }
 
-  // 3. Force announce audio locally/immediately if audio functions are enabled
-  if (typeof lastAnnouncedTicket !== 'undefined') {
-    lastAnnouncedTicket = null; // Clear lock so sound/speech triggers
-  }
+      // 1. Reset audio lock so the chime and voice re-trigger on the Display tab
+      lastAnnouncedTicket = null;
 
-  // 4. Directly post the 'call' action to Google Sheets
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'call',
-        ticketNum: ticket,
-        TicketNumber: ticket,
-        stationId: station,
-        StationID: station
-      })
-    });
-    console.log(`Recall payload sent successfully for ticket ${ticket} at station ${station}`);
-  } catch (err) {
-    console.error("Error sending recall request:", err);
-  }
+      // 2. Play audio immediately if this local screen is currently open
+      playChimeAndAnnounce(ticket, station);
 
-  // 5. Trigger immediate queue refresh
-  setTimeout(fetchQueue, 300);
-}
+      // 3. Post 'call' to Google Sheets so public display instances refresh & announce
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'call',
+            ticketNum: ticket,
+            TicketNumber: ticket,
+            stationId: station,
+            StationID: station
+          })
+        });
+      } catch (err) {
+        console.error("Error sending recall request:", err);
+      }
+
+      setTimeout(fetchQueue, 500);
+    }
 
     async function completeCurrentPatient() {
       if (!activePatient) return;
@@ -547,6 +544,6 @@
 
     // Start background queue polling
     setInterval(fetchQueue, 3000);
-  </script>
+</script>
 </body>
 </html>
