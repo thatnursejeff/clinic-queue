@@ -99,18 +99,6 @@
     </div>
 
   </div>
-          <!-- RESET QUEUE BUTTON -->
-<div class="mt-6 flex justify-end">
-  <button 
-    type="button" 
-    onclick="resetQueue()" 
-    class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-    <span>Reset / Clear Queue</span>
-  </button>
-</div>
 </div>
       </div>
     </section>
@@ -214,7 +202,7 @@
   </main>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Ensure your deployment URL is here
+    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
     let activePatient = null;
     let lastProcessedCallId = null; 
 
@@ -223,6 +211,7 @@
       if (!timeStr) return '';
       const str = String(timeStr).trim();
       
+      // ISO timestamp string (e.g., 1899-12-30T21:47:24.000Z or full ISO dates)
       if (str.includes('T')) {
         const dateObj = new Date(str);
         if (!isNaN(dateObj.getTime())) {
@@ -232,6 +221,7 @@
         }
       }
       
+      // Standard 12-hour format with AM/PM (e.g. "9:47 PM")
       const ampmMatch = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)/i);
       if (ampmMatch) {
         let hours = parseInt(ampmMatch[1], 10);
@@ -244,6 +234,7 @@
         return `${String(hours).padStart(2, '0')}:${minutes}`;
       }
 
+      // Already HH:mm
       const rawMatch = str.match(/(\d{1,2}):(\d{2})/);
       if (rawMatch) {
         return `${rawMatch[1].padStart(2, '0')}:${rawMatch[2]}`;
@@ -252,6 +243,7 @@
       return str; 
     }
 
+    // Helper to get current local time in HH:mm
     function getCurrent24HourTime() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -269,8 +261,6 @@
       const tabNurse = document.getElementById('tab-nurse');
       const tabDisplay = document.getElementById('tab-display');
 
-      const navHeader = document.getElementById('nav-header');
-
       regScreen.classList.add('hidden');
       nurseScreen.classList.add('hidden');
       displayScreen.classList.add('hidden');
@@ -278,23 +268,20 @@
       const defaultStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
       const activeStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
 
-      if (tabReg) tabReg.className = defaultStyle;
-      if (tabNurse) tabNurse.className = defaultStyle;
-      if (tabDisplay) tabDisplay.className = defaultStyle;
+      tabReg.className = defaultStyle;
+      tabNurse.className = defaultStyle;
+      tabDisplay.className = defaultStyle;
 
       if (tabName === 'register') {
         regScreen.classList.remove('hidden');
-        if (tabReg) tabReg.className = activeStyle;
-        if (navHeader) navHeader.classList.remove('hidden');
+        tabReg.className = activeStyle;
       } else if (tabName === 'nurse') {
         nurseScreen.classList.remove('hidden');
-        if (tabNurse) tabNurse.className = activeStyle;
-        if (navHeader) navHeader.classList.remove('hidden');
+        tabNurse.className = activeStyle;
         fetchQueue();
       } else if (tabName === 'display') {
         displayScreen.classList.remove('hidden');
-        if (tabDisplay) tabDisplay.className = activeStyle;
-        if (navHeader) navHeader.classList.add('hidden');
+        tabDisplay.className = activeStyle;
         fetchQueue();
       }
     }
@@ -347,6 +334,7 @@
       if (el) el.innerText = value;
     }
 
+    // Helper to format the queue details string for triage
     function buildTimeDisplay(apptType, rawApptTime, rawRegTime) {
       const typeStr = String(apptType || '').trim();
       const isDropIn = typeStr.toLowerCase().includes('drop');
@@ -355,9 +343,11 @@
       const formattedRegTime = formatTo24HourTime(rawRegTime);
 
       if (isDropIn) {
+        // Drop-ins only show arrival time
         const arrival = formattedRegTime || formattedApptTime || getCurrent24HourTime();
         return `${typeStr} • Arrived: ${arrival}`;
       } else {
+        // Pre-booked shows both Appt Time and Arrival Time
         const appt = formattedApptTime || '--:--';
         const arrival = formattedRegTime ? ` (Arrived: ${formattedRegTime})` : '';
         return `${typeStr} • Appt: ${appt}${arrival}`;
@@ -387,6 +377,7 @@
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
         
+        // Find patient currently serving at this station
         const myActive = data.find(r => {
           if (!r) return false;
           const status = String(r.Status || r.status || '').trim().toLowerCase();
@@ -523,7 +514,7 @@
     }
 
     async function submitRegistration(e) {
-      if (e) e.preventDefault();
+      e.preventDefault();
       const btn = document.getElementById('submitBtn');
       const alertMsg = document.getElementById('alertMsg');
       if (btn) {
@@ -534,6 +525,7 @@
       const selectedAppType = document.querySelector('input[name="appType"]:checked')?.value || 'Drop-in';
       const inputTime = document.getElementById('appTime')?.value || '';
 
+      // Triage logic for submission: if Drop-in, default to current time
       let finalAppTime = inputTime;
       if (selectedAppType.toLowerCase().includes('drop') || !inputTime) {
         finalAppTime = getCurrent24HourTime();
@@ -558,9 +550,7 @@
         console.error("Submission error:", err);
       }
 
-      const regForm = document.getElementById('regForm');
-      if (regForm) regForm.reset();
-
+      document.getElementById('regForm').reset();
       if (btn) {
         btn.innerText = "Issue ticket and add to queue";
         btn.disabled = false;
@@ -573,32 +563,24 @@
       setTimeout(fetchQueue, 500);
     }
 
-    async function resetQueue() {
-      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from the Database and Jeff may be too busy to save you from yourself if you aren't sure what you're doing and ignore this warning.");
-      
-      if (!confirmed) return;
+    async function callPatient(ticketNum) {
+      const stationEl = document.getElementById('stationSelect');
+      const station = stationEl ? stationEl.value : 'Station A';
 
-      const regForm = document.getElementById('regForm');
-      if (regForm) regForm.reset();
-
-      // Build target URL with query string
-      const clearUrl = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=clear&t=' + Date.now();
-
-      // Method A: Standard Fetch
-      try {
-        fetch(clearUrl, { mode: 'no-cors' });
-      } catch (e) {
-        console.log("Fetch clear attempt completed.");
-      }
-
-      // Method B: Image Beacon Fallback (Guarantees execution even if CORS blocks fetch)
-      const img = new Image();
-      img.src = clearUrl;
-
-      alert("Queue reset signal sent!");
-
+      playChimeAndAnnounce(ticketNum, station);
       activePatient = null;
-      setTimeout(fetchQueue, 1200);
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
+        });
+      } catch (err) {
+        console.error("Call error:", err);
+      }
+      setTimeout(fetchQueue, 300);
     }
 
     async function recallCurrentPatient() {
