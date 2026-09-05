@@ -214,7 +214,7 @@
   </main>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Ensure your deployment URL is here
     let activePatient = null;
     let lastProcessedCallId = null; 
 
@@ -223,7 +223,6 @@
       if (!timeStr) return '';
       const str = String(timeStr).trim();
       
-      // ISO timestamp string (e.g., 1899-12-30T21:47:24.000Z or full ISO dates)
       if (str.includes('T')) {
         const dateObj = new Date(str);
         if (!isNaN(dateObj.getTime())) {
@@ -232,32 +231,7 @@
           return `${hours}:${minutes}`;
         }
       }
-
-      async function resetQueue() {
-      // Browser safety confirmation prompt
-      const confirmed = confirm("Are you sure you want to clear the ENTIRE queue?\n\nThis will permanently delete all waiting, active, and completed records from the sheet.");
       
-      if (!confirmed) return;
-
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'clear' })
-        });
-        
-        alert("Queue has been reset successfully.");
-      } catch (err) {
-        console.error("Error resetting queue:", err);
-        alert("Failed to reset queue. Check browser console for details.");
-      }
-
-      // Refresh the local interface counts and lists
-      setTimeout(fetchQueue, 500);
-    }
-      
-      // Standard 12-hour format with AM/PM (e.g. "9:47 PM")
       const ampmMatch = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)/i);
       if (ampmMatch) {
         let hours = parseInt(ampmMatch[1], 10);
@@ -270,7 +244,6 @@
         return `${String(hours).padStart(2, '0')}:${minutes}`;
       }
 
-      // Already HH:mm
       const rawMatch = str.match(/(\d{1,2}):(\d{2})/);
       if (rawMatch) {
         return `${rawMatch[1].padStart(2, '0')}:${rawMatch[2]}`;
@@ -279,7 +252,6 @@
       return str; 
     }
 
-    // Helper to get current local time in HH:mm
     function getCurrent24HourTime() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -297,6 +269,8 @@
       const tabNurse = document.getElementById('tab-nurse');
       const tabDisplay = document.getElementById('tab-display');
 
+      const navHeader = document.getElementById('nav-header');
+
       regScreen.classList.add('hidden');
       nurseScreen.classList.add('hidden');
       displayScreen.classList.add('hidden');
@@ -304,20 +278,23 @@
       const defaultStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
       const activeStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
 
-      tabReg.className = defaultStyle;
-      tabNurse.className = defaultStyle;
-      tabDisplay.className = defaultStyle;
+      if (tabReg) tabReg.className = defaultStyle;
+      if (tabNurse) tabNurse.className = defaultStyle;
+      if (tabDisplay) tabDisplay.className = defaultStyle;
 
       if (tabName === 'register') {
         regScreen.classList.remove('hidden');
-        tabReg.className = activeStyle;
+        if (tabReg) tabReg.className = activeStyle;
+        if (navHeader) navHeader.classList.remove('hidden');
       } else if (tabName === 'nurse') {
         nurseScreen.classList.remove('hidden');
-        tabNurse.className = activeStyle;
+        if (tabNurse) tabNurse.className = activeStyle;
+        if (navHeader) navHeader.classList.remove('hidden');
         fetchQueue();
       } else if (tabName === 'display') {
         displayScreen.classList.remove('hidden');
-        tabDisplay.className = activeStyle;
+        if (tabDisplay) tabDisplay.className = activeStyle;
+        if (navHeader) navHeader.classList.add('hidden');
         fetchQueue();
       }
     }
@@ -370,7 +347,6 @@
       if (el) el.innerText = value;
     }
 
-    // Helper to format the queue details string for triage
     function buildTimeDisplay(apptType, rawApptTime, rawRegTime) {
       const typeStr = String(apptType || '').trim();
       const isDropIn = typeStr.toLowerCase().includes('drop');
@@ -379,11 +355,9 @@
       const formattedRegTime = formatTo24HourTime(rawRegTime);
 
       if (isDropIn) {
-        // Drop-ins only show arrival time
         const arrival = formattedRegTime || formattedApptTime || getCurrent24HourTime();
         return `${typeStr} • Arrived: ${arrival}`;
       } else {
-        // Pre-booked shows both Appt Time and Arrival Time
         const appt = formattedApptTime || '--:--';
         const arrival = formattedRegTime ? ` (Arrived: ${formattedRegTime})` : '';
         return `${typeStr} • Appt: ${appt}${arrival}`;
@@ -413,7 +387,6 @@
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
         
-        // Find patient currently serving at this station
         const myActive = data.find(r => {
           if (!r) return false;
           const status = String(r.Status || r.status || '').trim().toLowerCase();
@@ -550,7 +523,7 @@
     }
 
     async function submitRegistration(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const btn = document.getElementById('submitBtn');
       const alertMsg = document.getElementById('alertMsg');
       if (btn) {
@@ -561,7 +534,6 @@
       const selectedAppType = document.querySelector('input[name="appType"]:checked')?.value || 'Drop-in';
       const inputTime = document.getElementById('appTime')?.value || '';
 
-      // Triage logic for submission: if Drop-in, default to current time
       let finalAppTime = inputTime;
       if (selectedAppType.toLowerCase().includes('drop') || !inputTime) {
         finalAppTime = getCurrent24HourTime();
@@ -586,7 +558,9 @@
         console.error("Submission error:", err);
       }
 
-      document.getElementById('regForm').reset();
+      const regForm = document.getElementById('regForm');
+      if (regForm) regForm.reset();
+
       if (btn) {
         btn.innerText = "Issue ticket and add to queue";
         btn.disabled = false;
@@ -596,6 +570,35 @@
         alertMsg.classList.remove('hidden');
         setTimeout(() => alertMsg.classList.add('hidden'), 3000);
       }
+      setTimeout(fetchQueue, 500);
+    }
+
+    async function resetQueue() {
+      // 1. Popup Confirmation Warning
+      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from Google Sheets.");
+      
+      if (!confirmed) return;
+
+      // 2. Clear input fields in the registration form immediately
+      const regForm = document.getElementById('regForm');
+      if (regForm) regForm.reset();
+
+      // 3. Post clear action to backend
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'clear' })
+        });
+        alert("Queue has been successfully reset.");
+      } catch (err) {
+        console.error("Error resetting queue:", err);
+        alert("Could not reach backend to reset queue.");
+      }
+
+      // 4. Force state refresh
+      activePatient = null;
       setTimeout(fetchQueue, 500);
     }
 
