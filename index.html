@@ -574,50 +574,34 @@
     }
 
     async function resetQueue() {
-      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from the Database and Jeff doesn't want to help you.");
+      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from the Database and Jeff doesn't have time to save you from yourself if you don't know what you are doing and ignore this warning.");
       
       if (!confirmed) return;
 
       const regForm = document.getElementById('regForm');
       if (regForm) regForm.reset();
 
+      // Append ?action=clear directly to URL
+      const clearUrl = API_URL.includes('?') 
+        ? `${API_URL}&action=clear` 
+        : `${API_URL}?action=clear`;
+
       try {
-        // Send payload via POST
-        await fetch(API_URL, {
+        await fetch(clearUrl, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ action: 'clear' })
         });
         
-        alert("Queue clear request sent successfully.");
+        alert("Queue cleared!");
       } catch (err) {
         console.error("Error resetting queue:", err);
-        alert("Could not reach backend to reset queue.");
+        alert("Could not clear queue.");
       }
 
       activePatient = null;
       setTimeout(fetchQueue, 1000);
-    }
-
-    async function callPatient(ticketNum) {
-      const stationEl = document.getElementById('stationSelect');
-      const station = stationEl ? stationEl.value : 'Station A';
-
-      playChimeAndAnnounce(ticketNum, station);
-      activePatient = null;
-
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
-        });
-      } catch (err) {
-        console.error("Call error:", err);
-      }
-      setTimeout(fetchQueue, 300);
     }
 
     async function recallCurrentPatient() {
