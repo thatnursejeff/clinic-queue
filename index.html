@@ -145,8 +145,8 @@
 
         const waiting = data.filter(r => r && String(r.Status || '').trim() === 'Waiting');
         document.getElementById('count-waiting').innerText = waiting.length;
-        document.getElementById('count-nurse').innerText = data.filter(r => r && String(r.Status || '').trim() = 'With Nurse').length;
-        document.getElementById('count-completed').innerText = data.filter(r => r && String(r.Status || '').trim() = 'Completed').length;
+        document.getElementById('count-nurse').innerText = data.filter(r => r && String(r.Status || '').trim() === 'With Nurse').length;
+        document.getElementById('count-completed').innerText = data.filter(r => r && String(r.Status || '').trim() === 'Completed').length;
 
         const queueList = document.getElementById('queue-list');
         queueList.innerHTML = '';
