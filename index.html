@@ -574,32 +574,30 @@
     }
 
     async function resetQueue() {
-      // 1. Popup Confirmation Warning
-      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from Google Sheets.");
+      const confirmed = window.confirm("⚠️ WARNING: Are you sure you want to clear the ENTIRE queue?\n\nThis action will permanently delete all waiting, active, and completed ticket records from the Database and Jeff doesn't want to help you.");
       
       if (!confirmed) return;
 
-      // 2. Clear input fields in the registration form immediately
       const regForm = document.getElementById('regForm');
       if (regForm) regForm.reset();
 
-      // 3. Post clear action to backend
       try {
+        // Send payload via POST
         await fetch(API_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ action: 'clear' })
         });
-        alert("Queue has been successfully reset.");
+        
+        alert("Queue clear request sent successfully.");
       } catch (err) {
         console.error("Error resetting queue:", err);
         alert("Could not reach backend to reset queue.");
       }
 
-      // 4. Force state refresh
       activePatient = null;
-      setTimeout(fetchQueue, 500);
+      setTimeout(fetchQueue, 1000);
     }
 
     async function callPatient(ticketNum) {
