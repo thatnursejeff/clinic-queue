@@ -180,11 +180,10 @@
 
   </main>
 
- <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec";
+<script>
+    const API_URL = "YOUR_DEPLOYMENT_URL_HERE"; // Keep your deployment URL
     let activePatient = null;
-    let lastAnnouncedTicket = null;
-    let forceRecallTicket = null; // Stores ticket during an active recall event
+    let lastProcessedCallId = null; 
 
     // TAB SWITCHING FUNCTION
     function switchTab(tabName) {
@@ -196,12 +195,10 @@
       const tabNurse = document.getElementById('tab-nurse');
       const tabDisplay = document.getElementById('tab-display');
 
-      // Hide all screens
       regScreen.classList.add('hidden');
       nurseScreen.classList.add('hidden');
       displayScreen.classList.add('hidden');
 
-      // Reset button styles
       const defaultStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
       const activeStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
 
@@ -209,7 +206,6 @@
       tabNurse.className = defaultStyle;
       tabDisplay.className = defaultStyle;
 
-      // Activate selected screen and style button
       if (tabName === 'register') {
         regScreen.classList.remove('hidden');
         tabReg.className = activeStyle;
@@ -287,6 +283,7 @@
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
         
+        // Find current patient assigned to this station
         const myActive = data.find(r => {
           if (!r) return false;
           const status = String(r.Status || r.status || '').trim().toLowerCase();
@@ -312,6 +309,7 @@
           if (activeBox) activeBox.classList.add('hidden');
         }
 
+        // Render queue list
         const queueList = document.getElementById('queue-list');
         if (queueList) {
           queueList.innerHTML = '';
@@ -348,9 +346,10 @@
           }
         }
 
+        // Render Display Screen
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
-          .reverse();
+          .sort((a, b) => new Date(b.Timestamp || 0) - new Date(a.Timestamp || 0));
 
         const primaryBox = document.getElementById('display-primary');
         const sec1 = document.getElementById('display-secondary-1');
@@ -363,15 +362,17 @@
           if (calledPatients[0]) {
             const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
             const s0 = calledPatients[0].StationID || calledPatients[0].stationId || 'Station A';
+            const time0 = new Date(calledPatients[0].Timestamp || 0).getTime();
+            const callId = `${t0}_${time0}`;
+
             primaryBox.innerHTML = `
               <span class="text-8xl font-black tracking-tight leading-none">${t0}</span>
               <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
             `;
 
-            // Announce if it's a new ticket OR if explicitly re-called
-            if ((lastAnnouncedTicket !== t0 || forceRecallTicket === t0) && isDisplayActive) {
-              lastAnnouncedTicket = t0;
-              forceRecallTicket = null; // Clear recall trigger
+            // Auto-trigger announcement on display screen when new call ID arrives
+            if (lastProcessedCallId !== callId && isDisplayActive) {
+              lastProcessedCallId = callId;
               playChimeAndAnnounce(t0, s0);
             }
           } else {
@@ -456,8 +457,12 @@
     async function callPatient(ticketNum) {
       const stationEl = document.getElementById('stationSelect');
       const station = stationEl ? stationEl.value : 'Station A';
-      
-      lastAnnouncedTicket = null;
+
+      // 1. Instantly trigger audio locally
+      playChimeAndAnnounce(ticketNum, station);
+
+      // 2. Clear local active patient hold so interface updates immediately
+      activePatient = null;
 
       try {
         await fetch(API_URL, {
@@ -469,32 +474,27 @@
       } catch (err) {
         console.error("Call error:", err);
       }
-      setTimeout(fetchQueue, 500);
+      setTimeout(fetchQueue, 300);
     }
 
     async function recallCurrentPatient() {
-      if (!activePatient) return;
-
-      const ticket = String(
-        activePatient.TicketNumber || 
-        activePatient.ticketNumber || 
-        activePatient.Ticketnumber || 
-        activePatient.ticketNum || 
-        activePatient.ticketnum || 
-        ''
-      ).trim();
+      // Find ticket from active patient or DOM directly
+      let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
+      
+      if (!ticket) {
+        const domTicket = document.getElementById('active-ticket-num');
+        if (domTicket) ticket = domTicket.innerText.trim();
+      }
 
       const stationSelect = document.getElementById('stationSelect');
-      const station = activePatient.StationID || 
-                      activePatient.stationId || 
-                      (stationSelect ? stationSelect.value : 'Station A');
+      const station = stationSelect ? stationSelect.value : 'Station A';
 
-      if (!ticket) return;
+      if (!ticket || ticket === 'N/A' || ticket === '--') return;
 
-      // Set recall flags to trigger audio playback during fetchQueue
-      forceRecallTicket = ticket;
-      lastAnnouncedTicket = null;
+      // 1. Play voice/chime immediately
+      playChimeAndAnnounce(ticket, station);
 
+      // 2. Post update to backend
       try {
         await fetch(API_URL, {
           method: 'POST',
@@ -503,9 +503,7 @@
           body: JSON.stringify({
             action: 'call',
             ticketNum: ticket,
-            TicketNumber: ticket,
-            stationId: station,
-            StationID: station
+            stationId: station
           })
         });
       } catch (err) {
@@ -516,12 +514,18 @@
     }
 
     async function completeCurrentPatient() {
-      if (!activePatient) return;
-      const ticket = activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum;
+      let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
+      
+      if (!ticket) {
+        const domTicket = document.getElementById('active-ticket-num');
+        if (domTicket) ticket = domTicket.innerText.trim();
+      }
 
       const activeBox = document.getElementById('active-client-box');
       if (activeBox) activeBox.classList.add('hidden');
       activePatient = null;
+
+      if (!ticket) return;
 
       try {
         await fetch(API_URL, {
@@ -536,7 +540,6 @@
       setTimeout(fetchQueue, 500);
     }
 
-    // Start background queue polling
     setInterval(fetchQueue, 3000);
 </script>
 </body>
