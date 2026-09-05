@@ -3,74 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Clinic Queue System</title>
+  <title>Clinic Queue Management System</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .hidden { display: none !important; }
-  </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen text-gray-900 p-4 md:p-8">
+<body class="bg-gray-100 font-sans min-h-screen text-gray-900">
 
-  <div class="max-w-6xl mx-auto space-y-8">
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="bg-black text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 bg-white text-black font-black rounded-lg flex items-center justify-center text-lg">Q</div>
+      <h1 class="text-xl font-bold tracking-tight">Clinic Queue Manager</h1>
+    </div>
+    
+    <!-- NAVIGATION TABS -->
+    <nav class="flex space-x-2 bg-gray-900 p-1 rounded-xl border border-gray-800">
+      <button type="button" onclick="switchTab('register')" id="tab-register" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow">
+        Register Client
+      </button>
+      <button type="button" onclick="switchTab('nurse')" id="tab-nurse" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+        Nurse Station
+      </button>
+      <button type="button" onclick="switchTab('display')" id="tab-display" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+        Public Display
+      </button>
+    </nav>
+  </header>
 
-    <!-- REGISTRATION SECTION -->
-    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-      <h2 class="text-2xl font-black mb-1">Issue New Ticket</h2>
-      <p class="text-sm text-gray-500 mb-6">Enter patient details to assign a ticket and add them to the queue.</p>
+  <main class="p-4 md:p-8 max-w-6xl mx-auto">
 
-      <div id="alertMsg" class="hidden mb-6 p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-sm font-bold">
-        ✓ Ticket issued and client added to queue successfully!
-      </div>
+    <!-- ==================== SCREEN 1: REGISTRATION ==================== -->
+    <section id="screen-register" class="block">
+      <div class="max-w-xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+        <h2 class="text-2xl font-black mb-1">Issue New Ticket</h2>
+        <p class="text-sm text-gray-500 mb-6">Enter patient details to assign a ticket and add them to the queue.</p>
 
-      <form id="regForm" onsubmit="submitRegistration(event)" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="alertMsg" class="hidden mb-6 p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-sm font-bold">
+          ✓ Ticket issued and client added to queue successfully!
+        </div>
+
+        <form id="regForm" onsubmit="submitRegistration(event)" class="space-y-5">
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-600 mb-2">Ticket Number</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Ticket Number</label>
             <input type="text" id="ticketNum" required placeholder="e.g. 101" class="w-full px-4 py-3 bg-gray-50 border rounded-xl font-bold text-lg focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-600 mb-2">Service Required</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Service Required</label>
             <select id="service" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl font-bold text-base focus:outline-none focus:ring-2 focus:ring-black">
               <option value="Vaccination">Vaccination</option>
               <option value="STI screening and care">STI screening and care</option>
               <option value="General Consultation">General Consultation</option>
             </select>
           </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-600 mb-2">Appointment Type</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Appointment Type</label>
             <div class="grid grid-cols-2 gap-3">
-              <label class="flex items-center space-x-2 p-3 bg-gray-50 rounded-xl border cursor-pointer">
-                <input type="radio" name="appType" value="Drop-in" checked class="w-4 h-4 text-black" />
+              <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="appType" value="Drop-in" checked class="w-4 h-4 text-black focus:ring-black" />
                 <span class="font-bold text-sm">Drop-in</span>
               </label>
-              <label class="flex items-center space-x-2 p-3 bg-gray-50 rounded-xl border cursor-pointer">
-                <input type="radio" name="appType" value="Booked Appointment" class="w-4 h-4 text-black" />
-                <span class="font-bold text-sm">Booked</span>
+              <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="appType" value="Booked Appointment" class="w-4 h-4 text-black focus:ring-black" />
+                <span class="font-bold text-sm">Booked Appointment</span>
               </label>
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-600 mb-2">Scheduled / Arrival Time</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Scheduled / Arrival Time</label>
             <input type="time" id="appTime" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl font-bold text-base focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
-        </div>
 
-        <button type="submit" id="submitBtn" class="w-full py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition text-lg mt-2">
-          Issue ticket and add to queue
-        </button>
-      </form>
-    </div>
+          <button type="submit" id="submitBtn" class="w-full py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition shadow-lg text-lg mt-4">
+            Issue ticket and add to queue
+          </button>
+        </form>
+      </div>
+    </section>
 
-    <!-- NURSE STATION SECTION -->
-    <div class="bg-white p-6 rounded-2xl border shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <!-- ==================== SCREEN 2: NURSE STATION ==================== -->
+    <section id="screen-nurse" class="hidden">
+      <!-- Control Bar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between bg-white p-4 rounded-2xl border shadow-sm mb-6 gap-4">
         <div>
-          <span class="text-xs font-bold uppercase text-gray-400 block mb-1">Select Active Station</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Station Selection</span>
           <select id="stationSelect" onchange="fetchQueue()" class="bg-gray-100 border text-black font-black text-lg px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-black">
             <option value="Station A">Station A</option>
             <option value="Station B">Station B</option>
@@ -82,6 +99,7 @@
           </select>
         </div>
 
+        <!-- Counts -->
         <div class="flex items-center space-x-4 text-sm font-bold">
           <div class="bg-amber-50 text-amber-900 border border-amber-200 px-4 py-2 rounded-xl">
             Waiting: <span id="count-waiting">0</span>
@@ -100,24 +118,24 @@
         <div class="md:col-span-1">
           <div id="active-client-box" class="bg-black text-white p-6 rounded-2xl shadow-xl hidden">
             <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1" id="active-station-label">Currently Serving</span>
-            <div class="text-6xl font-black mb-4" id="active-ticket-num">--</div>
+            <div class="text-6xl font-black mb-4 tracking-tight" id="active-ticket-num">--</div>
 
             <div class="space-y-2 mb-6 border-t border-gray-800 pt-4">
               <div>
-                <span class="text-xs text-gray-400 uppercase font-bold block">Service</span>
+                <span class="text-xs text-gray-500 uppercase font-bold block">Service</span>
                 <span class="font-bold text-lg text-white" id="active-service">--</span>
               </div>
               <div>
-                <span class="text-xs text-gray-400 uppercase font-bold block">Booking Details</span>
+                <span class="text-xs text-gray-500 uppercase font-bold block">Booking Details</span>
                 <span class="font-semibold text-sm text-gray-300" id="active-appt-info">--</span>
               </div>
             </div>
 
             <div class="space-y-3">
-              <button onclick="recallCurrentPatient()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl text-sm border border-gray-700">
+              <button onclick="recallCurrentPatient()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl text-sm transition border border-gray-700">
                 🔊 Call Patient Again
               </button>
-              <button onclick="completeCurrentPatient()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm">
+              <button onclick="completeCurrentPatient()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition">
                 ✓ Complete & Release Client
               </button>
             </div>
@@ -126,41 +144,86 @@
 
         <!-- Waiting Queue List -->
         <div class="md:col-span-2">
-          <h3 class="text-lg font-black mb-4">Waiting Queue</h3>
-          <div id="queue-list" class="space-y-3">
-            <p class="text-sm text-gray-400 italic">No clients currently waiting.</p>
+          <div class="bg-white p-6 rounded-2xl border shadow-sm">
+            <h3 class="text-lg font-black mb-4">Waiting Queue</h3>
+            <div id="queue-list" class="space-y-3">
+              <p class="text-sm text-gray-400 italic">No clients currently waiting.</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- PUBLIC DISPLAY SECTION -->
-    <div class="bg-white p-8 rounded-2xl border shadow-sm text-center">
-      <span class="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-4">Public Screen - Now Serving</span>
-      
-      <div id="display-primary" class="bg-black text-white p-10 rounded-3xl shadow-xl flex flex-col items-center justify-center min-h-[200px] mb-6">
-        <span class="text-6xl font-black text-gray-600">--</span>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div id="display-secondary-1" class="bg-gray-50 p-4 rounded-xl border">
-          <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-          <span class="text-2xl font-bold text-gray-600">--</span>
+    <!-- ==================== SCREEN 3: PUBLIC DISPLAY ==================== -->
+    <section id="screen-display" class="hidden">
+      <div class="w-full max-w-4xl mx-auto text-center py-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-4">Now Serving</span>
+        
+        <!-- Primary Active Calling Box -->
+        <div id="display-primary" class="bg-black text-white p-12 rounded-3xl shadow-2xl flex flex-col items-center justify-center min-h-[280px] mb-8 border border-gray-800">
+          <span class="text-6xl font-black text-gray-600">--</span>
         </div>
-        <div id="display-secondary-2" class="bg-gray-50 p-4 rounded-xl border">
-          <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-          <span class="text-2xl font-bold text-gray-600">--</span>
+
+        <!-- Secondary Call History -->
+        <div class="grid grid-cols-2 gap-4">
+          <div id="display-secondary-1" class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col items-center justify-center min-h-[120px]">
+            <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
+            <span class="text-2xl font-bold text-gray-600">--</span>
+          </div>
+          <div id="display-secondary-2" class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col items-center justify-center min-h-[120px]">
+            <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
+            <span class="text-2xl font-bold text-gray-600">--</span>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-  </div>
+  </main>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbISQ33-RuTsdHsKt_8bOzN_Zj2qw6pQ8s4JhhW5h2s8q4fD3JAQheKqe3UUXDa8-cTkw/exec";
     let activePatient = null;
     let lastAnnouncedTicket = null;
 
+    // TAB SWITCHING FUNCTION
+    function switchTab(tabName) {
+      const regScreen = document.getElementById('screen-register');
+      const nurseScreen = document.getElementById('screen-nurse');
+      const displayScreen = document.getElementById('screen-display');
+
+      const tabReg = document.getElementById('tab-register');
+      const tabNurse = document.getElementById('tab-nurse');
+      const tabDisplay = document.getElementById('tab-display');
+
+      // Hide all screens
+      regScreen.classList.add('hidden');
+      nurseScreen.classList.add('hidden');
+      displayScreen.classList.add('hidden');
+
+      // Reset button styles
+      const defaultStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
+      const activeStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
+
+      tabReg.className = defaultStyle;
+      tabNurse.className = defaultStyle;
+      tabDisplay.className = defaultStyle;
+
+      // Activate selected screen and style button
+      if (tabName === 'register') {
+        regScreen.classList.remove('hidden');
+        tabReg.className = activeStyle;
+      } else if (tabName === 'nurse') {
+        nurseScreen.classList.remove('hidden');
+        tabNurse.className = activeStyle;
+        fetchQueue();
+      } else if (tabName === 'display') {
+        displayScreen.classList.remove('hidden');
+        tabDisplay.className = activeStyle;
+        fetchQueue();
+      }
+    }
+
+    // Audio chime and voice synthesis
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -292,6 +355,9 @@
         const sec1 = document.getElementById('display-secondary-1');
         const sec2 = document.getElementById('display-secondary-2');
 
+        const displayScreen = document.getElementById('screen-display');
+        const isDisplayActive = displayScreen && !displayScreen.classList.contains('hidden');
+
         if (primaryBox) {
           if (calledPatients[0]) {
             const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
@@ -301,7 +367,7 @@
               <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
             `;
 
-            if (lastAnnouncedTicket !== t0) {
+            if (lastAnnouncedTicket !== t0 && isDisplayActive) {
               lastAnnouncedTicket = t0;
               playChimeAndAnnounce(t0, s0);
             }
@@ -430,8 +496,7 @@
       setTimeout(fetchQueue, 500);
     }
 
-    // Initial load and periodic updates
-    fetchQueue();
+    // Start background queue polling
     setInterval(fetchQueue, 3000);
   </script>
 </body>
