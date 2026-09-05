@@ -10,9 +10,9 @@
 
  <!-- Top Navigation Tabs -->
  <div class="flex justify-center space-x-4 mb-6">
-   <button onclick="switchTab('register')" id="btn-register" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
-   <button onclick="switchTab('nurse')" id="btn-nurse" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
-   <button onclick="switchTab('display')" id="btn-display" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
+   <button type="button" onclick="switchTab('register')" id="btn-register" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
+   <button type="button" onclick="switchTab('nurse')" id="btn-nurse" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
+   <button type="button" onclick="switchTab('display')" id="btn-display" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
  </div>
 
  <!-- SCREEN 1: REGISTRATION -->
@@ -122,23 +122,28 @@
    const API_URL = "https://script.google.com/macros/s/AKfycbwcLsuz147a8DUXcRtMSqfVOmlBAOgeKzShTEoEK-5ySbX_ck9bYh7G-dgwhLOPAE2_gQ/exec";
 
    function switchTab(tabName) {
-     document.getElementById('screen-register').style.display = 'none';
-     document.getElementById('screen-nurse').style.display = 'none';
-     document.getElementById('screen-display').style.display = 'none';
+     const sReg = document.getElementById('screen-register');
+     const sNurse = document.getElementById('screen-nurse');
+     const sDisp = document.getElementById('screen-display');
 
-     if (tabName = 'register') {
-       document.getElementById('screen-register').style.display = 'block';
-     } else if (tabName = 'nurse') {
-       document.getElementById('screen-nurse').style.display = 'block';
+     if (sReg) sReg.classList.add('hidden');
+     if (sNurse) sNurse.classList.add('hidden');
+     if (sDisp) sDisp.classList.add('hidden');
+
+     if (tabName = 'register' && sReg) {
+       sReg.classList.remove('hidden');
+     } else if (tabName = 'nurse' && sNurse) {
+       sNurse.classList.remove('hidden');
        fetchQueue();
-     } else if (tabName = 'display') {
-       document.getElementById('screen-display').style.display = 'flex';
+     } else if (tabName = 'display' && sDisp) {
+       sDisp.classList.remove('hidden');
+       sDisp.classList.add('flex');
        fetchQueue();
      }
    }
 
    async function fetchQueue() {
-     if (!API_URL || API_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) return;
+     if (!API_URL) return;
      try {
        const res = await fetch(API_URL);
        const data = await res.json();
@@ -275,6 +280,7 @@
      setTimeout(fetchQueue, 1000);
    }
 
+   // Initialize view directly
    switchTab('register');
    setInterval(fetchQueue, 3000);
  </script>
