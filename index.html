@@ -7,23 +7,25 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans p-6">
- 
+
+  <!-- Navigation -->
   <div class="flex justify-center space-x-4 mb-6">
-    <button type="button" onclick="switchTab('register')" id="btn-register" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
-    <button type="button" onclick="switchTab('nurse')" id="btn-nurse" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
-    <button type="button" onclick="switchTab('display')" id="btn-display" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
+    <button type="button" onclick="switchTab('register')" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Registration</button>
+    <button type="button" onclick="switchTab('nurse')" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Nurse Queue</button>
+    <button type="button" onclick="switchTab('display')" class="px-5 py-2.5 bg-white text-gray-800 font-semibold rounded-xl shadow-sm border hover:bg-gray-50">Public Display</button>
   </div>
- 
+
+  <!-- SCREEN 1: REGISTRATION -->
   <div id="screen-register" class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-sm border">
     <h2 class="text-xl font-bold text-gray-800 mb-1">Register New Arrival</h2>
     <p class="text-sm text-gray-500 mb-6">Enter ticket details to add client to the live queue.</p>
- 
+
     <form id="regForm" onsubmit="submitRegistration(event)" class="space-y-4">
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Ticket Number</label>
         <input type="text" id="ticketNum" required placeholder="e.g. 101" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none">
       </div>
- 
+
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Service Required</label>
         <select id="service" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none bg-white">
@@ -32,7 +34,7 @@
           <option value="General Consultation">General Consultation</option>
         </select>
       </div>
- 
+
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Appointment Type</label>
         <div class="flex space-x-4 mt-1">
@@ -46,29 +48,57 @@
           </label>
         </div>
       </div>
- 
+
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Appointment Time</label>
         <input type="time" id="appTime" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-black outline-none">
       </div>
- 
+
       <button type="submit" id="submitBtn" class="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition">
         Issue ticket and add to queue
       </button>
       <p id="alertMsg" class="text-sm font-bold text-green-600 hidden text-center mt-2">✓ Patient added to queue!</p>
     </form>
   </div>
- 
+
+  <!-- SCREEN 2: NURSE QUEUE -->
   <div id="screen-nurse" style="display: none;" class="max-w-4xl mx-auto space-y-6">
     <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between">
       <span class="text-sm font-semibold text-gray-700">Your Station:</span>
-      <select id="stationSelect" class="p-2 border rounded-lg font-bold text-gray-800 bg-gray-50 outline-none">
+      <select id="stationSelect" onchange="fetchQueue()" class="p-2 border rounded-lg font-bold text-gray-800 bg-gray-50 outline-none">
         <option value="Station A">Station A</option>
         <option value="Station B">Station B</option>
         <option value="Station C">Station C</option>
+        <option value="Station D">Station D</option>
+        <option value="Station E">Station E</option>
+        <option value="Station F">Station F</option>
+        <option value="Station G">Station G</option>
+        <option value="Station H">Station H</option>
       </select>
     </div>
- 
+
+    <!-- Active Client Card -->
+    <div id="active-client-box" class="bg-blue-50 border-2 border-blue-500 p-6 rounded-2xl shadow-sm hidden">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Currently Serving at Station</span>
+          <h3 id="active-ticket-num" class="text-4xl font-black text-gray-900 mt-1">--</h3>
+        </div>
+        <div class="text-right">
+          <p id="active-service" class="font-bold text-gray-800 text-lg">--</p>
+          <p id="active-appt-info" class="text-sm text-gray-600">--</p>
+        </div>
+      </div>
+      <div class="flex space-x-3">
+        <button onclick="recallCurrentPatient()" class="flex-1 bg-amber-500 text-white py-3 rounded-xl font-bold hover:bg-amber-600 transition shadow-sm">
+          🔔 Call Patient Again
+        </button>
+        <button onclick="completeCurrentPatient()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-sm">
+          ✓ Complete & Release Client
+        </button>
+      </div>
+    </div>
+
     <div class="grid grid-cols-3 gap-4">
       <div class="bg-white p-4 rounded-xl shadow-sm border">
         <p class="text-xs text-gray-500 font-semibold uppercase">Waiting</p>
@@ -83,7 +113,7 @@
         <p id="count-completed" class="text-3xl font-bold text-gray-900 mt-1">0</p>
       </div>
     </div>
- 
+
     <div class="bg-white p-6 rounded-2xl shadow-sm border">
       <h3 class="text-lg font-bold text-gray-800 mb-1">Waiting Clients</h3>
       <p class="text-xs text-gray-500 mb-4">Booked appointments appear first, followed by drop-ins.</p>
@@ -92,14 +122,15 @@
       </div>
     </div>
   </div>
- 
+
+  <!-- SCREEN 3: PUBLIC DISPLAY -->
   <div id="screen-display" style="display: none;" class="fixed inset-0 bg-gray-100 flex-col items-center justify-center p-8 space-y-6">
     <p class="text-xl font-bold text-gray-500 uppercase tracking-widest">Now Serving</p>
- 
+
     <div id="display-primary" class="w-full max-w-2xl bg-black text-white rounded-3xl p-10 text-center shadow-2xl flex flex-col items-center justify-center min-h-[250px]">
       <span class="text-8xl font-black tracking-tight leading-none">--</span>
     </div>
- 
+
     <div class="w-full max-w-2xl grid grid-cols-2 gap-4 mt-4">
       <div id="display-secondary-1" class="bg-black text-white rounded-2xl p-6 text-center shadow-md">
         <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
@@ -111,15 +142,48 @@
       </div>
     </div>
   </div>
- 
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwcLsuz147a8DUXcRtMSqfVOmlBAOgeKzShTEoEK-5ySbX_ck9bYh7G-dgwhLOPAE2_gQ/exec";
- 
+    let activePatient = null;
+    let lastAnnouncedTicket = null;
+
+    // Audio Chime & Speech Synthesis
+    function playChimeAndAnnounce(ticketNum, stationId) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const playTone = (freq, start, duration) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.frequency.value = freq;
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(audioCtx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + start + duration);
+          osc.stop(audioCtx.currentTime + start + duration);
+        };
+        playTone(523.25, 0, 0.6); // C5
+        playTone(659.25, 0.3, 0.8); // E5
+
+        setTimeout(() => {
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const text = `Now serving number ${ticketNum} at ${stationId}`;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+          }
+        }, 1000);
+      } catch (e) {
+        console.error("Audio playback error:", e);
+      }
+    }
+
     function switchTab(tabName) {
       document.getElementById('screen-register').style.display = 'none';
       document.getElementById('screen-nurse').style.display = 'none';
       document.getElementById('screen-display').style.display = 'none';
- 
+
       if (tabName === 'register') {
         document.getElementById('screen-register').style.display = 'block';
       } else if (tabName === 'nurse') {
@@ -130,21 +194,37 @@
         fetchQueue();
       }
     }
- 
+
     async function fetchQueue() {
       if (!API_URL) return;
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
- 
+
         const waiting = data.filter(r => r && String(r.Status || '').trim() === 'Waiting');
         document.getElementById('count-waiting').innerText = waiting.length;
         document.getElementById('count-nurse').innerText = data.filter(r => r && String(r.Status || '').trim() === 'With Nurse').length;
         document.getElementById('count-completed').innerText = data.filter(r => r && String(r.Status || '').trim() === 'Completed').length;
- 
+
+        const currentStation = document.getElementById('stationSelect').value;
+        const myActive = data.find(r => r && String(r.Status || '').trim() === 'With Nurse' && r.StationID === currentStation);
+
+        const activeBox = document.getElementById('active-client-box');
+        if (myActive) {
+          activePatient = myActive;
+          const ticket = myActive.TicketNumber || myActive.Ticketnumber || 'N/A';
+          document.getElementById('active-ticket-num').innerText = ticket;
+          document.getElementById('active-service').innerText = myActive.Service || '';
+          document.getElementById('active-appt-info').innerText = `${myActive.ApptType || ''} ${myActive.ApptTime ? '• ' + myActive.ApptTime : ''}`;
+          activeBox.classList.remove('hidden');
+        } else {
+          activePatient = null;
+          activeBox.classList.add('hidden');
+        }
+
         const queueList = document.getElementById('queue-list');
         queueList.innerHTML = '';
- 
+
         if (waiting.length === 0) {
           queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
         } else {
@@ -153,7 +233,7 @@
             const service = item.Service || '';
             const apptType = item.ApptType || '';
             const apptTime = item.ApptTime ? ' • ' + item.ApptTime : '';
- 
+
             const row = document.createElement('div');
             row.className = "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
             row.innerHTML = `
@@ -168,23 +248,23 @@
                 Call Patient
               </button>
             `;
- 
+            
             row.querySelector('button').onclick = function() {
               callPatient(ticket);
             };
- 
+
             queueList.appendChild(row);
           });
         }
- 
+
         const calledPatients = data
           .filter(r => r && String(r.Status || '').trim() === 'With Nurse')
           .reverse();
- 
+
         const primaryBox = document.getElementById('display-primary');
         const sec1 = document.getElementById('display-secondary-1');
         const sec2 = document.getElementById('display-secondary-2');
- 
+
         if (calledPatients[0]) {
           const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || '';
           const s0 = calledPatients[0].StationID || 'Station A';
@@ -192,10 +272,15 @@
             <span class="text-8xl font-black tracking-tight leading-none">${t0}</span>
             <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
           `;
+
+          if (lastAnnouncedTicket !== t0 && document.getElementById('screen-display').style.display !== 'none') {
+            lastAnnouncedTicket = t0;
+            playChimeAndAnnounce(t0, s0);
+          }
         } else {
           primaryBox.innerHTML = `<span class="text-6xl font-black text-gray-600">--</span>`;
         }
- 
+
         if (calledPatients[1]) {
           const t1 = calledPatients[1].TicketNumber || calledPatients[1].Ticketnumber || '';
           const s1 = calledPatients[1].StationID || '';
@@ -207,7 +292,7 @@
         } else {
           sec1.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
         }
- 
+
         if (calledPatients[2]) {
           const t2 = calledPatients[2].TicketNumber || calledPatients[2].Ticketnumber || '';
           const s2 = calledPatients[2].StationID || '';
@@ -219,19 +304,19 @@
         } else {
           sec2.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
         }
- 
+
       } catch (err) {
         console.error("Fetch error:", err);
       }
     }
- 
+
     async function submitRegistration(e) {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
       const alertMsg = document.getElementById('alertMsg');
       btn.innerText = "Adding...";
       btn.disabled = true;
- 
+
       const payload = {
         action: 'add',
         ticketNum: document.getElementById('ticketNum').value,
@@ -239,7 +324,7 @@
         appType: document.querySelector('input[name="appType"]:checked').value,
         appTime: document.getElementById('appTime').value
       };
- 
+
       try {
         await fetch(API_URL, {
           method: 'POST',
@@ -250,18 +335,19 @@
       } catch (err) {
         console.error("Submission error:", err);
       }
- 
+
       document.getElementById('regForm').reset();
       btn.innerText = "Issue ticket and add to queue";
       btn.disabled = false;
- 
+
       alertMsg.classList.remove('hidden');
       setTimeout(() => alertMsg.classList.add('hidden'), 3000);
       setTimeout(fetchQueue, 1000);
     }
- 
+
     async function callPatient(ticketNum) {
       const station = document.getElementById('stationSelect').value;
+      playChimeAndAnnounce(ticketNum, station);
       try {
         await fetch(API_URL, {
           method: 'POST',
@@ -274,9 +360,33 @@
       }
       setTimeout(fetchQueue, 1000);
     }
- 
+
+    function recallCurrentPatient() {
+      if (!activePatient) return;
+      const ticket = activePatient.TicketNumber || activePatient.Ticketnumber;
+      const station = document.getElementById('stationSelect').value;
+      callPatient(ticket);
+    }
+
+    async function completeCurrentPatient() {
+      if (!activePatient) return;
+      const ticket = activePatient.TicketNumber || activePatient.Ticketnumber;
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'complete', ticketNum: ticket })
+        });
+      } catch (err) {
+        console.error("Completion error:", err);
+      }
+      document.getElementById('active-client-box').classList.add('hidden');
+      activePatient = null;
+      setTimeout(fetchQueue, 1000);
+    }
+
     setInterval(fetchQueue, 3000);
   </script>
 </body>
 </html>
-
