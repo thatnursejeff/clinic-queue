@@ -77,11 +77,11 @@
       </select>
     </div>
 
-    <!-- Active Client Card -->
+    <!-- Active Client Card (Station-Specific) -->
     <div id="active-client-box" class="bg-blue-50 border-2 border-blue-500 p-6 rounded-2xl shadow-sm hidden">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Currently Serving</span>
+          <span id="active-station-label" class="text-xs font-bold uppercase tracking-wider text-blue-600">Currently Serving</span>
           <h3 id="active-ticket-num" class="text-4xl font-black text-gray-900 mt-1">--</h3>
         </div>
         <div class="text-right">
@@ -148,6 +148,7 @@
     let activePatient = null;
     let lastAnnouncedTicket = null;
 
+    // Play Chime & Announce using Female Voice
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -170,12 +171,25 @@
             const text = `Now serving number ${ticketNum} at ${stationId}`;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.9;
+
+            // Select Female Voice
+            const voices = window.speechSynthesis.getVoices();
+            const femaleVoice = voices.find(v => 
+              v.lang.startsWith('en') && 
+              (v.name.includes('Samantha') || v.name.includes('Victoria') || v.name.includes('Zira') || v.name.includes('Karen') || v.name.includes('Female'))
+            ) || voices.find(v => v.lang.startsWith('en'));
+
+            if (femaleVoice) utterance.voice = femaleVoice;
             window.speechSynthesis.speak(utterance);
           }
         }, 1000);
       } catch (e) {
         console.error("Audio playback error:", e);
       }
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
     }
 
     function switchTab(tabName) {
@@ -194,7 +208,6 @@
       }
     }
 
-    // Safe helper to set text content without throwing null errors
     function setSafeText(id, value) {
       const el = document.getElementById(id);
       if (el) el.innerText = value;
@@ -214,12 +227,19 @@
 
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
-        const myActive = data.find(r => r && String(r.Status || '').trim() === 'With Nurse' && r.StationID === currentStation);
+        
+        // Find active patient matching THIS SPECIFIC STATION
+        const myActive = data.find(r => 
+          r && 
+          String(r.Status || '').trim() === 'With Nurse' && 
+          String(r.StationID || '').trim().toLowerCase() === currentStation.trim().toLowerCase()
+        );
 
         const activeBox = document.getElementById('active-client-box');
         if (myActive) {
           activePatient = myActive;
           const ticket = myActive.TicketNumber || myActive.Ticketnumber || 'N/A';
+          setSafeText('active-station-label', `Currently Serving at ${currentStation}`);
           setSafeText('active-ticket-num', ticket);
           setSafeText('active-service', myActive.Service || '');
           setSafeText('active-appt-info', `${myActive.ApptType || ''} ${myActive.ApptTime ? '• ' + myActive.ApptTime : ''}`);
@@ -399,7 +419,7 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'complete', ticketNum: ticket })
+          body: JSON.stringify({ action: 'complete', ticketNum: ticket, ticketNo: ticket })
         });
       } catch (err) {
         console.error("Completion error:", err);
