@@ -96,7 +96,7 @@
    </div>
  </div>
 
-  <!-- SCREEN 3: PUBLIC DISPLAY -->
+ <!-- SCREEN 3: PUBLIC DISPLAY -->
  <div id="screen-display" class="hidden fixed inset-0 bg-gray-100 flex-col items-center justify-center p-8 space-y-6">
    <p class="text-xl font-bold text-gray-500 uppercase tracking-widest">Now Serving</p>
 
@@ -119,7 +119,7 @@
  </div>
 
  <script>
-   // GOOGLE APPS SCRIPT WEB APP URL HERE
+   // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
    const API_URL = "https://script.google.com/macros/s/AKfycbwcLsuz147a8DUXcRtMSqfVOmlBAOgeKzShTEoEK-5ySbX_ck9bYh7G-dgwhLOPAE2_gQ/exec";
 
    function switchTab(tabName) {
@@ -174,11 +174,53 @@
          });
        }
 
-       const lastCalled = data.filter(r => r && String(r.Status || '').trim() === 'With Nurse').pop();
-       if (lastCalled) {
-         const calledTicket = lastCalled.TicketNumber || lastCalled.Ticketnumber || '';
-         document.getElementById('display-number').innerText = `${calledTicket} - ${lastCalled.StationID || 'A'}`;
+       // Render Public Display Screen (Top 3 recent calls)
+       const calledPatients = data
+         .filter(r => r && String(r.Status || '').trim() === 'With Nurse')
+         .reverse();
+
+       const primaryBox = document.getElementById('display-primary');
+       const sec1 = document.getElementById('display-secondary-1');
+       const sec2 = document.getElementById('display-secondary-2');
+
+       // Main (Most Recent) Call
+       if (calledPatients[0]) {
+         const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || '';
+         const s0 = calledPatients[0].StationID || 'Station A';
+         primaryBox.innerHTML = `
+           <span class="text-8xl font-black tracking-tight leading-none">${t0}</span>
+           <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
+         `;
+       } else {
+         primaryBox.innerHTML = `<span class="text-6xl font-black text-gray-600">--</span>`;
        }
+
+       // 2nd Most Recent
+       if (calledPatients[1]) {
+         const t1 = calledPatients[1].TicketNumber || calledPatients[1].Ticketnumber || '';
+         const s1 = calledPatients[1].StationID || '';
+         sec1.innerHTML = `
+           <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
+           <span class="text-3xl font-black">${t1}</span>
+           <p class="text-xs text-gray-400 font-bold">${s1}</p>
+         `;
+       } else {
+         sec1.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
+       }
+
+       // 3rd Most Recent
+       if (calledPatients[2]) {
+         const t2 = calledPatients[2].TicketNumber || calledPatients[2].Ticketnumber || '';
+         const s2 = calledPatients[2].StationID || '';
+         sec2.innerHTML = `
+           <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
+           <span class="text-3xl font-black">${t2}</span>
+           <p class="text-xs text-gray-400 font-bold">${s2}</p>
+         `;
+       } else {
+         sec2.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
+       }
+
      } catch (err) {
        console.error("Fetch error:", err);
      }
