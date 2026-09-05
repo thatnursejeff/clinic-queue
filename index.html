@@ -176,19 +176,42 @@
     }
 
     async function submitRegistration(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submitBtn');
-      const alertMsg = document.getElementById('alertMsg');
-      btn.innerText = "Adding...";
-      btn.disabled = true;
+ e.preventDefault();
+ const btn = document.getElementById('submitBtn');
+ const alertMsg = document.getElementById('alertMsg');
+ btn.innerText = "Adding...";
+ btn.disabled = true;
 
-      const payload = {
-        action: 'add',
-        ticketNum: document.getElementById('ticketNum').value,
-        service: document.getElementById('service').value,
-        appType: document.querySelector('input[name="appType"]:checked').value,
-        appTime: document.getElementById('appTime').value
-      };
+ const payload = {
+   action: 'add',
+   ticketNum: document.getElementById('ticketNum').value,
+   service: document.getElementById('service').value,
+   appType: document.querySelector('input[name="appType"]:checked').value,
+   appTime: document.getElementById('appTime').value
+ };
+
+ try {
+   // text/plain payload prevents CORS preflight blocks from Google Apps Script
+   await fetch(API_URL, {
+     method: 'POST',
+     mode: 'no-cors',
+     headers: { 'Content-Type': 'text/plain' },
+     body: JSON.stringify(payload)
+   });
+ } catch (err) {
+   console.error("Submission error:", err);
+ }
+
+ document.getElementById('regForm').reset();
+ btn.innerText = "Issue ticket and add to queue";
+ btn.disabled = false;
+
+ alertMsg.classList.remove('hidden');
+ setTimeout(() => alertMsg.classList.add('hidden'), 3000);
+
+ // Fetch updated queue after 1 second delay to allow Google Sheets to write
+ setTimeout(fetchQueue, 1000);
+};
 
       try {
         await fetch(API_URL, {
