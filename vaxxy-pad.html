@@ -53,14 +53,14 @@
           id="searchInput" 
           onkeyup="filterVaccines()" 
           placeholder="Search by vaccine, condition, or age (e.g., MMRV, Shingles, Grade 7)..." 
-          class="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-sm"
+          class="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm"
         >
         <span class="absolute left-3 top-3 text-slate-400">🔍</span>
       </div>
 
       <!-- Filter Tabs -->
       <div class="flex gap-2 overflow-x-auto pb-1 md:pb-0">
-        <button onclick="setCategory('all')" class="cat-btn active bg-emerald-700 text-white text-xs px-3 py-2 rounded-md font-medium">All Vaccines</button>
+        <button onclick="setCategory('all')" class="cat-btn active bg-blue-700 text-white text-xs px-3 py-2 rounded-md font-medium">All Vaccines</button>
         <button onclick="setCategory('pediatric')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Pediatric / Youth</button>
         <button onclick="setCategory('adult')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Adult / Senior</button>
         <button onclick="setCategory('high-risk')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">High Risk / Medical</button>
@@ -261,7 +261,7 @@
           <div>
             <div class="flex justify-between items-start mb-2">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">${item.name}</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded">${item.name}</span>
                 <h3 class="text-lg font-bold text-slate-900 mt-1">${item.title}</h3>
               </div>
               <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">${item.products}</span>
@@ -314,7 +314,7 @@
 
       resultDiv.innerHTML = `
         <div class="flex gap-4 items-center">
-          <div><span class="font-normal text-slate-600">Vaccine Required:</span> <strong class="${vaccine.includes('Yes') ? 'text-emerald-700' : 'text-slate-700'}">${vaccine}</strong></div>
+          <div><span class="font-normal text-slate-600">Vaccine Required:</span> <strong class="${vaccine.includes('Yes') ? 'text-blue-700' : 'text-slate-700'}">${vaccine}</strong></div>
           <div><span class="font-normal text-slate-600">TIG Required:</span> <strong class="${tig.includes('Yes') ? 'text-red-600' : 'text-slate-700'}">${tig}</strong></div>
         </div>
       `;
@@ -336,11 +336,11 @@
     function setCategory(cat) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.classList.remove('bg-emerald-700', 'text-white');
+        btn.classList.remove('bg-blue-700', 'text-white');
         btn.classList.add('bg-white', 'text-slate-700');
       });
       event.target.classList.remove('bg-white', 'text-slate-700');
-      event.target.classList.add('bg-emerald-700', 'text-white');
+      event.target.classList.add('bg-blue-700', 'text-white');
       filterVaccines();
     }
 
