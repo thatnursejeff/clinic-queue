@@ -1,1 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova Scotia Publicly Funded Immunization Guide</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-emerald-700 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Nova Scotia Publicly Funded Immunization Eligibility</h1>
+        <p class="text-emerald-100 text-sm mt-1">Reference Guide & Interactive Wound Management Tool (Updated Oct 2026)</p>
+      </div>
+      <div class="bg-emerald-800 text-emerald-100 text-xs px-3 py-1.5 rounded-md border border-emerald-600">
+        Source: Nova Scotia Health & Wellness
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- Interactive Tetanus Tool Section -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+      <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+        <span>🩸</span> Tetanus Post-Exposure Wound Management Decision Tool
+      </h2>
+      <p class="text-slate-600 text-sm mb-6">Quickly evaluate immunization requirements based on wound severity and history.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">1. Wound Type</label>
+          <select id="woundType" onchange="calculateTetanus()" class="w-full bg-white border border-slate-300 rounded-md p-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="clean">Clean, Minor Wound</option>
+            <option value="other">All Other Wounds (Puncture, Contaminated, Animal Bite, etc.)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">2. History of Tetanus Immunization</label>
+          <select id="tetanusHistory" onchange="calculateTetanus()" class="w-full bg-white border border-slate-300 rounded-md p-2.5 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="unknown">Unknown or &lt; 3 doses in vaccine series</option>
+            <option value="lt5">3+ doses, last booster &lt; 5 years ago</option>
+            <option value="5to10">3+ doses, last booster 5–10 years ago</option>
+            <option value="gt10">3+ doses, last booster &gt; 10 years ago</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div id="tetanusResult" class="mt-4 p-4 rounded-lg border border-emerald-200 bg-emerald-50 flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-emerald-800">Recommended Action</span>
+          <div id="tetanusRecommendation" class="text-lg font-bold text-emerald-950 mt-1">Loading...</div>
+        </div>
+        <div class="text-right text-xs text-slate-500">
+          * Refer to full guidelines for TIG details in immunocompromised patients.
+        </div>
+      </div>
+    </section>
+
+    <!-- Vaccine Directory Controls -->
+    <section class="mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+      <!-- Search -->
+      <div class="relative flex-1">
+        <input 
+          type="text" 
+          id="searchInput" 
+          onkeyup="filterVaccines()" 
+          placeholder="Search by vaccine, condition, or age (e.g., MMRV, Shingles, Grade 7)..." 
+          class="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-sm"
+        >
+        <span class="absolute left-3 top-3 text-slate-400">🔍</span>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex gap-2 overflow-x-auto pb-1 md:pb-0">
+        <button onclick="setCategory('all')" class="cat-btn active bg-emerald-700 text-white text-xs px-3 py-2 rounded-md font-medium">All Vaccines</button>
+        <button onclick="setCategory('pediatric')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Pediatric / Youth</button>
+        <button onclick="setCategory('adult')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Adult / Senior</button>
+        <button onclick="setCategory('high-risk')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">High Risk / Medical</button>
+      </div>
+    </section>
+
+    <!-- Vaccine Cards Grid -->
+    <section id="vaccineGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Dynamic Javascript Generation -->
+    </section>
+
+  </main>
+
+  <script>
+    // Vaccine Database from Nova Scotia Publicly Funded Immunization Document
+    const vaccines = [
+      {
+        id: 'mmrv',
+        name: 'MMRV',
+        title: 'Measles, Mumps, Rubella & Varicella',
+        products: 'Priorix Tetra',
+        categories: ['pediatric', 'high-risk'],
+        formulation: 'Single Dose Vials, Reconstitution Required',
+        eligibility: [
+          'Routine immunization of children < 13 years of age, born 2006 and later (2 doses eligible).',
+          'Infants 6 to <12 months who received 1 dose for travel still require routine 2-dose schedule.',
+          'Pre-exposure for high-risk conditions < 13 years (once immunocompetent): HSCT, HIV, Immunosuppressive therapy, Solid organ transplant.'
+        ],
+        considerations: [
+          'Age: Do NOT give to children < 1 year, or 13 years and older.',
+          'Live Vaccine: Defer if pregnant. Safe if chest feeding.',
+          'Spacing: Do not give within 4 weeks of TB testing or another live vaccine.'
+        ]
+      },
+      {
+        id: 'mmr',
+        name: 'MMR',
+        title: 'Measles, Mumps & Rubella',
+        products: 'MMR II, Priorix',
+        categories: ['pediatric', 'adult', 'high-risk'],
+        formulation: 'Single Dose Vials, Reconstitution Required',
+        eligibility: [
+          'Routine immunization of children if not receiving MMRV.',
+          'Travelers (6–12 months) to endemic/outbreak regions.',
+          'Adults born in/after 1970 without immunity: 2 doses (4 weeks apart).',
+          'Adults born before 1970 without immunity traveling to endemic areas: 1 dose.',
+          'Health Care Workers & Post-secondary students.'
+        ],
+        considerations: [
+          'Live Vaccine: Defer if pregnant. Safe if chest feeding.',
+          'Immunocompromised: Refer to Canadian Immunization Guide (CIG).'
+        ]
+      },
+      {
+        id: 'var',
+        name: 'Varicella (Var)',
+        title: 'Varicella (Chickenpox)',
+        products: 'Varivax',
+        categories: ['pediatric', 'adult', 'high-risk'],
+        formulation: 'Single Dose Vials, Reconstitution Required',
+        eligibility: [
+          'Routine immunization of children not receiving MMRV.',
+          'Born 1996–2005: Eligible for 1 dose.',
+          'Born 2006 and later: Eligible for 2 doses.',
+          'Pre-exposure high-risk: HSCT, HIV, Chronic Renal Disease, Cystic Fibrosis, Splenic Disorders.',
+          'Non-immune healthcare workers & post-partum individuals.'
+        ],
+        considerations: [
+          'Antiviral Therapy: Hold valacyclovir 24h prior and 14 days post-vaccination.',
+          'Salicylate Therapy: Hold aspirin for 6 weeks post-vaccination.'
+        ]
+      },
+      {
+        id: 'tdap',
+        name: 'Tdap',
+        title: 'Tetanus, Diphtheria, Acellular Pertussis',
+        products: 'Adacel, Boostrix',
+        categories: ['pediatric', 'adult'],
+        formulation: 'Pre-filled Syringe',
+        eligibility: [
+          'Grade 7 students (School-based immunization program).',
+          'Pregnant people in EVERY pregnancy (regardless of past history).',
+          'Unimmunized/Incomplete adults (18+) or adults needing tetanus/pertussis booster.'
+        ],
+        considerations: [
+          'Consider Tdap-IPV if records are incomplete.'
+        ]
+      },
+      {
+        id: 'td',
+        name: 'Td',
+        title: 'Tetanus & Diphtheria',
+        products: 'Td Adsorbed',
+        categories: ['adult'],
+        formulation: 'Pre-filled Syringe / Single Dose Vial',
+        eligibility: [
+          'Adult booster every 10 years following 1 dose of Tdap as an adult.',
+          'Post-exposure immunization and wound management.'
+        ],
+        considerations: [
+          'Use Wound Management Matrix for post-exposure decisions.'
+        ]
+      },
+      {
+        id: 'shingles',
+        name: 'Shingles',
+        title: 'Herpes Zoster',
+        products: 'Shingrix',
+        categories: ['adult'],
+        formulation: 'Reconstitution Required (Single Dose Vials)',
+        eligibility: [
+          '2 lifetime doses, minimum of 2 months apart for individuals aged >65 years.'
+        ],
+        considerations: [
+          'If received Shingles vaccine prior to age 65, do not re-immunize.',
+          'If prior dose was Zostavax (subcutaneous), give primary 2-dose series of Shingrix.'
+        ]
+      },
+      {
+        id: 'pneumo',
+        name: 'Pneumococcal',
+        title: 'Pneumo',
+        products: 'Pneumococcal Conjugate',
+        categories: ['adult', 'high-risk'],
+        formulation: 'Pre-filled Syringe',
+        eligibility: [
+          '1 dose for individuals aged >65 years.',
+          'High-risk eligibility criteria applies for younger age groups.'
+        ],
+        considerations: [
+          'Review high-risk eligibility policy for specialized conditions.'
+        ]
+      },
+      {
+        id: 'rsv',
+        name: 'RSV (mRNA)',
+        title: 'Respiratory Syncytial Virus',
+        products: 'RSV mRNA Vaccine',
+        categories: ['adult'],
+        formulation: 'Pre-filled Syringe',
+        eligibility: [
+          '1 lifetime dose for individuals aged >75 years.'
+        ],
+        considerations: [
+          'If received RSV vaccine prior to age 75, do not re-immunize.',
+          'Consider deferring from other routine immunizations out of caution (new vaccine).'
+        ]
+      },
+      {
+        id: 'covid',
+        name: 'COVID-19 (mRNA)',
+        title: 'COVID-19 Vaccine',
+        products: 'Moderna (6m+), Pfizer (12y+)',
+        categories: ['pediatric', 'adult'],
+        formulation: 'Multidose Vials / Pre-filled Syringes',
+        eligibility: [
+          'Primary Series (6m-4y): 2 doses, 8 weeks apart.',
+          'Primary Series (5y+): 1 dose.'
+        ],
+        considerations: [
+          'Minimum 3 months between doses or following COVID-19 infection.'
+        ]
+      },
+      {
+        id: 'flu',
+        name: 'Influenza',
+        title: 'Seasonal Flu (Trivalent)',
+        products: 'Fluviral (6m+), Fluad (65+)',
+        categories: ['pediatric', 'adult'],
+        formulation: 'Multidose Vials / Pre-filled Syringes',
+        eligibility: [
+          'Children (6m–8y): 2 doses (4 weeks apart) if first time.',
+          'Individuals >8 years: 1 dose annually.'
+        ],
+        considerations: [
+          'Fluad is an enhanced, adjuvanted vaccine specifically for ages 65+.'
+        ]
+      }
+    ];
+
+    let currentCategory = 'all';
+
+    // Render Vaccines Cards
+    function renderVaccines(data) {
+      const grid = document.getElementById('vaccineGrid');
+      grid.innerHTML = '';
+
+      if (data.length === 0) {
+        grid.innerHTML = `<div class="col-span-2 text-center py-8 text-slate-500">No vaccines match your search filters.</div>`;
+        return;
+      }
+
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between";
+
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">${item.name}</span>
+                <h3 class="text-lg font-bold text-slate-900 mt-1">${item.title}</h3>
+              </div>
+              <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">${item.products}</span>
+            </div>
+
+            <div class="text-xs text-slate-500 mb-4 flex items-center gap-1">
+              <span>💉 Formulation:</span> <strong class="text-slate-700">${item.formulation}</strong>
+            </div>
+
+            <div class="mb-4">
+              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Eligibility Highlights</h4>
+              <ul class="text-xs text-slate-700 space-y-1 pl-4 list-disc">
+                ${item.eligibility.map(e => `<li>${e}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 mt-2 bg-slate-50 -mx-5 -mb-5 p-4 rounded-b-xl">
+            <h4 class="text-xs font-semibold text-slate-600 mb-1">Key Considerations:</h4>
+            <ul class="text-xs text-slate-600 space-y-0.5 pl-4 list-disc">
+              ${item.considerations.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Interactive Tetanus Calculator Logic
+    function calculateTetanus() {
+      const wound = document.getElementById('woundType').value;
+      const history = document.getElementById('tetanusHistory').value;
+      const resultDiv = document.getElementById('tetanusRecommendation');
+
+      let vaccine = "No";
+      let tig = "No";
+
+      if (wound === 'clean') {
+        if (history === 'unknown' || history === 'gt10') {
+          vaccine = "Yes (Tdap/Td)";
+        }
+      } else { // All other wounds
+        if (history === 'unknown') {
+          vaccine = "Yes (Tdap/Td)";
+          tig = "Yes (Tetanus Immunoglobulin)";
+        } else if (history === '5to10' || history === 'gt10') {
+          vaccine = "Yes (Tdap/Td)";
+        }
+      }
+
+      resultDiv.innerHTML = `
+        <div class="flex gap-4 items-center">
+          <div><span class="font-normal text-slate-600">Vaccine Required:</span> <strong class="${vaccine.includes('Yes') ? 'text-emerald-700' : 'text-slate-700'}">${vaccine}</strong></div>
+          <div><span class="font-normal text-slate-600">TIG Required:</span> <strong class="${tig.includes('Yes') ? 'text-red-600' : 'text-slate-700'}">${tig}</strong></div>
+        </div>
+      `;
+    }
+
+    // Filter Logic
+    function filterVaccines() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = vaccines.filter(v => {
+        const matchesCat = currentCategory === 'all' || v.categories.includes(currentCategory);
+        const matchesSearch = v.name.toLowerCase().includes(searchTerm) ||
+                              v.title.toLowerCase().includes(searchTerm) ||
+                              v.eligibility.some(e => e.toLowerCase().includes(searchTerm));
+        return matchesCat && matchesSearch;
+      });
+      renderVaccines(filtered);
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-700', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-700');
+      });
+      event.target.classList.remove('bg-white', 'text-slate-700');
+      event.target.classList.add('bg-emerald-700', 'text-white');
+      filterVaccines();
+    }
+
+    // Initial Load
+    renderVaccines(vaccines);
+    calculateTetanus();
+  </script>
+</body>
+</html>
 
