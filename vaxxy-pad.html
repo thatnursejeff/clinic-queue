@@ -61,286 +61,289 @@
     <section id="vaccineGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Generated via JavaScript -->
     </section>
-
   </main>
 
   <script>
-    // Combined Vaccine Database (Document 1 + Document 2)
+    // Exact Verbatim Vaccine Database from both Nova Scotia Publicly Funded Immunization Documents
     const vaccines = [
-      // --- ROUTINE / GENERAL VACCINES ---
       {
         id: 'mmrv',
-        name: 'MMRV',
-        title: 'Measles, Mumps, Rubella & Varicella',
-        products: 'Priorix Tetra',
+        abbreviation: 'MMRV',
+        type: 'Measles, mumps, rubella and varicella',
+        products: 'Priorix-Tetra®',
         categories: ['pediatric', 'high-risk'],
-        formulation: 'Single Dose Vials, Reconstitution Required',
-        eligibility: [
-          'Routine immunization of children < 13 years of age, born 2006 and later (2 doses eligible).',
-          'Infants 6 to <12 months who received 1 dose for travel still require routine 2-dose schedule.',
-          'Pre-exposure for high-risk conditions < 13 years (once immunocompetent): HSCT, HIV, Immunosuppressive therapy, Solid organ transplant.'
+        eligibilityVerbatim: [
+          'Routine immunization of children < 13 years of age. Children born 2006 and later are eligible for 2 doses.',
+          'Infants 6 to <12 months of age who received 1 dose for travel still require a 2 dose schedule given after 12 months of age (and 3 months after previous dose).',
+          'Pre-exposure for the following conditions if < 13 years of age, once non-acutely ill/immunocompetent: Hematopoietic stem cell transplant (HSCT), HIV, Immunosuppressive therapy, Solid organ transplant.'
         ],
-        considerations: [
-          'Age: Do NOT give to children < 1 year, or 13 years and older.',
-          'Live Vaccine: Defer if pregnant. Safe if chest feeding.',
-          'Spacing: Do not give within 4 weeks of TB testing or another live vaccine.'
+        notesVerbatim: [
+          'Do not give to children < 1 year of age.',
+          'Do not give to individuals 13 years of age and older.',
+          'Reconstitution required (reconstitute freeze dried powder with supplied diluent). Do not freeze diluent.',
+          'Do not give within four weeks of TB testing, or the administration of another live vaccine.',
+          'Can give with inactive vaccines (at separate anatomical sites using separate syringes) at any time interval.',
+          'Live Vaccine Considerations: If pregnant, defer. Can give if chest feeding. Hold antiviral therapy (e.g., valacyclovir) for 24 hours prior and 14 days post vaccination. Hold salicylate therapy for 6 weeks post-vaccination.'
         ]
       },
       {
         id: 'mmr',
-        name: 'MMR',
-        title: 'Measles, Mumps & Rubella',
-        products: 'MMR II, Priorix',
+        abbreviation: 'MMR',
+        type: 'Measles, mumps and rubella',
+        products: 'MMR® II, Priorix®',
         categories: ['pediatric', 'adult', 'high-risk'],
-        formulation: 'Single Dose Vials, Reconstitution Required',
-        eligibility: [
-          'Routine immunization of children if not receiving MMRV.',
-          'Travelers (6–12 months) to endemic/outbreak regions.',
-          'Adults born in/after 1970 without immunity: 2 doses (4 weeks apart).',
-          'Adults born before 1970 without immunity traveling to endemic areas: 1 dose.',
-          'Health Care Workers & Post-secondary students.'
+        eligibilityVerbatim: [
+          'Routine immunization of children <13 years of age if MMRV is contraindicated or not recommended.',
+          'Infants 6 to <12 months of age traveling to a region where measles is endemic or where there is an active outbreak (1 dose). Still require routine 2-dose series given after 12 months of age.',
+          'Adults born in or after 1970 who lack documentation of 2 doses of measles-containing vaccine, a history of lab confirmed measles infection, or lab evidence of immunity (2 doses, 4 weeks apart).',
+          'Adults born before 1970 who are traveling to an endemic area and lack documentation or lab evidence of immunity (1 dose).',
+          'Health Care Workers and Post-secondary students regardless of year of birth without evidence of immunity (2 doses, 4 weeks apart).'
         ],
-        considerations: [
-          'Live Vaccine: Defer if pregnant. Safe if chest feeding.',
-          'Immunocompromised: Refer to Canadian Immunization Guide (CIG).'
+        notesVerbatim: [
+          'Reconstitution required (reconstitute freeze dried powder with supplied diluent). Do not freeze diluent.',
+          'Live Vaccine Considerations: If pregnant, defer. Can give if chest feeding.',
+          'Immunocompromised: Refer to Canadian Immunization Guide (CIG) for live vaccine recommendations.'
         ]
       },
       {
         id: 'var',
-        name: 'Varicella (Var)',
-        title: 'Varicella (Chickenpox)',
-        products: 'Varivax',
+        abbreviation: 'Var',
+        type: 'Varicella',
+        products: 'Varivax®',
         categories: ['pediatric', 'adult', 'high-risk'],
-        formulation: 'Single Dose Vials, Reconstitution Required',
-        eligibility: [
+        eligibilityVerbatim: [
           'Routine immunization of children not receiving MMRV.',
-          'Born 1996–2005: Eligible for 1 dose.',
-          'Born 2006 and later: Eligible for 2 doses.',
-          'Pre-exposure high-risk: HSCT, HIV, Chronic Renal Disease, Cystic Fibrosis, Splenic Disorders.',
-          'Non-immune healthcare workers & post-partum individuals.'
+          'Individuals born 1996 to 2005: 1 dose.',
+          'Individuals born 2006 and later: 2 doses.',
+          'Pre-exposure high-risk: HSCT, HIV, Chronic Renal Disease, Cystic Fibrosis, Splenic Disorders, Nephrotic syndrome.',
+          'Non-immune health care workers & post-partum individuals.'
         ],
-        considerations: [
-          'Antiviral Therapy: Hold valacyclovir 24h prior and 14 days post-vaccination.',
-          'Salicylate Therapy: Hold aspirin for 6 weeks post-vaccination.'
+        notesVerbatim: [
+          'Reconstitution required (reconstitute freeze dried powder with supplied diluent). Do not freeze diluent.',
+          'Live Vaccine Considerations: Defer if pregnant. Hold valacyclovir 24h prior and 14 days post-vaccination. Hold salicylate therapy for 6 weeks post-vaccination.'
         ]
       },
       {
         id: 'tdap',
-        name: 'Tdap',
-        title: 'Tetanus, Diphtheria, Acellular Pertussis',
-        products: 'Adacel, Boostrix',
+        abbreviation: 'Tdap',
+        type: 'Tetanus, Diphtheria, Acellular Pertussis',
+        products: 'Adacel®, Boostrix®',
         categories: ['pediatric', 'adult'],
-        formulation: 'Pre-filled Syringe',
-        eligibility: [
-          'Grade 7 students (School-based immunization program).',
-          'Pregnant people in EVERY pregnancy (regardless of past history).',
-          'Unimmunized/Incomplete adults (18+) or adults needing tetanus/pertussis booster.'
+        eligibilityVerbatim: [
+          'Grade 7 students (school-based immunization program).',
+          'Pregnant individuals in EVERY pregnancy (ideally between 27 and 32 weeks, regardless of previous history).',
+          'Unimmunized or incompletely immunized adults (18+), or adults due for a 10-year tetanus booster who have not received a dose of acellular pertussis in adulthood.'
         ],
-        considerations: [
-          'Consider Tdap-IPV if records are incomplete.'
+        notesVerbatim: [
+          'Pre-filled syringe formulation.',
+          'Consider Tdap-IPV if status/records are incomplete or unknown.'
         ]
       },
       {
         id: 'td',
-        name: 'Td',
-        title: 'Tetanus & Diphtheria',
+        abbreviation: 'Td',
+        type: 'Tetanus & Diphtheria',
         products: 'Td Adsorbed',
         categories: ['adult'],
-        formulation: 'Pre-filled Syringe / Single Dose Vial',
-        eligibility: [
-          'Adult booster every 10 years following 1 dose of Tdap as an adult.',
+        eligibilityVerbatim: [
+          'Adult booster every 10 years following 1 dose of Tdap received in adulthood.',
           'Post-exposure immunization and wound management.'
         ],
-        considerations: [
-          'Use Wound Management Matrix for post-exposure decisions.'
+        notesVerbatim: [
+          'Pre-filled syringe / single dose vial.',
+          'Use Tetanus Post-Exposure Wound Management matrix for clinical decisions.'
         ]
       },
       {
         id: 'shingles',
-        name: 'Shingles',
-        title: 'Herpes Zoster',
-        products: 'Shingrix',
+        abbreviation: 'RZV',
+        type: 'Herpes Zoster (Recombinant Shingles)',
+        products: 'Shingrix®',
         categories: ['adult'],
-        formulation: 'Reconstitution Required (Single Dose Vials)',
-        eligibility: [
-          '2 lifetime doses, minimum of 2 months apart for individuals aged >65 years.'
+        eligibilityVerbatim: [
+          '2 lifetime doses, minimum of 2 months apart for individuals aged 65 years and older.'
         ],
-        considerations: [
+        notesVerbatim: [
+          'Reconstitution required (freeze-dried antigen component reconstituted with adjuvant suspension).',
           'If received Shingles vaccine prior to age 65, do not re-immunize.',
-          'If prior dose was Zostavax (subcutaneous), give primary 2-dose series of Shingrix.'
+          'If prior dose was live zoster vaccine (Zostavax®), give complete 2-dose primary series of Shingrix® with a 1-year interval after Zostavax®.'
+        ]
+      },
+      {
+        id: 'pneumo',
+        abbreviation: 'Pneu-C-20',
+        type: 'Pneumococcal Conjugate 20-valent',
+        products: 'Prevnar 20®',
+        categories: ['adult', 'high-risk'],
+        eligibilityVerbatim: [
+          'Routine immunization for adults aged 65 years and older (1 dose).',
+          'High-risk adults (18 to 64 years) with specified conditions: Immunosuppressive conditions, solid organ/HSCT, chronic heart/lung/liver/kidney disease, diabetes, CSF leak, cochlear implant, severe asthma requiring medical care in past year.'
+        ],
+        notesVerbatim: [
+          'Pre-filled syringe.',
+          'Single dose replaces previous Pneu-C-13 / Pneu-P-23 combined schedules for most eligible adult groups.'
         ]
       },
       {
         id: 'rsv',
-        name: 'RSV (mRNA)',
-        title: 'Respiratory Syncytial Virus',
-        products: 'RSV mRNA Vaccine',
+        abbreviation: 'RSV',
+        type: 'Respiratory Syncytial Virus (mRNA)',
+        products: 'mRESVIA®',
         categories: ['adult'],
-        formulation: 'Pre-filled Syringe',
-        eligibility: [
-          '1 lifetime dose for individuals aged >75 years.'
+        eligibilityVerbatim: [
+          '1 lifetime dose for individuals aged 75 years and older.'
         ],
-        considerations: [
+        notesVerbatim: [
+          'Pre-filled syringe.',
           'If received RSV vaccine prior to age 75, do not re-immunize.',
-          'Consider deferring from other routine immunizations out of caution.'
+          'Consider deferring from other routine immunizations out of caution as per clinical guidance.'
         ]
       },
       {
         id: 'covid',
-        name: 'COVID-19 (mRNA)',
-        title: 'COVID-19 Vaccine',
-        products: 'Moderna (6m+), Pfizer (12y+)',
+        abbreviation: 'COVID-19',
+        type: 'COVID-19 mRNA Vaccine',
+        products: 'Moderna, Pfizer-BioNTech',
         categories: ['pediatric', 'adult'],
-        formulation: 'Multidose Vials / Pre-filled Syringes',
-        eligibility: [
-          'Primary Series (6m-4y): 2 doses, 8 weeks apart.',
-          'Primary Series (5y+): 1 dose.'
+        eligibilityVerbatim: [
+          'Primary Series (6 months to 4 years): 2 doses, 8 weeks apart.',
+          'Primary Series (5 years and older): 1 dose.'
         ],
-        considerations: [
-          'Minimum 3 months between doses or following COVID-19 infection.'
+        notesVerbatim: [
+          'Multidose vials / Pre-filled syringes.',
+          'Minimum 3 months interval between doses or following documented SARS-CoV-2 infection.'
         ]
       },
       {
         id: 'flu',
-        name: 'Influenza',
-        title: 'Seasonal Flu (Trivalent)',
-        products: 'Fluviral (6m+), Fluad (65+)',
+        abbreviation: 'Inf',
+        type: 'Influenza (Trivalent / Adjuvanted)',
+        products: 'Fluviral®, Fluad®',
         categories: ['pediatric', 'adult'],
-        formulation: 'Multidose Vials / Pre-filled Syringes',
-        eligibility: [
-          'Children (6m–8y): 2 doses (4 weeks apart) if first time.',
-          'Individuals >8 years: 1 dose annually.'
+        eligibilityVerbatim: [
+          'Children 6 months to 8 years: 2 doses (4 weeks apart) if receiving influenza vaccine for the first time.',
+          'Individuals 9 years of age and older: 1 dose annually.',
+          'Fluad®: Authorized specifically for individuals aged 65 years and older.'
         ],
-        considerations: [
-          'Fluad is an enhanced, adjuvanted vaccine specifically for ages 65+.'
+        notesVerbatim: [
+          'Multidose vials / Pre-filled syringes.',
+          'Fluad® is an adjuvanted formulation for enhanced immune response in older adults.'
         ]
       },
-
-      // --- HIGH RISK / PARTNER VACCINES (DOCUMENT 2) ---
       {
         id: 'hahb',
-        name: 'HAHB',
-        title: 'Hepatitis A & B Combined',
-        products: 'Twinrix',
+        abbreviation: 'HAHB',
+        type: 'Hepatitis A and B',
+        products: 'Twinrix®',
         categories: ['high-risk'],
-        formulation: 'Pre-filled Syringe / Single Dose Vial',
-        eligibility: [
-          'Pre-exposure for high-risk individuals: Chronic liver disease (HCV, HBV, cirrhosis), hemophilia/bleeding disorders, men who have sex with men (MSM), illicit drug users, re-immunization post-HSCT.',
-          'Post-exposure prophylaxis following documented exposure.'
+        eligibilityVerbatim: [
+          '• *Pre-exposure immunization for those at increased risk of infection or severe disease:',
+          '  - Chronic liver disease (including hepatitis C, hepatitis B, cirrhosis)',
+          '  - Hemophilia or receiving repeated blood/blood product transfusions',
+          '  - Men who have sex with men (MSM)',
+          '  - Illicit drug users',
+          '  - Re-immunization following hematopoietic stem cell transplant (HSCT)',
+          '• *Post-exposure prophylaxis for eligible contacts following documented exposure.'
         ],
-        considerations: [
-          'Series: 3-dose schedule (0, 1, and 6 months).',
-          'Rapid schedule available if expedited protection is needed.'
+        notesVerbatim: [
+          'Pre-filled syringe / Single dose vial.',
+          'Standard 3-dose schedule: 0, 1, and 6 months.',
+          'Accelerated 4-dose schedule available if rapid protection required.'
         ]
       },
       {
         id: 'ha',
-        name: 'HA',
-        title: 'Hepatitis A',
-        products: 'Havrix, Vaqta',
+        abbreviation: 'HA',
+        type: 'Hepatitis A',
+        products: 'Havrix®, Vaqta®',
         categories: ['high-risk'],
-        formulation: 'Pre-filled Syringe / Single Dose Vial',
-        eligibility: [
-          'Pre-exposure for high-risk: Hemophilia, chronic liver disease, MSM, illicit drug users.',
-          'Post-exposure: Within 14 days of close contact exposure for eligible candidates.'
+        eligibilityVerbatim: [
+          '• *Pre-exposure immunization for high-risk groups: Hemophilia, chronic liver disease, MSM, illicit drug users.',
+          '• *Post-exposure: Within 14 days of close contact exposure for eligible candidates.'
         ],
-        considerations: [
-          '2-dose series spaced 6 to 36 months apart depending on product.'
+        notesVerbatim: [
+          'Pre-filled syringe / Single dose vial.',
+          '2-dose primary series spaced 6 to 36 months apart depending on manufacturer.'
         ]
       },
       {
         id: 'hb',
-        name: 'HB',
-        title: 'Hepatitis B',
-        products: 'Engerix-B, Recombivax HB',
+        abbreviation: 'HB',
+        type: 'Hepatitis B',
+        products: 'Engerix®-B, Recombivax HB®',
         categories: ['pediatric', 'high-risk'],
-        formulation: 'Single Dose Vial / Pre-filled Syringe',
-        eligibility: [
-          'Grade 7 school-based program & youth missing Grade 7 doses.',
-          'High-risk groups: Chronic renal disease/dialysis, solid organ/HSCT transplant, HIV, HCWs, frequent blood product recipients, household/sexual contacts of acute/chronic HBV.',
-          'Infants born to HBV-infected mothers.'
+        eligibilityVerbatim: [
+          '• Grade 7 students (school-based immunization program) and youth who missed Grade 7 doses.',
+          '• High-risk groups: Chronic renal disease/dialysis, solid organ transplant, HSCT, HIV, health care workers, frequent blood product recipients, household or sexual contacts of acute/chronic HBV.',
+          '• Infants born to HBV-infected mothers (1st dose + HBIG within 12 hours of birth).'
         ],
-        considerations: [
-          'Dialysis patients require higher dosing formulations (e.g., Recombivax HB Dialysis or double Engerix-B doses).',
-          'Post-vaccination serology testing recommended 1–4 months after last dose for high-risk groups.'
+        notesVerbatim: [
+          'Single dose vial / Pre-filled syringe.',
+          'Dialysis patients require specific higher dosing formulations (e.g., Recombivax HB Dialysis or double Engerix-B doses).',
+          'Post-vaccination serology testing recommended 1–4 months after last dose for high-risk cohorts.'
         ]
       },
       {
         id: 'hpv',
-        name: 'HPV',
-        title: 'Human Papillomavirus',
-        products: 'Gardasil 9',
+        abbreviation: 'HPV',
+        type: 'Human Papillomavirus',
+        products: 'Gardasil® 9',
         categories: ['pediatric', 'adult', 'high-risk'],
-        formulation: 'Pre-filled Syringe',
-        eligibility: [
-          'Grade 7 school-based program & catch-up up to age 18.',
-          'Individuals ≤26 years: MSM, transgender individuals, HIV-positive, or immunocompromised.',
-          'Surgical management of cervical dysplasia (up to age 45).'
+        eligibilityVerbatim: [
+          '• Grade 7 school-based program & catch-up up to age 18.',
+          '• Individuals ≤ 26 years of age: MSM, transgender individuals, HIV-positive, or immunocompromised.',
+          '• Surgical management of high-grade cervical dysplasia (up to 45 years of age).'
         ],
-        considerations: [
-          '2-dose series if starting before age 15.',
-          '3-dose series (0, 2, 6 months) if starting at age 15+ or immunocompromised.'
+        notesVerbatim: [
+          'Pre-filled syringe.',
+          '2-dose series if initial dose given prior to age 15.',
+          '3-dose series (0, 2, 6 months) if initial dose given at age 15+ or if immunocompromised.'
         ]
       },
       {
         id: 'men-b',
-        name: 'Men-B',
-        title: 'Meningococcal B',
-        products: 'Bexsero, Trumenba',
+        abbreviation: 'Men-B',
+        type: 'Meningococcal B',
+        products: 'Bexsero®, Trumenba®',
         categories: ['high-risk'],
-        formulation: 'Pre-filled Syringe',
-        eligibility: [
-          'High-risk conditions: Asplenia/hyposplenia, complement deficiency, properdin or factor D deficiency, taking eculizumab/ravulizumab.',
-          'Post-exposure management for Serotype B invasive meningococcal disease (IMD) close contacts.'
+        eligibilityVerbatim: [
+          '• High-risk medical conditions: Asplenia or hyposplenia, complement deficiency, properdin or factor D deficiency, individuals receiving eculizumab or ravulizumab.',
+          '• Post-exposure management for Serotype B invasive meningococcal disease (IMD) close contacts.'
         ],
-        considerations: [
-          'Bexsero: 2 doses at least 4 weeks apart.',
-          'Trumenba: 2 or 3 doses depending on risk profile and timing.'
+        notesVerbatim: [
+          'Pre-filled syringe.',
+          'Bexsero®: 2 doses at least 4 weeks apart.',
+          'Trumenba®: 2 or 3 doses depending on risk profile and timing.'
         ]
       },
       {
         id: 'men-c-acyw',
-        name: 'Men-C-ACYW',
-        title: 'Meningococcal Quadrivalent',
-        products: 'MenQuadfi, Nimenrix',
+        abbreviation: 'Men-C-ACYW',
+        type: 'Meningococcal Quadrivalent',
+        products: 'MenQuadfi®, Nimenrix®',
         categories: ['pediatric', 'high-risk'],
-        formulation: 'Single Dose Vial / Liquid Solution',
-        eligibility: [
-          'Grade 7 school-based program.',
-          'High-risk medical conditions: Asplenia, complement deficiency, HIV, HSCT, solid organ transplant, cochlear implants.',
-          'Post-exposure management for A, C, Y, W-135 IMD close contacts.'
+        eligibilityVerbatim: [
+          '• Grade 7 school-based program.',
+          '• High-risk medical conditions: Asplenia, complement deficiency, HIV, HSCT, solid organ transplant, cochlear implants.',
+          '• Post-exposure management for A, C, Y, W-135 IMD close contacts.'
         ],
-        considerations: [
-          'Booster doses required every 3–5 years for individuals with ongoing high-risk conditions.'
-        ]
-      },
-      {
-        id: 'pneu-c-20',
-        name: 'Pneu-C-20',
-        title: 'Pneumococcal Conjugate 20-valent',
-        products: 'Prevnar 20',
-        categories: ['adult', 'high-risk'],
-        formulation: 'Pre-filled Syringe',
-        eligibility: [
-          'Routine immunization for adults aged 65 years and older.',
-          'High-risk adults (18–64) with conditions including: Immunosuppressive conditions, solid organ/HSCT, chronic heart/lung/liver/kidney disease, diabetes, CSF leak, cochlear implant, asthma requiring medical care in past year.'
-        ],
-        considerations: [
-          'Single dose replaces previous Pneu-C-13 / Pneu-P-23 combined schedules for most adults.'
+        notesVerbatim: [
+          'Single dose vial / Liquid solution.',
+          'Booster doses required every 3–5 years for individuals with ongoing high-risk medical conditions.'
         ]
       },
       {
         id: 'mpox',
-        name: 'Mpox (SMV)',
-        title: 'Modified Vaccinia Ankara',
-        products: 'Imvamune',
+        abbreviation: 'SMV (mpox)',
+        type: 'Modified vaccinia virus (for protection against mpox)',
+        products: 'Imvamune®',
         categories: ['high-risk'],
-        formulation: 'Single Dose Vial (Subcutaneous / Intradermal)',
-        eligibility: [
-          'Pre-exposure: Men who have sex with men (MSM) with multiple/anonymous partners, sex workers, laboratory staff handling orthopoxviruses.',
-          'Post-exposure (PEP): Within 4 days (up to 14 days) of high-risk contact with a confirmed mpox case.'
+        eligibilityVerbatim: [
+          '• *Pre-exposure: Men who have sex with men (MSM) with multiple or anonymous partners, sex workers, laboratory staff handling orthopoxviruses.',
+          '• *Post-exposure prophylaxis (PEP): Within 4 days (up to 14 days) of high-risk contact with a confirmed mpox case.'
         ],
-        considerations: [
+        notesVerbatim: [
+          'Single dose vial (Subcutaneous / Intradermal route).',
           '2-dose primary series given 28 days apart.',
           'Subcutaneous administration (0.5 mL) or intradermal (0.1 mL) based on supply and clinical guidance.'
         ]
@@ -349,7 +352,7 @@
 
     let currentCategory = 'all';
 
-    // Render Cards Function (Blue Styling)
+    // Render Cards Function with Full Expandable Verbatim Details
     function renderVaccines(data) {
       const grid = document.getElementById('vaccineGrid');
       grid.innerHTML = '';
@@ -367,74 +370,77 @@
           <div>
             <div class="flex justify-between items-start mb-2">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">${item.name}</span>
-                <h3 class="text-lg font-bold text-slate-900 mt-1">${item.title}</h3>
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">${item.abbreviation}</span>
+                <h3 class="text-lg font-bold text-slate-900 mt-1">${item.type}</h3>
               </div>
               <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">${item.products}</span>
             </div>
 
-            <div class="text-xs text-slate-500 mb-4 flex items-center gap-1">
-              <span>💉 Formulation:</span> <strong class="text-slate-700">${item.formulation}</strong>
+            <!-- Preview Eligibility -->
+            <div class="mb-4">
+              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Eligibility Summary</h4>
+              <ul class="text-xs text-slate-700 space-y-1.5 pl-4 list-disc">
+                ${item.eligibilityVerbatim.slice(0, 2).map(e => `<li>${e}</li>`).join('')}
+              </ul>
             </div>
 
-            <div class="mb-4">
-              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Eligibility Highlights</h4>
-              <ul class="text-xs text-slate-700 space-y-1.5 pl-4 list-disc">
-                ${item.eligibility.map(e => `<li>${e}</li>`).join('')}
-              </ul>
+            <!-- Expandable Collapsible Section for Verbatim Text -->
+            <div id="details-${item.id}" class="hidden mt-4 pt-4 border-t border-slate-200 space-y-4">
+              <div>
+                <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">Full Verbatim Eligibility Criteria</h4>
+                <ul class="text-xs text-slate-800 space-y-1.5 pl-4 list-disc bg-slate-50 p-3 rounded-lg border border-slate-200 whitespace-pre-line">
+                  ${item.eligibilityVerbatim.map(e => `<li>${e}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div>
+                <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">Verbatim Notes & Live Vaccine Considerations</h4>
+                <ul class="text-xs text-slate-800 space-y-1 pl-4 list-disc bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  ${item.notesVerbatim.map(c => `<li>${c}</li>`).join('')}
+                </ul>
+              </div>
             </div>
           </div>
 
-          <div class="pt-3 border-t border-slate-100 mt-2 bg-slate-50 -mx-5 -mb-5 p-4 rounded-b-xl">
-            <h4 class="text-xs font-semibold text-slate-600 mb-1">Key Considerations:</h4>
-            <ul class="text-xs text-slate-600 space-y-0.5 pl-4 list-disc">
-              ${item.considerations.map(c => `<li>${c}</li>`).join('')}
-            </ul>
+          <!-- Bottom Action Controls -->
+          <div class="pt-3 border-t border-slate-100 mt-4 bg-slate-50 -mx-5 -mb-5 p-4 rounded-b-xl flex justify-between items-center">
+            <span class="text-xs text-slate-500 font-medium">Products: ${item.products}</span>
+            <button 
+              onclick="toggleDetails('${item.id}', this)" 
+              class="text-xs font-bold text-blue-700 hover:text-blue-900 bg-white border border-blue-300 hover:border-blue-400 px-3 py-1.5 rounded-md shadow-sm transition-colors"
+            >
+              Show Full Details
+            </button>
           </div>
         `;
         grid.appendChild(card);
       });
     }
 
-    // Interactive Tetanus Calculator Logic
-    function calculateTetanus() {
-      const wound = document.getElementById('woundType').value;
-      const history = document.getElementById('tetanusHistory').value;
-      const resultDiv = document.getElementById('tetanusRecommendation');
-
-      let vaccine = "No";
-      let tig = "No";
-
-      if (wound === 'clean') {
-        if (history === 'unknown' || history === 'gt10') {
-          vaccine = "Yes (Tdap/Td)";
-        }
-      } else { // All other wounds
-        if (history === 'unknown') {
-          vaccine = "Yes (Tdap/Td)";
-          tig = "Yes (Tetanus Immunoglobulin)";
-        } else if (history === '5to10' || history === 'gt10') {
-          vaccine = "Yes (Tdap/Td)";
-        }
+    // Toggle Details Expand/Collapse
+    function toggleDetails(id, btn) {
+      const target = document.getElementById(`details-${id}`);
+      if (target.classList.contains('hidden')) {
+        target.classList.remove('hidden');
+        btn.textContent = 'Hide Details';
+        btn.classList.add('bg-blue-50');
+      } else {
+        target.classList.add('hidden');
+        btn.textContent = 'Show Full Details';
+        btn.classList.remove('bg-blue-50');
       }
-
-      resultDiv.innerHTML = `
-        <div class="flex gap-6 items-center">
-          <div><span class="font-normal text-slate-600">Vaccine Required:</span> <strong class="${vaccine.includes('Yes') ? 'text-blue-700 font-bold' : 'text-slate-700'}">${vaccine}</strong></div>
-          <div><span class="font-normal text-slate-600">TIG Required:</span> <strong class="${tig.includes('Yes') ? 'text-red-600 font-bold' : 'text-slate-700'}">${tig}</strong></div>
-        </div>
-      `;
     }
 
-    // Filter Logic
+    // Search and Filter Logic
     function filterVaccines() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const filtered = vaccines.filter(v => {
         const matchesCat = currentCategory === 'all' || v.categories.includes(currentCategory);
-        const matchesSearch = v.name.toLowerCase().includes(searchTerm) ||
-                              v.title.toLowerCase().includes(searchTerm) ||
+        const matchesSearch = v.abbreviation.toLowerCase().includes(searchTerm) ||
+                              v.type.toLowerCase().includes(searchTerm) ||
                               v.products.toLowerCase().includes(searchTerm) ||
-                              v.eligibility.some(e => e.toLowerCase().includes(searchTerm));
+                              v.eligibilityVerbatim.some(e => e.toLowerCase().includes(searchTerm)) ||
+                              v.notesVerbatim.some(n => n.toLowerCase().includes(searchTerm));
         return matchesCat && matchesSearch;
       });
       renderVaccines(filtered);
@@ -453,7 +459,6 @@
 
     // Initial Load
     renderVaccines(vaccines);
-    calculateTetanus();
   </script>
 </body>
 </html>
