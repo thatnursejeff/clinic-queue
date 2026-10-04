@@ -3,38 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vaxxy-Pad - Nova Scotia Publicly Funded Immunization Guide</title>
+  <title>Nova Scotia Publicly Funded Immunization Guide</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for Wispy Paint Brush Title -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&display=swap" rel="stylesheet">
   <style>
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.6rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border-radius: 9999px;
+    .wispy-title {
+      font-family: 'Caveat Brush', cursive;
+      letter-spacing: 0.03em;
     }
   </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&display=swap" rel="stylesheet">
-
-<style>
-  .wispy-title {
-    font-family: 'Caveat Brush', cursive;
-    letter-spacing: 0.05em;
-  }
-</style>
-
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
 
-  <!-- Header -->
+  <!-- Header Banner (Blue Theme + Wispy Brush Font Title) -->
   <header class="bg-blue-700 text-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
-        <h1 class="text-5xl font-bold tracking-tight wispy-title">Vaxxy-Pad</h1>
-        <p class="text-blue-100 text-sm mt-1">An Interactive Repository of Nova Scotia's Publicly Funded Immunizations and Eligibility<br>
-         <font size=0> *As interpreted by Anna and Glamourized by Jeff</font> </p>
+        <h1 class="text-3xl md:text-4xl font-bold tracking-wide wispy-title">Nova Scotia Publicly Funded Immunization Eligibility</h1>
+        <p class="text-blue-100 text-sm mt-1">Reference Guide & Interactive Wound Management Tool (Updated Oct 2026)</p>
       </div>
       <div class="bg-blue-800 text-blue-100 text-xs px-3 py-1.5 rounded-md border border-blue-600">
         Source: Nova Scotia Health & Wellness
@@ -44,39 +34,80 @@
 
   <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-     <!-- Vaccine Directory Controls -->
+
+    <!-- Interactive Tetanus Tool Section -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+      <h2 class="text-xl font-bold text-slate-900 mb-2 flex items-center gap-2">
+        <span>🩸</span> Tetanus Post-Exposure Wound Management Decision Tool
+      </h2>
+      <p class="text-slate-600 text-sm mb-6">Quickly evaluate immunization requirements based on wound severity and history.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">1. Wound Type</label>
+          <select id="woundType" onchange="calculateTetanus()" class="w-full bg-white border border-slate-300 rounded-md p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="clean">Clean, Minor Wound</option>
+            <option value="other">All Other Wounds (Puncture, Contaminated, Animal Bite, etc.)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-2">2. History of Tetanus Immunization</label>
+          <select id="tetanusHistory" onchange="calculateTetanus()" class="w-full bg-white border border-slate-300 rounded-md p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            <option value="unknown">Unknown or &lt; 3 doses in vaccine series</option>
+            <option value="lt5">3+ doses, last booster &lt; 5 years ago</option>
+            <option value="5to10">3+ doses, last booster 5–10 years ago</option>
+            <option value="gt10">3+ doses, last booster &gt; 10 years ago</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Result Card -->
+      <div id="tetanusResult" class="mt-4 p-4 rounded-lg border border-blue-200 bg-blue-50 flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase tracking-wider font-semibold text-blue-800">Recommended Action</span>
+          <div id="tetanusRecommendation" class="text-lg font-bold text-blue-950 mt-1">Loading...</div>
+        </div>
+        <div class="text-right text-xs text-slate-500">
+          * Refer to full guidelines for TIG details in immunocompromised patients.
+        </div>
+      </div>
+    </section>
+
+    <!-- Directory Filter Controls -->
     <section class="mb-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
-      <!-- Search -->
+      <!-- Search Input -->
       <div class="relative flex-1">
         <input 
           type="text" 
           id="searchInput" 
           onkeyup="filterVaccines()" 
-          placeholder="Search by vaccine, condition, or age (e.g., MMRV, Shingles, Grade 7)..." 
+          placeholder="Search by vaccine, condition, or age (e.g., Mpox, Hepatitis, Grade 7)..." 
           class="w-full bg-white border border-slate-300 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm"
         >
         <span class="absolute left-3 top-3 text-slate-400">🔍</span>
       </div>
 
-      <!-- Filter Tabs -->
+      <!-- Category Filter Tabs -->
       <div class="flex gap-2 overflow-x-auto pb-1 md:pb-0">
-        <button onclick="setCategory('all')" class="cat-btn active bg-blue-700 text-white text-xs px-3 py-2 rounded-md font-medium">All Vaccines</button>
-        <button onclick="setCategory('pediatric')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Pediatric / Youth</button>
-        <button onclick="setCategory('adult')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Adult / Senior</button>
-        <button onclick="setCategory('high-risk')" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">High Risk / Medical</button>
+        <button onclick="setCategory('all', this)" class="cat-btn bg-blue-700 text-white text-xs px-3 py-2 rounded-md font-medium">All Vaccines</button>
+        <button onclick="setCategory('pediatric', this)" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Pediatric / Youth</button>
+        <button onclick="setCategory('adult', this)" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">Adult / Senior</button>
+        <button onclick="setCategory('high-risk', this)" class="cat-btn bg-white border text-slate-700 text-xs px-3 py-2 rounded-md font-medium hover:bg-slate-100">High Risk / Medical</button>
       </div>
     </section>
 
     <!-- Vaccine Cards Grid -->
     <section id="vaccineGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Dynamic Javascript Generation -->
+      <!-- Generated via JavaScript -->
     </section>
 
   </main>
 
   <script>
-    // Vaccine Database from Nova Scotia Publicly Funded Immunization Document
+    // Combined Vaccine Database (Document 1 + Document 2)
     const vaccines = [
+      // --- ROUTINE / GENERAL VACCINES ---
       {
         id: 'mmrv',
         name: 'MMRV',
@@ -180,21 +211,6 @@
         ]
       },
       {
-        id: 'pneumo',
-        name: 'Pneumococcal',
-        title: 'Pneumo',
-        products: 'Pneumococcal Conjugate',
-        categories: ['adult', 'high-risk'],
-        formulation: 'Pre-filled Syringe',
-        eligibility: [
-          '1 dose for individuals aged >65 years.',
-          'High-risk eligibility criteria applies for younger age groups.'
-        ],
-        considerations: [
-          'Review high-risk eligibility policy for specialized conditions.'
-        ]
-      },
-      {
         id: 'rsv',
         name: 'RSV (mRNA)',
         title: 'Respiratory Syncytial Virus',
@@ -206,7 +222,7 @@
         ],
         considerations: [
           'If received RSV vaccine prior to age 75, do not re-immunize.',
-          'Consider deferring from other routine immunizations out of caution (new vaccine).'
+          'Consider deferring from other routine immunizations out of caution.'
         ]
       },
       {
@@ -238,17 +254,148 @@
         considerations: [
           'Fluad is an enhanced, adjuvanted vaccine specifically for ages 65+.'
         ]
+      },
+
+      // --- HIGH RISK / PARTNER VACCINES (DOCUMENT 2) ---
+      {
+        id: 'hahb',
+        name: 'HAHB',
+        title: 'Hepatitis A & B Combined',
+        products: 'Twinrix',
+        categories: ['high-risk'],
+        formulation: 'Pre-filled Syringe / Single Dose Vial',
+        eligibility: [
+          'Pre-exposure for high-risk individuals: Chronic liver disease (HCV, HBV, cirrhosis), hemophilia/bleeding disorders, men who have sex with men (MSM), illicit drug users, re-immunization post-HSCT.',
+          'Post-exposure prophylaxis following documented exposure.'
+        ],
+        considerations: [
+          'Series: 3-dose schedule (0, 1, and 6 months).',
+          'Rapid schedule available if expedited protection is needed.'
+        ]
+      },
+      {
+        id: 'ha',
+        name: 'HA',
+        title: 'Hepatitis A',
+        products: 'Havrix, Vaqta',
+        categories: ['high-risk'],
+        formulation: 'Pre-filled Syringe / Single Dose Vial',
+        eligibility: [
+          'Pre-exposure for high-risk: Hemophilia, chronic liver disease, MSM, illicit drug users.',
+          'Post-exposure: Within 14 days of close contact exposure for eligible candidates.'
+        ],
+        considerations: [
+          '2-dose series spaced 6 to 36 months apart depending on product.'
+        ]
+      },
+      {
+        id: 'hb',
+        name: 'HB',
+        title: 'Hepatitis B',
+        products: 'Engerix-B, Recombivax HB',
+        categories: ['pediatric', 'high-risk'],
+        formulation: 'Single Dose Vial / Pre-filled Syringe',
+        eligibility: [
+          'Grade 7 school-based program & youth missing Grade 7 doses.',
+          'High-risk groups: Chronic renal disease/dialysis, solid organ/HSCT transplant, HIV, HCWs, frequent blood product recipients, household/sexual contacts of acute/chronic HBV.',
+          'Infants born to HBV-infected mothers.'
+        ],
+        considerations: [
+          'Dialysis patients require higher dosing formulations (e.g., Recombivax HB Dialysis or double Engerix-B doses).',
+          'Post-vaccination serology testing recommended 1–4 months after last dose for high-risk groups.'
+        ]
+      },
+      {
+        id: 'hpv',
+        name: 'HPV',
+        title: 'Human Papillomavirus',
+        products: 'Gardasil 9',
+        categories: ['pediatric', 'adult', 'high-risk'],
+        formulation: 'Pre-filled Syringe',
+        eligibility: [
+          'Grade 7 school-based program & catch-up up to age 18.',
+          'Individuals ≤26 years: MSM, transgender individuals, HIV-positive, or immunocompromised.',
+          'Surgical management of cervical dysplasia (up to age 45).'
+        ],
+        considerations: [
+          '2-dose series if starting before age 15.',
+          '3-dose series (0, 2, 6 months) if starting at age 15+ or immunocompromised.'
+        ]
+      },
+      {
+        id: 'men-b',
+        name: 'Men-B',
+        title: 'Meningococcal B',
+        products: 'Bexsero, Trumenba',
+        categories: ['high-risk'],
+        formulation: 'Pre-filled Syringe',
+        eligibility: [
+          'High-risk conditions: Asplenia/hyposplenia, complement deficiency, properdin or factor D deficiency, taking eculizumab/ravulizumab.',
+          'Post-exposure management for Serotype B invasive meningococcal disease (IMD) close contacts.'
+        ],
+        considerations: [
+          'Bexsero: 2 doses at least 4 weeks apart.',
+          'Trumenba: 2 or 3 doses depending on risk profile and timing.'
+        ]
+      },
+      {
+        id: 'men-c-acyw',
+        name: 'Men-C-ACYW',
+        title: 'Meningococcal Quadrivalent',
+        products: 'MenQuadfi, Nimenrix',
+        categories: ['pediatric', 'high-risk'],
+        formulation: 'Single Dose Vial / Liquid Solution',
+        eligibility: [
+          'Grade 7 school-based program.',
+          'High-risk medical conditions: Asplenia, complement deficiency, HIV, HSCT, solid organ transplant, cochlear implants.',
+          'Post-exposure management for A, C, Y, W-135 IMD close contacts.'
+        ],
+        considerations: [
+          'Booster doses required every 3–5 years for individuals with ongoing high-risk conditions.'
+        ]
+      },
+      {
+        id: 'pneu-c-20',
+        name: 'Pneu-C-20',
+        title: 'Pneumococcal Conjugate 20-valent',
+        products: 'Prevnar 20',
+        categories: ['adult', 'high-risk'],
+        formulation: 'Pre-filled Syringe',
+        eligibility: [
+          'Routine immunization for adults aged 65 years and older.',
+          'High-risk adults (18–64) with conditions including: Immunosuppressive conditions, solid organ/HSCT, chronic heart/lung/liver/kidney disease, diabetes, CSF leak, cochlear implant, asthma requiring medical care in past year.'
+        ],
+        considerations: [
+          'Single dose replaces previous Pneu-C-13 / Pneu-P-23 combined schedules for most adults.'
+        ]
+      },
+      {
+        id: 'mpox',
+        name: 'Mpox (SMV)',
+        title: 'Modified Vaccinia Ankara',
+        products: 'Imvamune',
+        categories: ['high-risk'],
+        formulation: 'Single Dose Vial (Subcutaneous / Intradermal)',
+        eligibility: [
+          'Pre-exposure: Men who have sex with men (MSM) with multiple/anonymous partners, sex workers, laboratory staff handling orthopoxviruses.',
+          'Post-exposure (PEP): Within 4 days (up to 14 days) of high-risk contact with a confirmed mpox case.'
+        ],
+        considerations: [
+          '2-dose primary series given 28 days apart.',
+          'Subcutaneous administration (0.5 mL) or intradermal (0.1 mL) based on supply and clinical guidance.'
+        ]
       }
     ];
+
     let currentCategory = 'all';
 
-    // Render Vaccines Cards
+    // Render Cards Function (Blue Styling)
     function renderVaccines(data) {
       const grid = document.getElementById('vaccineGrid');
       grid.innerHTML = '';
 
       if (data.length === 0) {
-        grid.innerHTML = `<div class="col-span-2 text-center py-8 text-slate-500">No vaccines match your search filters.</div>`;
+        grid.innerHTML = `<div class="col-span-2 text-center py-12 text-slate-500 bg-white rounded-xl border border-slate-200">No vaccines match your search criteria.</div>`;
         return;
       }
 
@@ -260,10 +407,10 @@
           <div>
             <div class="flex justify-between items-start mb-2">
               <div>
-                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded">${item.name}</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">${item.name}</span>
                 <h3 class="text-lg font-bold text-slate-900 mt-1">${item.title}</h3>
               </div>
-              <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">${item.products}</span>
+              <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">${item.products}</span>
             </div>
 
             <div class="text-xs text-slate-500 mb-4 flex items-center gap-1">
@@ -272,7 +419,7 @@
 
             <div class="mb-4">
               <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Eligibility Highlights</h4>
-              <ul class="text-xs text-slate-700 space-y-1 pl-4 list-disc">
+              <ul class="text-xs text-slate-700 space-y-1.5 pl-4 list-disc">
                 ${item.eligibility.map(e => `<li>${e}</li>`).join('')}
               </ul>
             </div>
@@ -312,9 +459,9 @@
       }
 
       resultDiv.innerHTML = `
-        <div class="flex gap-4 items-center">
-          <div><span class="font-normal text-slate-600">Vaccine Required:</span> <strong class="${vaccine.includes('Yes') ? 'text-blue-700' : 'text-slate-700'}">${vaccine}</strong></div>
-          <div><span class="font-normal text-slate-600">TIG Required:</span> <strong class="${tig.includes('Yes') ? 'text-red-600' : 'text-slate-700'}">${tig}</strong></div>
+        <div class="flex gap-6 items-center">
+          <div><span class="font-normal text-slate-600">Vaccine Required:</span> <strong class="${vaccine.includes('Yes') ? 'text-blue-700 font-bold' : 'text-slate-700'}">${vaccine}</strong></div>
+          <div><span class="font-normal text-slate-600">TIG Required:</span> <strong class="${tig.includes('Yes') ? 'text-red-600 font-bold' : 'text-slate-700'}">${tig}</strong></div>
         </div>
       `;
     }
@@ -326,20 +473,21 @@
         const matchesCat = currentCategory === 'all' || v.categories.includes(currentCategory);
         const matchesSearch = v.name.toLowerCase().includes(searchTerm) ||
                               v.title.toLowerCase().includes(searchTerm) ||
+                              v.products.toLowerCase().includes(searchTerm) ||
                               v.eligibility.some(e => e.toLowerCase().includes(searchTerm));
         return matchesCat && matchesSearch;
       });
       renderVaccines(filtered);
     }
 
-    function setCategory(cat) {
+    function setCategory(cat, btnElement) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.classList.remove('bg-blue-700', 'text-white');
         btn.classList.add('bg-white', 'text-slate-700');
       });
-      event.target.classList.remove('bg-white', 'text-slate-700');
-      event.target.classList.add('bg-blue-700', 'text-white');
+      btnElement.classList.remove('bg-white', 'text-slate-700');
+      btnElement.classList.add('bg-blue-700', 'text-white');
       filterVaccines();
     }
 
@@ -349,4 +497,3 @@
   </script>
 </body>
 </html>
-
