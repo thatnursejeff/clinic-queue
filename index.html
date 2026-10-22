@@ -909,7 +909,7 @@
     }
 
     async function resetQueueSheet() {
-      const confirmReset = confirm("⚠️ RESET QUEUE:\n\nAre you sure you want to permanently clear all rows in the active queue sheet? The data will be forever lost and Jeff can't get it back even if he wanted to help you - which he does not.");
+      const confirmReset = confirm("⚠️ RESET QUEUE:\n\nAre you sure you want to permanently clear all entries for the current clinic? The data will be forever lost and Jeff can't get it back even if he wanted to help you - which he does not.");
       if (!confirmReset) return;
 
       try {
