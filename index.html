@@ -890,7 +890,7 @@
     }
 
     async function closeAndArchiveClinic() {
-      const confirmClose = confirm("📁 CLOSE CLINIC & ARCHIVE DATA:\n\nThis will archive today's clinic records into a master log sheet and reset the current queue.\n\nDo you wish to proceed?");
+      const confirmClose = confirm("📁 CLOSE CLINIC & ARCHIVE DATA:\n\nThis will archive today's clinic data to the master database and reset the current queue. Jeff may not have time to save you from yourself if you continue and have regrets.\n\nDo you wish to proceed?");
       if (!confirmClose) return;
 
       try {
@@ -909,7 +909,7 @@
     }
 
     async function resetQueueSheet() {
-      const confirmReset = confirm("⚠️ RESET QUEUE:\n\nAre you sure you want to permanently clear all rows in the active queue sheet?");
+      const confirmReset = confirm("⚠️ RESET QUEUE:\n\nAre you sure you want to permanently clear all rows in the active queue sheet? The data will be forever lost and Jeff can't get it back even if he wanted to help you - which he does not.");
       if (!confirmReset) return;
 
       try {
