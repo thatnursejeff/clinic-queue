@@ -345,7 +345,7 @@
       fetchQueue();
     }
 
-    // TAB SWITCHING FUNCTION
+ // TAB SWITCHING FUNCTION WITH URL HASH SUPPORT
     function switchTab(tabName, save = true) {
       const regScreen = document.getElementById('screen-register');
       const nurseScreen = document.getElementById('screen-nurse');
@@ -404,8 +404,39 @@
 
       if (save) {
         localStorage.setItem('phm_active_tab', tabName);
+        window.location.hash = tabName; // Updates URL hash for bookmarking
       }
     }
+
+    // Restore saved user state on page load (with URL hash priority & Display trap escape)
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Restore saved station selection
+      const savedStation = localStorage.getItem('phm_selected_station');
+      if (savedStation) {
+        const stationEl = document.getElementById('stationSelect');
+        if (stationEl) stationEl.value = savedStation;
+      }
+
+      // 2. Determine initial tab: URL Hash takes priority, falling back to localStorage, defaulting to 'register'
+      let initialTab = window.location.hash.replace('#', '').trim();
+      
+      // Safety fix: If someone gets stuck on 'display' via localStorage without a hash, 
+      // fallback to 'register' so they don't get trapped.
+      if (!initialTab || initialTab === 'display') {
+        const savedTab = localStorage.getItem('phm_active_tab');
+        initialTab = (savedTab && savedTab !== 'display') ? savedTab : 'register';
+      }
+
+      switchTab(initialTab, true);
+    });
+
+    // Emergency Escape Hatch for Display Screen: Double-click anywhere or press 'Esc' to go back to Registration
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        switchTab('register');
+      }
+    });
+
 
     // Audio chime and voice synthesis - Triggered ONLY on Public Display Screen
     function playChimeAndAnnounce(ticketNum, stationId) {
