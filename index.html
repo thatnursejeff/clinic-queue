@@ -36,8 +36,18 @@
     <!-- ==================== SCREEN 1: REGISTRATION ==================== -->
     <section id="screen-register" class="block">
       <div class="max-w-xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-        <h2 class="text-2xl font-black mb-1">Issue Queue Number</h2>
-        <p class="text-sm text-gray-500 mb-6">Enter the Number handed to client </p>
+        
+        <!-- HEADER WITH LAST ISSUED NUMBER DISPLAY -->
+        <div class="flex items-start justify-between mb-6 gap-4">
+          <div>
+            <h2 class="text-2xl font-black mb-1">Issue Queue Number</h2>
+            <p class="text-sm text-gray-500">Enter the Number handed to client</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 px-4 py-3 rounded-2xl text-center min-w-[120px] shadow-sm">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Last Issued</span>
+            <span id="last-issued-num" class="text-2xl font-black text-black">--</span>
+          </div>
+        </div>
 
         <div id="alertMsg" class="hidden mb-6 p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-sm font-bold">
           ✓ Number issued and client added to queue successfully!
@@ -544,6 +554,14 @@
         setSafeText('count-waiting-reg', waitingCount);
         setSafeText('count-nurse-reg', nurseCount);
         setSafeText('count-completed-reg', completedCount);
+
+        // Calculate Last Number Issued across active/completed queue records
+        const allValidTickets = data
+          .filter(r => r && (r.TicketNumber || r.Ticketnumber || r.ticketNum))
+          .map(r => String(r.TicketNumber || r.Ticketnumber || r.ticketNum).trim());
+        
+        const lastIssued = allValidTickets.length > 0 ? allValidTickets[allValidTickets.length - 1] : '--';
+        setSafeText('last-issued-num', lastIssued);
 
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
