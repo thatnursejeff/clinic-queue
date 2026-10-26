@@ -337,6 +337,15 @@
       return `${hours}:${minutes}`;
     }
 
+    // Helper to convert time strings (e.g. "14:30" or "2:30 PM") into total minutes from midnight
+    function parseTimeToMinutes(timeStr) {
+      const formatted = formatTo24HourTime(timeStr);
+      if (!formatted || !formatted.includes(':')) return -1;
+      const [h, m] = formatted.split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return -1;
+      return h * 60 + m;
+    }
+
     function saveStationSelection() {
       const stationEl = document.getElementById('stationSelect');
       if (stationEl) {
@@ -345,7 +354,7 @@
       fetchQueue();
     }
 
- // TAB SWITCHING FUNCTION WITH URL HASH SUPPORT
+    // TAB SWITCHING FUNCTION WITH URL HASH SUPPORT
     function switchTab(tabName, save = true) {
       const regScreen = document.getElementById('screen-register');
       const nurseScreen = document.getElementById('screen-nurse');
@@ -430,13 +439,12 @@
       switchTab(initialTab, true);
     });
 
-    // Emergency Escape Hatch for Display Screen: Double-click anywhere or press 'Esc' to go back to Registration
+    // Emergency Escape Hatch for Display Screen: Press 'Esc' to go back to Registration
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         switchTab('register');
       }
     });
-
 
     // Audio chime and voice synthesis - Triggered ONLY on Public Display Screen
     function playChimeAndAnnounce(ticketNum, stationId) {
@@ -553,7 +561,7 @@
           if (activeBox) activeBox.classList.add('hidden');
         }
 
-        // Render Waiting Queue List
+        // Render Waiting Queue List with Priority Sorting & Overdue Highlighting
         const queueList = document.getElementById('queue-list');
         if (queueList) {
           queueList.innerHTML = '';
@@ -561,6 +569,43 @@
             queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
           } else {
             const waitingList = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting');
+
+            // Get current local time in total minutes from midnight
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+            // SORTING LOGIC: Prioritize booked appointments starting 15 mins before scheduled time
+            waitingList.sort((a, b) => {
+              const typeA = String(a.ApptType || a.appType || '').toLowerCase();
+              const typeB = String(b.ApptType || b.appType || '').toLowerCase();
+              const isBookedA = !typeA.includes('drop');
+              const isBookedB = !typeB.includes('drop');
+
+              const timeStrA = formatTo24HourTime(a.ApptTime || a.appTime);
+              const timeStrB = formatTo24HourTime(b.ApptTime || b.appTime);
+              
+              const minsA = timeStrA ? parseTimeToMinutes(timeStrA) : -1;
+              const minsB = timeStrB ? parseTimeToMinutes(timeStrB) : -1;
+
+              // Priority condition: Booked appointment and current time >= (apptTime - 15 minutes)
+              const isPriorityA = isBookedA && minsA !== -1 && (nowMinutes >= minsA - 15);
+              const isPriorityB = isBookedB && minsB !== -1 && (nowMinutes >= minsB - 15);
+
+              if (isPriorityA && !isPriorityB) return -1;
+              if (!isPriorityA && isPriorityB) return 1;
+
+              // If both have priority, sort chronologically by appointment time
+              if (isPriorityA && isPriorityB) {
+                return minsA - minsB;
+              }
+
+              // Fallback for drop-ins / unprioritized items: sort by registration timestamp
+              const timeA = new Date(a.Timestamp || 0).getTime();
+              const timeB = new Date(b.Timestamp || 0).getTime();
+              return timeA - timeB;
+            });
+
+            // Render each sorted waiting item
             waitingList.forEach(item => {
               const ticket = item.TicketNumber || item.Ticketnumber || item.ticketNum || 'N/A';
               const service = item.Service || item.service || '';
@@ -570,17 +615,30 @@
 
               const timeSummary = buildTimeDisplay(apptType, rawApptTime, rawRegTime);
 
+              // OVERDUE CHECK: Highlight red if booked, has valid time, and current time > appt time
+              const timeStr = formatTo24HourTime(rawApptTime);
+              const itemMins = timeStr ? parseTimeToMinutes(timeStr) : -1;
+              const isBooked = !String(apptType).toLowerCase().includes('drop');
+              const isOverdue = isBooked && itemMins !== -1 && (nowMinutes > itemMins);
+
+              const rowClass = isOverdue
+                ? "flex items-center justify-between p-4 bg-rose-50 rounded-xl border border-rose-200 text-rose-900 shadow-sm"
+                : "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
+
               const row = document.createElement('div');
-              row.className = "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
+              row.className = rowClass;
               row.innerHTML = `
                 <div class="flex items-center space-x-4">
-                  <span class="text-2xl font-black text-black">${ticket}</span>
+                  <span class="text-2xl font-black ${isOverdue ? 'text-rose-700' : 'text-black'}">${ticket}</span>
                   <div>
-                    <p class="font-bold text-gray-800 text-sm">${service}</p>
-                    <p class="text-xs text-gray-500 font-medium">${timeSummary}</p>
+                    <p class="font-bold text-sm ${isOverdue ? 'text-rose-900' : 'text-gray-800'}">
+                      ${service} 
+                      ${isOverdue ? '<span class="ml-2 px-2 py-0.5 bg-rose-200 text-rose-800 text-[10px] font-bold rounded-full uppercase">Overdue</span>' : ''}
+                    </p>
+                    <p class="text-xs ${isOverdue ? 'text-rose-700' : 'text-gray-500'} font-medium">${timeSummary}</p>
                   </div>
                 </div>
-                <button type="button" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
+                <button type="button" class="${isOverdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-black text-white hover:bg-gray-800'} px-4 py-2 rounded-xl text-sm font-semibold transition">
                   Call Patient
                 </button>
               `;
