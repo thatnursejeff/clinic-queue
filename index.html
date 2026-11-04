@@ -92,6 +92,18 @@
           </button>
         </form>
 
+        <!-- VERIFICATION FEED: RECENT REGISTRATIONS (LAST 10 ENTRIES) -->
+        <div class="mt-8 pt-6 border-t border-gray-200">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Recent Registrations (Last 10 Logged)</h3>
+            <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">Auto-Syncs</span>
+          </div>
+          <div id="recent-regs-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+            <p class="text-xs text-gray-400 italic text-center py-3">Loading recent entries...</p>
+          </div>
+        </div>
+
+        <!-- OVERALL CLINIC STATUS -->
         <div class="mt-8 pt-6 border-t border-gray-200">
           <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Overall Clinic Status</h3>
           <div class="grid grid-cols-3 gap-4">
@@ -585,6 +597,39 @@
         
         const lastIssued = allValidTickets.length > 0 ? allValidTickets[allValidTickets.length - 1] : '--';
         setSafeText('last-issued-num', lastIssued);
+
+        // Render Recent Registrations Feed (Last 10 entries) on Registration Screen
+        const recentRegsList = document.getElementById('recent-regs-list');
+        if (recentRegsList) {
+          const validRecords = data.filter(r => r && (r.TicketNumber || r.Ticketnumber || r.ticketNum));
+          if (validRecords.length === 0) {
+            recentRegsList.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-3">No registrations logged yet.</p>';
+          } else {
+            // Take the last 10 entries in reverse chronological order (newest first)
+            const last10 = [...validRecords].reverse().slice(0, 10);
+            recentRegsList.innerHTML = last10.map(r => {
+              const ticket = r.TicketNumber || r.Ticketnumber || r.ticketNum || '--';
+              const service = r.Service || r.service || 'General';
+              const status = r.Status || r.status || 'Waiting';
+              
+              let statusBadgeColor = 'bg-amber-100 text-amber-800';
+              if (status === 'With Nurse') statusBadgeColor = 'bg-blue-100 text-blue-800';
+              if (status === 'Completed') statusBadgeColor = 'bg-emerald-100 text-emerald-800';
+
+              return `
+                <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl border text-xs font-semibold">
+                  <div class="flex items-center space-x-3">
+                    <span class="text-base font-black text-black min-w-[32px]">#${ticket}</span>
+                    <div>
+                      <p class="text-gray-800">${service}</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${statusBadgeColor}">${status}</span>
+                </div>
+              `;
+            }).join('');
+          }
+        }
 
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
