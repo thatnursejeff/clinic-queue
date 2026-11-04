@@ -338,6 +338,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
     let activePatient = null;
     let lastProcessedCallId = null; 
+    let isSpeechActive = false;
     let isAdminAuthenticated = false;
     const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
 
@@ -508,6 +509,9 @@
 
     // Audio chime and voice synthesis - Triggered ONLY on Public Display Screen
     function playChimeAndAnnounce(ticketNum, stationId) {
+      if (isSpeechActive) return; // Lock to prevent mid-sentence cutoffs and double chimes
+      isSpeechActive = true;
+
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const playTone = (freq, start, duration) => {
@@ -520,23 +524,18 @@
           gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + start + duration);
           osc.stop(audioCtx.currentTime + start + duration);
         };
+
         playTone(523.25, 0, 0.6);
         playTone(659.25, 0.3, 0.8);
 
-                setTimeout(() => {
+        setTimeout(() => {
           if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            
-            // Fix TTS normalization bug where "Station E" becomes "Station East"
-            let spokenStation = stationId;
-            if (spokenStation.toUpperCase().includes("STATION E")) {
-              spokenStation = "Station letter E"; 
-            }
+            // Appending a period forces the browser engine to treat "E" as a single letter abbreviation instead of "East"
+            let spokenStation = String(stationId || '').replace(/\bStation\s+([A-G])\b/i, 'Station $1.');
 
             const text = `Now serving number ${ticketNum} at ${spokenStation}`;
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 0.9;
-
+            utterance.rate = 0.85;
 
             const voices = window.speechSynthesis.getVoices();
             const femaleVoice = voices.find(v => 
@@ -545,11 +544,18 @@
             ) || voices.find(v => v.lang.startsWith('en'));
 
             if (femaleVoice) utterance.voice = femaleVoice;
+
+            utterance.onend = () => { isSpeechActive = false; };
+            utterance.onerror = () => { isSpeechActive = false; };
+
             window.speechSynthesis.speak(utterance);
+          } else {
+            isSpeechActive = false;
           }
         }, 1000);
       } catch (e) {
         console.error("Audio playback error:", e);
+        isSpeechActive = false;
       }
     }
 
