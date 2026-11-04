@@ -523,12 +523,20 @@
         playTone(523.25, 0, 0.6);
         playTone(659.25, 0.3, 0.8);
 
-        setTimeout(() => {
+                setTimeout(() => {
           if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            const text = `Now serving number ${ticketNum} at ${stationId}`;
+            
+            // Fix TTS normalization bug where "Station E" becomes "Station East"
+            let spokenStation = stationId;
+            if (spokenStation.toUpperCase().includes("STATION E")) {
+              spokenStation = "Station letter E"; 
+            }
+
+            const text = `Now serving number ${ticketNum} at ${spokenStation}`;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.9;
+
 
             const voices = window.speechSynthesis.getVoices();
             const femaleVoice = voices.find(v => 
