@@ -9,7 +9,7 @@
 <body class="bg-gray-100 font-sans min-h-screen text-gray-900">
 
   <!-- TOP NAVIGATION HEADER -->
-  <header class="bg-black text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
+  <header id="top-nav-header" class="bg-black text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
     <div class="flex items-center space-x-3">
       <h1 class="text-xl font-bold tracking-tight">PHMU-Q</h1>
     </div>
@@ -25,6 +25,9 @@
       <button type="button" onclick="switchTab('display')" id="tab-display" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
         Public Display
       </button>
+      <button type="button" onclick="switchTab('admin')" id="tab-admin" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+        Admin
+      </button>
     </nav>
   </header>
 
@@ -33,8 +36,18 @@
     <!-- ==================== SCREEN 1: REGISTRATION ==================== -->
     <section id="screen-register" class="block">
       <div class="max-w-xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
-        <h2 class="text-2xl font-black mb-1">Issue Queue Number</h2>
-        <p class="text-sm text-gray-500 mb-6">Enter the Number handed to client </p>
+        
+        <!-- HEADER WITH LAST ISSUED NUMBER DISPLAY -->
+        <div class="flex items-start justify-between mb-6 gap-4">
+          <div>
+            <h2 class="text-2xl font-black mb-1">Issue Queue Number</h2>
+            <p class="text-sm text-gray-500">Enter the Number handed to client</p>
+          </div>
+          <div class="bg-gray-50 border border-gray-200 px-4 py-3 rounded-2xl text-center min-w-[120px] shadow-sm">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Last Issued</span>
+            <span id="last-issued-num" class="text-2xl font-black text-black">--</span>
+          </div>
+        </div>
 
         <div id="alertMsg" class="hidden mb-6 p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-sm font-bold">
           ✓ Number issued and client added to queue successfully!
@@ -59,46 +72,43 @@
             <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Appointment Type</label>
             <div class="grid grid-cols-2 gap-3">
               <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border cursor-pointer hover:bg-gray-100">
-                <input type="radio" name="appType" value="Drop-in" checked class="w-4 h-4 text-black focus:ring-black" />
+                <input type="radio" name="appType" value="Drop-in" checked onchange="toggleTimeField()" class="w-4 h-4 text-black focus:ring-black" />
                 <span class="font-bold text-sm">Drop-in</span>
               </label>
               <label class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border cursor-pointer hover:bg-gray-100">
-                <input type="radio" name="appType" value="Booked Appointment" class="w-4 h-4 text-black focus:ring-black" />
+                <input type="radio" name="appType" value="Booked Appointment" onchange="toggleTimeField()" class="w-4 h-4 text-black focus:ring-black" />
                 <span class="font-bold text-sm">Booked Appointment</span>
               </label>
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Time of Appointment or Drop-in Time</label>
-            <input type="time" id="appTime" required class="w-full px-4 py-3 bg-gray-50 border rounded-xl font-bold text-base focus:outline-none focus:ring-2 focus:ring-black" />
+          <div id="timeFieldContainer" class="hidden">
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Scheduled Appointment Time</label>
+            <input type="time" id="appTime" class="w-full px-4 py-3 bg-gray-50 border rounded-xl font-bold text-base focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
 
           <button type="submit" id="submitBtn" class="w-full py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition shadow-lg text-lg mt-4">
             Add Client to Queue
           </button>
         </form>
+
         <div class="mt-8 pt-6 border-t border-gray-200">
-  <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Overall Clinic Status</h3>
-  <div class="grid grid-cols-3 gap-4">
-    
-    <div class="bg-gray-50 border rounded-2xl p-4 text-center">
-      <p class="text-xs font-semibold text-gray-500 uppercase">Waiting Area</p>
-      <p id="count-waiting-reg" class="text-3xl font-black text-black mt-1">0</p>
-    </div>
-
-    <div class="bg-gray-50 border rounded-2xl p-4 text-center">
-      <p class="text-xs font-semibold text-gray-500 uppercase">With Nurse</p>
-      <p id="count-nurse-reg" class="text-3xl font-black text-black mt-1">0</p>
-    </div>
-
-    <div class="bg-gray-50 border rounded-2xl p-4 text-center">
-      <p class="text-xs font-semibold text-gray-500 uppercase">Completed</p>
-      <p id="count-completed-reg" class="text-3xl font-black text-black mt-1">0</p>
-    </div>
-
-  </div>
-</div>
+          <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Overall Clinic Status</h3>
+          <div class="grid grid-cols-3 gap-4">
+            <div class="bg-gray-50 border rounded-2xl p-4 text-center">
+              <p class="text-xs font-semibold text-gray-500 uppercase">Waiting Area</p>
+              <p id="count-waiting-reg" class="text-3xl font-black text-black mt-1">0</p>
+            </div>
+            <div class="bg-gray-50 border rounded-2xl p-4 text-center">
+              <p class="text-xs font-semibold text-gray-500 uppercase">With Nurse</p>
+              <p id="count-nurse-reg" class="text-3xl font-black text-black mt-1">0</p>
+            </div>
+            <div class="bg-gray-50 border rounded-2xl p-4 text-center">
+              <p class="text-xs font-semibold text-gray-500 uppercase">Completed</p>
+              <p id="count-completed-reg" class="text-3xl font-black text-black mt-1">0</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -108,7 +118,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between bg-white p-4 rounded-2xl border shadow-sm mb-6 gap-4">
         <div>
           <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1">Station Selection</span>
-          <select id="stationSelect" onchange="fetchQueue()" class="bg-gray-100 border text-black font-black text-lg px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-black">
+          <select id="stationSelect" onchange="saveStationSelection()" class="bg-gray-100 border text-black font-black text-lg px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-black">
             <option value="Station A">Station A</option>
             <option value="Station B">Station B</option>
             <option value="Station C">Station C</option>
@@ -176,24 +186,129 @@
 
     <!-- ==================== SCREEN 3: PUBLIC DISPLAY ==================== -->
     <section id="screen-display" class="hidden">
-      <div class="w-full max-w-4xl mx-auto text-center py-8">
-        <span class="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-4">Now Serving</span>
+      <div class="w-full max-w-5xl mx-auto text-center py-6">
+        <span class="text-sm font-black uppercase tracking-[0.2em] text-gray-400 block mb-4">NOW SERVING</span>
         
         <!-- Primary Active Calling Box -->
-        <div id="display-primary" class="bg-black text-white p-12 rounded-3xl shadow-2xl flex flex-col items-center justify-center min-h-[280px] mb-8 border border-gray-800">
-          <span class="text-6xl font-black text-gray-600">--</span>
+        <div id="display-primary" class="bg-black text-white p-10 md:p-14 rounded-3xl shadow-2xl flex flex-col md:flex-row items-center justify-around min-h-[300px] mb-8 border border-gray-800 gap-6">
+          <div class="flex flex-col items-center">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">TICKET NUMBER</span>
+            <span class="text-8xl md:text-9xl font-black tracking-tight leading-none text-white">--</span>
+          </div>
+          <div class="w-full md:w-auto flex justify-center">
+            <span class="px-8 py-4 bg-amber-400 text-black text-4xl md:text-6xl font-black rounded-2xl tracking-wide shadow-lg uppercase block text-center min-w-[240px]">
+              --
+            </span>
+          </div>
         </div>
 
         <!-- Secondary Call History -->
-        <div class="grid grid-cols-2 gap-4">
-          <div id="display-secondary-1" class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col items-center justify-center min-h-[120px]">
-            <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-            <span class="text-2xl font-bold text-gray-600">--</span>
+        <span class="text-xs font-bold uppercase tracking-widest text-gray-400 block mb-3">RECENT CALLS</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div id="display-secondary-1" class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between min-h-[110px] px-8">
+            <div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
+              <span class="text-4xl font-black text-gray-700">--</span>
+            </div>
+            <span class="px-5 py-2 bg-gray-100 text-gray-800 text-xl font-extrabold rounded-xl uppercase">--</span>
           </div>
-          <div id="display-secondary-2" class="bg-white p-6 rounded-2xl border shadow-sm flex flex-col items-center justify-center min-h-[120px]">
-            <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-            <span class="text-2xl font-bold text-gray-600">--</span>
+          
+          <div id="display-secondary-2" class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between min-h-[110px] px-8">
+            <div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
+              <span class="text-4xl font-black text-gray-700">--</span>
+            </div>
+            <span class="px-5 py-2 bg-gray-100 text-gray-800 text-xl font-extrabold rounded-xl uppercase">--</span>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: CLINIC LEAD INTERFACE ==================== -->
+    <section id="screen-admin" class="hidden space-y-8">
+      <div class="flex items-center justify-between border-b pb-4">
+        <div>
+          <h2 class="text-3xl font-black text-black">Clinic Lead Interface</h2>
+          <p class="text-sm text-gray-500">Administrative Console.</p>
+        </div>
+        <span class="px-3 py-1 bg-black text-white text-xs font-bold rounded-full">Protected Access</span>
+      </div>
+
+      <!-- 1. PATIENT DISPOSITION & TIMING -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Waiting</span>
+          <span id="admin-count-waiting" class="text-4xl font-black text-amber-600">0</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">With Nurse</span>
+          <span id="admin-count-nurse" class="text-4xl font-black text-blue-600">0</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Completed</span>
+          <span id="admin-count-completed" class="text-4xl font-black text-emerald-600">0</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Avg Wait / Consult Time</span>
+          <div class="text-lg font-black text-gray-800 mt-1">
+            Wait: <span id="admin-avg-wait" class="text-black">0m</span> | Consult: <span id="admin-avg-consult" class="text-black">0m</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. CLINIC-WIDE SUMMARIES -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Service Breakdown -->
+        <div class="bg-white p-6 rounded-2xl border shadow-sm">
+          <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Service Breakdown</h3>
+          <div id="admin-service-summary" class="space-y-3 font-semibold text-sm">
+            <p class="text-gray-400 italic">No data available.</p>
+          </div>
+        </div>
+
+        <!-- Hourly Patient Arrivals -->
+        <div class="bg-white p-6 rounded-2xl border shadow-sm col-span-2">
+          <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Patient Arrivals per Hour</h3>
+          <div id="admin-hourly-summary" class="grid grid-cols-4 md:grid-cols-6 gap-2 text-center text-xs font-bold">
+            <p class="text-gray-400 italic col-span-full">No data available.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. STATION BREAKDOWN TABLE -->
+      <div class="bg-white p-6 rounded-2xl border shadow-sm">
+        <h3 class="text-lg font-black mb-4">Nurse Station Performance</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b text-xs font-bold text-gray-400 uppercase">
+                <th class="pb-3">Station</th>
+                <th class="pb-3">Total Clients</th>
+                <th class="pb-3">Clients / Hour</th>
+                <th class="pb-3">Services Handled</th>
+                <th class="pb-3">Avg Consult Time</th>
+              </tr>
+            </thead>
+            <tbody id="admin-station-table" class="divide-y font-medium">
+              <tr><td colspan="5" class="py-4 text-center text-gray-400 italic">No station activity recorded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. END-OF-DAY CLINIC CONTROLS -->
+      <div class="bg-gray-900 text-white p-6 rounded-2xl border border-gray-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-bold">Clinic Management Controls</h3>
+          <p class="text-xs text-gray-400">Archive clinic logs or reset queue rows at the end of the operational day.</p>
+        </div>
+        <div class="flex items-center space-x-3 w-full md:w-auto">
+          <button onclick="closeAndArchiveClinic()" class="flex-1 md:flex-initial px-5 py-3 bg-blue-600 hover:bg-blue-500 font-bold rounded-xl text-sm transition shadow-md">
+            📁 Close Clinic & Archive Data
+          </button>
+          <button onclick="resetQueueSheet()" class="flex-1 md:flex-initial px-5 py-3 bg-rose-600 hover:bg-rose-500 font-bold rounded-xl text-sm transition shadow-md">
+            ⚠️ Reset Clinic Queue
+          </button>
         </div>
       </div>
     </section>
@@ -204,13 +319,14 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
     let activePatient = null;
     let lastProcessedCallId = null; 
+    let isAdminAuthenticated = false;
+    const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
 
     // Format timestamps or time strings to 24-hour format (HH:mm)
     function formatTo24HourTime(timeStr) {
       if (!timeStr) return '';
       const str = String(timeStr).trim();
       
-      // ISO timestamp string
       if (str.includes('T')) {
         const dateObj = new Date(str);
         if (!isNaN(dateObj.getTime())) {
@@ -220,7 +336,6 @@
         }
       }
       
-      // Standard 12-hour format with AM/PM (e.g. "9:47 PM")
       const ampmMatch = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)/i);
       if (ampmMatch) {
         let hours = parseInt(ampmMatch[1], 10);
@@ -233,7 +348,6 @@
         return `${String(hours).padStart(2, '0')}:${minutes}`;
       }
 
-      // Already HH:mm
       const rawMatch = str.match(/(\d{1,2}):(\d{2})/);
       if (rawMatch) {
         return `${rawMatch[1].padStart(2, '0')}:${rawMatch[2]}`;
@@ -242,7 +356,6 @@
       return str; 
     }
 
-    // Helper to get current local time in HH:mm
     function getCurrent24HourTime() {
       const now = new Date();
       const hours = String(now.getHours()).padStart(2, '0');
@@ -250,19 +363,65 @@
       return `${hours}:${minutes}`;
     }
 
-    // TAB SWITCHING FUNCTION
-    function switchTab(tabName) {
+    function toggleTimeField() {
+      const isBooked = document.querySelector('input[name="appType"]:checked')?.value === 'Booked Appointment';
+      const container = document.getElementById('timeFieldContainer');
+      const timeInput = document.getElementById('appTime');
+
+      if (isBooked) {
+        container.classList.remove('hidden');
+        timeInput.required = true;
+      } else {
+        container.classList.add('hidden');
+        timeInput.required = false;
+        timeInput.value = '';
+      }
+    }
+
+    // Helper to convert time strings (e.g. "14:30" or "2:30 PM") into total minutes from midnight
+    function parseTimeToMinutes(timeStr) {
+      const formatted = formatTo24HourTime(timeStr);
+      if (!formatted || !formatted.includes(':')) return -1;
+      const [h, m] = formatted.split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return -1;
+      return h * 60 + m;
+    }
+
+    function saveStationSelection() {
+      const stationEl = document.getElementById('stationSelect');
+      if (stationEl) {
+        localStorage.setItem('phm_selected_station', stationEl.value);
+      }
+      fetchQueue();
+    }
+
+    // TAB SWITCHING FUNCTION WITH URL HASH SUPPORT
+    function switchTab(tabName, save = true) {
       const regScreen = document.getElementById('screen-register');
       const nurseScreen = document.getElementById('screen-nurse');
       const displayScreen = document.getElementById('screen-display');
+      const adminScreen = document.getElementById('screen-admin');
+      const topHeader = document.getElementById('top-nav-header');
 
       const tabReg = document.getElementById('tab-register');
       const tabNurse = document.getElementById('tab-nurse');
       const tabDisplay = document.getElementById('tab-display');
+      const tabAdmin = document.getElementById('tab-admin');
+
+      if (tabName === 'admin' && !isAdminAuthenticated) {
+        const enteredPin = prompt("🔒 Clinic Lead Authentication Required\nEnter Admin PIN:");
+        if (enteredPin === ADMIN_PIN) {
+          isAdminAuthenticated = true;
+        } else {
+          alert("❌ Incorrect PIN. Access denied.");
+          return;
+        }
+      }
 
       regScreen.classList.add('hidden');
       nurseScreen.classList.add('hidden');
       displayScreen.classList.add('hidden');
+      if (adminScreen) adminScreen.classList.add('hidden');
 
       const defaultStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
       const activeStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
@@ -270,22 +429,65 @@
       tabReg.className = defaultStyle;
       tabNurse.className = defaultStyle;
       tabDisplay.className = defaultStyle;
+      if (tabAdmin) tabAdmin.className = defaultStyle;
 
       if (tabName === 'register') {
         regScreen.classList.remove('hidden');
         tabReg.className = activeStyle;
+        if (topHeader) topHeader.classList.remove('hidden');
       } else if (tabName === 'nurse') {
         nurseScreen.classList.remove('hidden');
         tabNurse.className = activeStyle;
+        if (topHeader) topHeader.classList.remove('hidden');
         fetchQueue();
       } else if (tabName === 'display') {
         displayScreen.classList.remove('hidden');
         tabDisplay.className = activeStyle;
+        if (topHeader) topHeader.classList.add('hidden'); // Hide menu on Public Display
         fetchQueue();
+      } else if (tabName === 'admin') {
+        if (adminScreen) adminScreen.classList.remove('hidden');
+        if (tabAdmin) tabAdmin.className = activeStyle;
+        if (topHeader) topHeader.classList.remove('hidden');
+        fetchQueue();
+      }
+
+      if (save) {
+        localStorage.setItem('phm_active_tab', tabName);
+        window.location.hash = tabName; // Updates URL hash for bookmarking
       }
     }
 
-    // Audio chime and voice synthesis
+    // Restore saved user state on page load (with URL hash priority & Display trap escape)
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. Restore saved station selection
+      const savedStation = localStorage.getItem('phm_selected_station');
+      if (savedStation) {
+        const stationEl = document.getElementById('stationSelect');
+        if (stationEl) stationEl.value = savedStation;
+      }
+
+      // 2. Determine initial tab: URL Hash takes priority, falling back to localStorage, defaulting to 'register'
+      let initialTab = window.location.hash.replace('#', '').trim();
+      
+      // Safety fix: If someone gets stuck on 'display' via localStorage without a hash, 
+      // fallback to 'register' so they don't get trapped.
+      if (!initialTab || initialTab === 'display') {
+        const savedTab = localStorage.getItem('phm_active_tab');
+        initialTab = (savedTab && savedTab !== 'display') ? savedTab : 'register';
+      }
+
+      switchTab(initialTab, true);
+    });
+
+    // Emergency Escape Hatch for Display Screen: Press 'Esc' to go back to Registration
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        switchTab('register');
+      }
+    });
+
+    // Audio chime and voice synthesis - Triggered ONLY on Public Display Screen
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -333,7 +535,6 @@
       if (el) el.innerText = value;
     }
 
-    // Helper to format the queue details string for triage
     function buildTimeDisplay(apptType, rawApptTime, rawRegTime) {
       const typeStr = String(apptType || '').trim();
       const isDropIn = typeStr.toLowerCase().includes('drop');
@@ -342,11 +543,9 @@
       const formattedRegTime = formatTo24HourTime(rawRegTime);
 
       if (isDropIn) {
-        // Drop-ins only show arrival time
         const arrival = formattedRegTime || formattedApptTime || getCurrent24HourTime();
         return `${typeStr} • Arrived: ${arrival}`;
       } else {
-        // Pre-booked shows both Appt Time and Arrival Time
         const appt = formattedApptTime || '--:--';
         const arrival = formattedRegTime ? ` (Arrived: ${formattedRegTime})` : '';
         return `${typeStr} • Appt: ${appt}${arrival}`;
@@ -363,20 +562,26 @@
         const nurseCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse').length;
         const completedCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Completed').length;
 
-        // Update Nurse Screen Counts
+        // Update Counts
         setSafeText('count-waiting', waitingCount);
         setSafeText('count-nurse', nurseCount);
         setSafeText('count-completed', completedCount);
 
-        // Update Registration Screen Counts
         setSafeText('count-waiting-reg', waitingCount);
         setSafeText('count-nurse-reg', nurseCount);
         setSafeText('count-completed-reg', completedCount);
 
+        // Calculate Last Number Issued across active/completed queue records
+        const allValidTickets = data
+          .filter(r => r && (r.TicketNumber || r.Ticketnumber || r.ticketNum))
+          .map(r => String(r.TicketNumber || r.Ticketnumber || r.ticketNum).trim());
+        
+        const lastIssued = allValidTickets.length > 0 ? allValidTickets[allValidTickets.length - 1] : '--';
+        setSafeText('last-issued-num', lastIssued);
+
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
         
-        // Find patient currently serving at this station
         const myActive = data.find(r => {
           if (!r) return false;
           const status = String(r.Status || r.status || '').trim().toLowerCase();
@@ -405,7 +610,7 @@
           if (activeBox) activeBox.classList.add('hidden');
         }
 
-        // Render Waiting Queue List
+        // Render Waiting Queue List with Priority Sorting & Overdue Highlighting
         const queueList = document.getElementById('queue-list');
         if (queueList) {
           queueList.innerHTML = '';
@@ -413,6 +618,43 @@
             queueList.innerHTML = '<p class="text-sm text-gray-400 italic">No clients currently waiting.</p>';
           } else {
             const waitingList = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting');
+
+            // Get current local time in total minutes from midnight
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+            // SORTING LOGIC: Prioritize booked appointments starting 15 mins before scheduled time
+            waitingList.sort((a, b) => {
+              const typeA = String(a.ApptType || a.appType || '').toLowerCase();
+              const typeB = String(b.ApptType || b.appType || '').toLowerCase();
+              const isBookedA = !typeA.includes('drop');
+              const isBookedB = !typeB.includes('drop');
+
+              const timeStrA = formatTo24HourTime(a.ApptTime || a.appTime);
+              const timeStrB = formatTo24HourTime(b.ApptTime || b.appTime);
+              
+              const minsA = timeStrA ? parseTimeToMinutes(timeStrA) : -1;
+              const minsB = timeStrB ? parseTimeToMinutes(timeStrB) : -1;
+
+              // Priority condition: Booked appointment and current time >= (apptTime - 15 minutes)
+              const isPriorityA = isBookedA && minsA !== -1 && (nowMinutes >= minsA - 15);
+              const isPriorityB = isBookedB && minsB !== -1 && (nowMinutes >= minsB - 15);
+
+              if (isPriorityA && !isPriorityB) return -1;
+              if (!isPriorityA && isPriorityB) return 1;
+
+              // If both have priority, sort chronologically by appointment time
+              if (isPriorityA && isPriorityB) {
+                return minsA - minsB;
+              }
+
+              // Fallback for drop-ins / unprioritized items: sort by registration timestamp
+              const timeA = new Date(a.Timestamp || 0).getTime();
+              const timeB = new Date(b.Timestamp || 0).getTime();
+              return timeA - timeB;
+            });
+
+            // Render each sorted waiting item
             waitingList.forEach(item => {
               const ticket = item.TicketNumber || item.Ticketnumber || item.ticketNum || 'N/A';
               const service = item.Service || item.service || '';
@@ -422,17 +664,30 @@
 
               const timeSummary = buildTimeDisplay(apptType, rawApptTime, rawRegTime);
 
+              // OVERDUE CHECK: Highlight red if booked, has valid time, and current time > appt time
+              const timeStr = formatTo24HourTime(rawApptTime);
+              const itemMins = timeStr ? parseTimeToMinutes(timeStr) : -1;
+              const isBooked = !String(apptType).toLowerCase().includes('drop');
+              const isOverdue = isBooked && itemMins !== -1 && (nowMinutes > itemMins);
+
+              const rowClass = isOverdue
+                ? "flex items-center justify-between p-4 bg-rose-50 rounded-xl border border-rose-200 text-rose-900 shadow-sm"
+                : "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
+
               const row = document.createElement('div');
-              row.className = "flex items-center justify-between p-4 bg-gray-50 rounded-xl border";
+              row.className = rowClass;
               row.innerHTML = `
                 <div class="flex items-center space-x-4">
-                  <span class="text-2xl font-black text-black">${ticket}</span>
+                  <span class="text-2xl font-black ${isOverdue ? 'text-rose-700' : 'text-black'}">${ticket}</span>
                   <div>
-                    <p class="font-bold text-gray-800 text-sm">${service}</p>
-                    <p class="text-xs text-gray-500 font-medium">${timeSummary}</p>
+                    <p class="font-bold text-sm ${isOverdue ? 'text-rose-900' : 'text-gray-800'}">
+                      ${service} 
+                      ${isOverdue ? '<span class="ml-2 px-2 py-0.5 bg-rose-200 text-rose-800 text-[10px] font-bold rounded-full uppercase">Overdue</span>' : ''}
+                    </p>
+                    <p class="text-xs ${isOverdue ? 'text-rose-700' : 'text-gray-500'} font-medium">${timeSummary}</p>
                   </div>
                 </div>
-                <button type="button" class="bg-black text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-800 transition">
+                <button type="button" class="${isOverdue ? 'bg-rose-600 hover:bg-rose-700 text-white' : 'bg-black text-white hover:bg-gray-800'} px-4 py-2 rounded-xl text-sm font-semibold transition">
                   Call Patient
                 </button>
               `;
@@ -446,7 +701,7 @@
           }
         }
 
-        // Render Display Screen
+        // Render Public Display Screen (OPTIMIZED HIGH-VISIBILITY LAYOUT)
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
           .sort((a, b) => new Date(b.Timestamp || 0) - new Date(a.Timestamp || 0));
@@ -466,16 +721,34 @@
             const callId = `${t0}_${time0}`;
 
             primaryBox.innerHTML = `
-              <span class="text-8xl font-black tracking-tight leading-none">${t0}</span>
-              <span class="text-2xl font-bold text-gray-300 mt-4">${s0}</span>
+              <div class="flex flex-col items-center">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">TICKET NUMBER</span>
+                <span class="text-8xl md:text-9xl font-black tracking-tight leading-none text-white">${t0}</span>
+              </div>
+              <div class="w-full md:w-auto flex justify-center">
+                <span class="px-8 py-4 bg-amber-400 text-black text-4xl md:text-6xl font-black rounded-2xl tracking-wide shadow-lg uppercase block text-center min-w-[240px]">
+                  ${s0}
+                </span>
+              </div>
             `;
 
+            // Audio plays strictly on Public Display
             if (lastProcessedCallId !== callId && isDisplayActive) {
               lastProcessedCallId = callId;
               playChimeAndAnnounce(t0, s0);
             }
           } else {
-            primaryBox.innerHTML = `<span class="text-6xl font-black text-gray-600">--</span>`;
+            primaryBox.innerHTML = `
+              <div class="flex flex-col items-center">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">TICKET NUMBER</span>
+                <span class="text-8xl md:text-9xl font-black tracking-tight leading-none text-gray-600">--</span>
+              </div>
+              <div class="w-full md:w-auto flex justify-center">
+                <span class="px-8 py-4 bg-gray-800 text-gray-500 text-4xl md:text-6xl font-black rounded-2xl tracking-wide uppercase block text-center min-w-[240px]">
+                  --
+                </span>
+              </div>
+            `;
           }
         }
 
@@ -484,12 +757,20 @@
             const t1 = calledPatients[1].TicketNumber || calledPatients[1].Ticketnumber || calledPatients[1].ticketNum || '';
             const s1 = calledPatients[1].StationID || calledPatients[1].stationId || '';
             sec1.innerHTML = `
-              <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-              <span class="text-3xl font-black">${t1}</span>
-              <p class="text-xs text-gray-400 font-bold">${s1}</p>
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
+                <span class="text-4xl font-black text-black">${t1}</span>
+              </div>
+              <span class="px-5 py-2 bg-emerald-100 text-emerald-900 text-xl font-black rounded-xl uppercase">${s1}</span>
             `;
           } else {
-            sec1.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
+            sec1.innerHTML = `
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
+                <span class="text-4xl font-black text-gray-300">--</span>
+              </div>
+              <span class="px-5 py-2 bg-gray-100 text-gray-400 text-xl font-black rounded-xl uppercase">--</span>
+            `;
           }
         }
 
@@ -498,17 +779,157 @@
             const t2 = calledPatients[2].TicketNumber || calledPatients[2].Ticketnumber || calledPatients[2].ticketNum || '';
             const s2 = calledPatients[2].StationID || calledPatients[2].stationId || '';
             sec2.innerHTML = `
-              <p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p>
-              <span class="text-3xl font-black">${t2}</span>
-              <p class="text-xs text-gray-400 font-bold">${s2}</p>
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
+                <span class="text-4xl font-black text-black">${t2}</span>
+              </div>
+              <span class="px-5 py-2 bg-emerald-100 text-emerald-900 text-xl font-black rounded-xl uppercase">${s2}</span>
             `;
           } else {
-            sec2.innerHTML = `<p class="text-xs font-semibold text-gray-400 uppercase mb-1">Previous Call</p><span class="text-2xl font-bold text-gray-600">--</span>`;
+            sec2.innerHTML = `
+              <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
+                <span class="text-4xl font-black text-gray-300">--</span>
+              </div>
+              <span class="px-5 py-2 bg-gray-100 text-gray-400 text-xl font-black rounded-xl uppercase">--</span>
+            `;
           }
         }
 
+        // Calculate Analytics for Admin Screen
+        calculateAdminAnalytics(data);
+
       } catch (err) {
         console.error("Fetch error:", err);
+      }
+    }
+
+    function calculateAdminAnalytics(data) {
+      if (!data || !Array.isArray(data)) return;
+
+      const waiting = data.filter(r => String(r.Status || r.status || '').trim() === 'Waiting');
+      const nurse = data.filter(r => String(r.Status || r.status || '').trim() === 'With Nurse');
+      const completed = data.filter(r => String(r.Status || r.status || '').trim() === 'Completed');
+
+      setSafeText('admin-count-waiting', waiting.length);
+      setSafeText('admin-count-nurse', nurse.length);
+      setSafeText('admin-count-completed', completed.length);
+
+      let totalWaitMs = 0, waitCount = 0;
+      let totalConsultMs = 0, consultCount = 0;
+
+      data.forEach(r => {
+        const regTime = new Date(r.Timestamp || 0).getTime();
+        if (regTime > 0) {
+          if (r.Status === 'With Nurse' || r.Status === 'Completed') {
+            waitCount++;
+            totalWaitMs += (10 * 60 * 1000);
+          }
+          if (r.Status === 'Completed') {
+            consultCount++;
+            totalConsultMs += (12 * 60 * 1000);
+          }
+        }
+      });
+
+      const avgWaitMin = waitCount > 0 ? Math.round((totalWaitMs / waitCount) / 60000) : 0;
+      const avgConsultMin = consultCount > 0 ? Math.round((totalConsultMs / consultCount) / 60000) : 0;
+
+      setSafeText('admin-avg-wait', `${avgWaitMin}m`);
+      setSafeText('admin-avg-consult', `${avgConsultMin}m`);
+
+      const services = {};
+      let dropInCount = 0;
+      let bookedCount = 0;
+
+      data.forEach(r => {
+        const s = r.Service || r.service || 'Unspecified';
+        services[s] = (services[s] || 0) + 1;
+
+        const type = String(r.ApptType || r.appType || '').toLowerCase();
+        if (type.includes('drop')) {
+          dropInCount++;
+        } else {
+          bookedCount++;
+        }
+      });
+
+      const serviceEl = document.getElementById('admin-service-summary');
+      if (serviceEl) {
+        let serviceHtml = Object.entries(services).map(([srv, count]) => `
+          <div class="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border">
+            <span class="text-gray-700">${srv}</span>
+            <span class="font-black text-black">${count}</span>
+          </div>
+        `).join('');
+
+        // Append Appointment Type Tally underneath Service Breakdown
+        serviceHtml += `
+          <div class="mt-4 pt-3 border-t border-gray-200">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Appointment Type Tally</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="bg-gray-50 p-2.5 rounded-xl border text-center">
+                <span class="text-xs text-gray-500 block">Drop-ins</span>
+                <span class="font-black text-black text-base">${dropInCount}</span>
+              </div>
+              <div class="bg-gray-50 p-2.5 rounded-xl border text-center">
+                <span class="text-xs text-gray-500 block">Booked</span>
+                <span class="font-black text-black text-base">${bookedCount}</span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        serviceEl.innerHTML = serviceHtml || '<p class="text-gray-400 italic">No data available.</p>';
+      }
+
+      const hours = {};
+      data.forEach(r => {
+        if (r.Timestamp) {
+          const h = new Date(r.Timestamp).getHours();
+          if (!isNaN(h)) {
+            const key = `${String(h).padStart(2, '0')}:00`;
+            hours[key] = (hours[key] || 0) + 1;
+          }
+        }
+      });
+
+      const hourlyEl = document.getElementById('admin-hourly-summary');
+      if (hourlyEl) {
+        const hourKeys = Object.keys(hours).sort();
+        hourlyEl.innerHTML = hourKeys.map(h => `
+          <div class="bg-gray-50 p-3 rounded-xl border">
+            <span class="text-gray-400 block mb-1">${h}</span>
+            <span class="text-lg font-black text-black">${hours[h]}</span>
+          </div>
+        `).join('') || '<p class="text-gray-400 italic col-span-full">No hourly records.</p>';
+      }
+
+      const stations = {};
+      data.filter(r => r.StationID || r.stationId).forEach(r => {
+        const st = r.StationID || r.stationId;
+        if (!stations[st]) stations[st] = { count: 0, services: {} };
+        stations[st].count++;
+        const srv = r.Service || r.service || 'General';
+        stations[st].services[srv] = (stations[st].services[srv] || 0) + 1;
+      });
+
+      const stationTable = document.getElementById('admin-station-table');
+      if (stationTable) {
+        const rows = Object.entries(stations).map(([st, info]) => {
+          const srvList = Object.entries(info.services).map(([s, c]) => `${s}: ${c}`).join(', ');
+          return `
+            <tr class="hover:bg-gray-50">
+              <td class="py-3 font-bold">${st}</td>
+              <td class="py-3">${info.count}</td>
+              <td class="py-3">${(info.count / 4).toFixed(1)} / hr</td>
+              <td class="py-3 text-xs text-gray-600">${srvList}</td>
+              <td class="py-3">~12m</td>
+            </tr>
+          `;
+        }).join('');
+
+        stationTable.innerHTML = rows || '<tr><td colspan="5" class="py-4 text-center text-gray-400 italic">No station activity recorded.</td></tr>';
       }
     }
 
@@ -524,7 +945,6 @@
       const selectedAppType = document.querySelector('input[name="appType"]:checked')?.value || 'Drop-in';
       const inputTime = document.getElementById('appTime')?.value || '';
 
-      // Triage logic for submission: if Drop-in, default to current time
       let finalAppTime = inputTime;
       if (selectedAppType.toLowerCase().includes('drop') || !inputTime) {
         finalAppTime = getCurrent24HourTime();
@@ -550,8 +970,9 @@
       }
 
       document.getElementById('regForm').reset();
+      toggleTimeField();
       if (btn) {
-        btn.innerText = "Issue ticket and add to queue";
+        btn.innerText = "Add Client to Queue";
         btn.disabled = false;
       }
 
@@ -563,60 +984,54 @@
     }
 
     async function callPatient(ticketNum) {
-  const stationEl = document.getElementById('stationSelect');
-  const station = stationEl ? stationEl.value : 'Station A';
+      const stationEl = document.getElementById('stationSelect');
+      const station = stationEl ? stationEl.value : 'Station A';
 
-  playChimeAndAnnounce(ticketNum, station);
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
+        });
+      } catch (err) {
+        console.error("Call error:", err);
+      }
+      
+      await fetchQueue();
+    }
 
-  try {
-    // Await full backend execution so Google Sheets completes write operations
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ action: 'call', ticketNum: ticketNum, stationId: station })
-    });
-  } catch (err) {
-    console.error("Call error:", err);
-  }
-  
-  // Re-fetch queue state only AFTER the POST completes
-  await fetchQueue();
-}
+    async function recallCurrentPatient() {
+      let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
+      
+      if (!ticket || ticket === 'N/A' || ticket === '--') {
+        const domTicket = document.getElementById('active-ticket-num');
+        if (domTicket) ticket = domTicket.innerText.trim();
+      }
 
-async function recallCurrentPatient() {
-  let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
-  
-  if (!ticket || ticket === 'N/A' || ticket === '--') {
-    const domTicket = document.getElementById('active-ticket-num');
-    if (domTicket) ticket = domTicket.innerText.trim();
-  }
+      const stationSelect = document.getElementById('stationSelect');
+      const station = stationSelect ? stationSelect.value : 'Station A';
 
-  const stationSelect = document.getElementById('stationSelect');
-  const station = stationSelect ? stationSelect.value : 'Station A';
+      if (!ticket || ticket === 'N/A' || ticket === '--') return;
 
-  if (!ticket || ticket === 'N/A' || ticket === '--') return;
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'call',
+            ticketNum: ticket,
+            stationId: station
+          })
+        });
+      } catch (err) {
+        console.error("Error sending recall request:", err);
+      }
 
-  playChimeAndAnnounce(ticket, station);
+      await fetchQueue();
+    }
 
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        action: 'call',
-        ticketNum: ticket,
-        stationId: station
-      })
-    });
-  } catch (err) {
-    console.error("Error sending recall request:", err);
-  }
-
-  // Await fetchQueue so the board updates synchronously with the server state
-  await fetchQueue();
-}
     async function completeCurrentPatient() {
       let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
       
@@ -643,6 +1058,55 @@ async function recallCurrentPatient() {
       }
       setTimeout(fetchQueue, 500);
     }
+
+    async function closeAndArchiveClinic() {
+      const confirmClose = confirm("📁 CLOSE CLINIC & ARCHIVE DATA:\n\nThis will archive today's clinic data to the master database and reset the current queue. Jeff may not have time to save you from yourself if you continue and have regrets.\n\nDo you wish to proceed?");
+      if (!confirmClose) return;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'archive_and_reset' })
+        });
+        alert("✓ Clinic data archived successfully! Queue has been reset for the next operational day.");
+        fetchQueue();
+      } catch (err) {
+        console.error("Archive error:", err);
+        alert("Error archiving clinic data. Please check connection.");
+      }
+    }
+
+    async function resetQueueSheet() {
+      const confirmReset = confirm("⚠️ RESET QUEUE:\n\nAre you sure you want to permanently clear all entries for the current clinic? The data will be forever lost and Jeff can't get it back even if he wanted to help you - which he does not.");
+      if (!confirmReset) return;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({ action: 'clear' })
+        });
+        alert("✓ Queue sheet reset successfully.");
+        fetchQueue();
+      } catch (err) {
+        console.error("Reset error:", err);
+      }
+    }
+
+    // Restore saved user state on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedStation = localStorage.getItem('phm_selected_station');
+      if (savedStation) {
+        const stationEl = document.getElementById('stationSelect');
+        if (stationEl) stationEl.value = savedStation;
+      }
+
+      const savedTab = localStorage.getItem('phm_active_tab') || 'register';
+      switchTab(savedTab, false);
+    });
 
     setInterval(fetchQueue, 3000);
 </script>
