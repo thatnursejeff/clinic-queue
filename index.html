@@ -10,8 +10,11 @@
 
   <!-- TOP NAVIGATION HEADER -->
   <header id="top-nav-header" class="bg-black text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
-    <div class="flex items-center space-x-3">
+    <div class="flex flex-col items-start">
       <h1 class="text-xl font-bold tracking-tight">PHMU-Q</h1>
+      <button type="button" onclick="openChangelog()" class="text-[10px] font-mono text-gray-400 hover:text-white transition hover:underline focus:outline-none -mt-0.5">
+        v1.2.0 (Release Notes)
+      </button>
     </div>
     
     <!-- NAVIGATION TABS -->
@@ -344,12 +347,71 @@
 
   </main>
 
+  <!-- VERSION HISTORY MODAL -->
+  <div id="changelogModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white text-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 space-y-4">
+      <div class="flex items-center justify-between border-b pb-3">
+        <h3 class="text-lg font-black tracking-tight">Version Details & Release Notes</h3>
+        <button onclick="closeChangelog()" class="text-gray-400 hover:text-black font-bold text-xl px-2">&times;</button>
+      </div>
+      
+      <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-black text-black text-sm">Version 1.2.0</span>
+            <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Current</span>
+          </div>
+          <ul class="list-disc list-inside text-gray-600 text-xs space-y-1">
+            <li>Added Return to Queue functionality at Nurse Stations.</li>
+            <li>Added version release notes popup viewer.</li>
+            <li>Optimized layout and responsive styling.</li>
+          </ul>
+        </div>
+        
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-700 text-xs">Version 1.1.0</span>
+          </div>
+          <ul class="list-disc list-inside text-gray-500 text-xs space-y-1">
+            <li>Added appointment timing and overdue indicators.</li>
+            <li>Added registration verification feed.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t text-right">
+        <button onclick="closeChangelog()" class="px-4 py-2 bg-black hover:bg-gray-800 text-white font-bold rounded-xl text-xs transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
     let activePatient = null;
     let lastProcessedCallId = null; 
     let isAdminAuthenticated = false;
     const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
+
+    // Modal Control Functions
+    function openChangelog() {
+      const modal = document.getElementById('changelogModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeChangelog() {
+      const modal = document.getElementById('changelogModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // Close modal when clicking outside of the content container
+    window.addEventListener('click', (e) => {
+      const modal = document.getElementById('changelogModal');
+      if (e.target === modal) {
+        closeChangelog();
+      }
+    });
 
     // Format timestamps or time strings to 24-hour format (HH:mm)
     function formatTo24HourTime(timeStr) {
