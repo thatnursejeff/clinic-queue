@@ -173,6 +173,7 @@
               </div>
             </div>
 
+            <!-- MAIN OPERATIONAL BUTTONS -->
             <div class="space-y-3">
               <button onclick="recallCurrentPatient()" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl text-sm transition border border-gray-700">
                 🔊 Call Patient Again
@@ -180,10 +181,16 @@
               <button onclick="completeCurrentPatient()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition">
                 ✓ Complete & Release Client
               </button>
-              <button onclick="returnPatientToQueue()" class="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-sm transition shadow-md">
-                ↩ Return Patient to Queue
+            </div>
+
+            <!-- DISTAL MIS-CLICK CORRECTION AREA -->
+            <div class="border-t border-gray-900 pt-4 mt-6">
+              <button onclick="returnPatientToQueue()" class="w-full py-2 px-3 bg-gray-900 hover:bg-amber-950 text-amber-400 border border-amber-900/50 font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 opacity-80 hover:opacity-100">
+                <span>↩</span>
+                <span>Return Client to Queue (Wrong Call)</span>
               </button>
             </div>
+
           </div>
         </div>
 
@@ -1099,7 +1106,7 @@
 
       if (!ticket || ticket === 'N/A' || ticket === '--') return;
 
-      const confirmReturn = confirm(`↩ RETURN PATIENT TO QUEUE:\n\nAre you sure you want to return Client #${ticket} back to the queue?`);
+      const confirmReturn = confirm(`↩ RETURN CLIENT TO QUEUE:\n\nAre you sure you want to return Client #${ticket} back to the waiting queue?`);
       if (!confirmReturn) return;
 
       const activeBox = document.getElementById('active-client-box');
