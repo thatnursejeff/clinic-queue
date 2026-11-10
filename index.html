@@ -361,18 +361,27 @@
         <button onclick="closeChangelog()" class="text-gray-400 hover:text-black font-bold text-xl px-2">&times;</button>
       </div>
       
-      <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
+            <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
         <div>
           <div class="flex items-center justify-between mb-1">
             <span class="font-black text-black text-sm">Version 1.2.0</span>
             <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Current</span>
           </div>
-          <ul class="list-disc list-inside text-gray-600 text-xs space-y-1">
-            <li>Updated app name and logo. </li>
-            <li>Added Return to Queue functionality to Nurse Stations.</li>
-            <li>Fixed "Last number registered" on registration screen.</li>
-            <li>Added version release notes popup viewer.</li>
-            <li>Optimized layout and responsive styling.</li>
+          
+          <!-- Indented / Hanging indent bullet list -->
+          <ul class="space-y-1.5 text-gray-600 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Added Return to Queue functionality at Nurse Stations with mis-click confirmation popups.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Integrated EvoQueue branding and clickable version release notes popup viewer.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Optimized responsive layout and multi-device scalability.</span>
+            </li>
           </ul>
         </div>
         
@@ -380,13 +389,19 @@
           <div class="flex items-center justify-between mb-1">
             <span class="font-bold text-gray-700 text-xs">Version 1.1.0</span>
           </div>
-          <ul class="list-disc list-inside text-gray-500 text-xs space-y-1">
-            <li>Added appointment timing and overdue indicators.</li>
-            <li>Gave up trying to solve "station EAST" bug. Station E is now called station STFU. </li>
-            <li>Added registration verification feed.</li>
+          <ul class="space-y-1.5 text-gray-500 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Added appointment timing and overdue indicators for booked queues.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Introduced real-time registration verification feed.</span>
+            </li>
           </ul>
         </div>
       </div>
+
 
       <div class="pt-3 border-t text-right">
         <button onclick="closeChangelog()" class="px-4 py-2 bg-black hover:bg-gray-800 text-white font-bold rounded-xl text-xs transition">
