@@ -353,6 +353,25 @@
 
   </main>
 
+  <!-- STAFF SHIFT PIN ENTRY MODAL -->
+  <div id="staffPinModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white text-gray-900 rounded-3xl max-w-sm w-full p-8 shadow-2xl border border-gray-200 text-center space-y-6">
+      <div>
+        <div class="w-12 h-12 bg-black text-white rounded-2xl mx-auto flex items-center justify-center text-xl mb-3 shadow-md">🔒</div>
+        <h3 class="text-xl font-black tracking-tight">Terminal Authorization</h3>
+        <p class="text-xs text-gray-500 mt-1">Enter clinic staff PIN to initialize this terminal for the shift.</p>
+      </div>
+      
+      <form onsubmit="verifyStaffPin(event)" class="space-y-4">
+        <input type="password" id="staffPinInput" required maxlength="6" placeholder="Enter PIN" class="w-full px-4 py-3 bg-gray-50 border rounded-xl text-center font-black text-xl tracking-widest focus:outline-none focus:ring-2 focus:ring-black" />
+        <button type="submit" class="w-full py-3.5 bg-black hover:bg-gray-800 text-white font-bold rounded-xl transition shadow-lg text-sm">
+          Authorize Terminal
+        </button>
+      </form>
+      <p class="text-[10px] text-gray-400">Authorized personnel only.</p>
+    </div>
+  </div>
+
   <!-- VERSION HISTORY MODAL -->
   <div id="changelogModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white text-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 space-y-4">
@@ -361,7 +380,7 @@
         <button onclick="closeChangelog()" class="text-gray-400 hover:text-black font-bold text-xl px-2">&times;</button>
       </div>
       
-            <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
+      <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
         <div>
           <div class="flex items-center justify-between mb-1">
             <span class="font-black text-black text-sm">Version 1.2.0</span>
@@ -384,7 +403,7 @@
             </li>
              <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
-              <span>Increased station font and overall scale of public display screen for increased visibility *feedback from team &#10084; </span>
+              <span>Increased station font and overall scale of public display screen for increased visibility *feedback from team ❤️</span>
             </li>
             <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
@@ -392,7 +411,7 @@
             </li>
             <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
-              <span>Gave up on solving the speech synthesis bug resulting in Station E being called out as Station "East". Station E will henceforth be known as "Station STFU". </span>
+              <span>Gave up on solving the speech synthesis bug resulting in Station E being called out as Station "East". Station E will henceforth be known as "Station STFU".</span>
             </li>
           </ul>
         </div>
@@ -414,7 +433,6 @@
         </div>
       </div>
 
-
       <div class="pt-3 border-t text-right">
         <button onclick="closeChangelog()" class="px-4 py-2 bg-black hover:bg-gray-800 text-white font-bold rounded-xl text-xs transition">
           Close
@@ -429,6 +447,44 @@
     let lastProcessedCallId = null; 
     let isAdminAuthenticated = false;
     const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
+    const STAFF_PIN = "5050"; // Default PIN for Staff Session Access (Change as needed)
+
+    // STAFF SESSION AUTHORIZATION
+    function checkStaffAuth(targetTab) {
+      if (targetTab === 'display') return true; // Public display bypasses PIN check completely
+      
+      const isAuthed = sessionStorage.getItem('evo_staff_authed') === 'true';
+      if (!isAuthed) {
+        const modal = document.getElementById('staffPinModal');
+        if (modal) modal.classList.remove('hidden');
+        setTimeout(() => document.getElementById('staffPinInput')?.focus(), 100);
+        return false;
+      }
+      return true;
+    }
+
+    function verifyStaffPin(e) {
+      e.preventDefault();
+      const input = document.getElementById('staffPinInput');
+      if (input && input.value === STAFF_PIN) {
+        sessionStorage.setItem('evo_staff_authed', 'true');
+        const modal = document.getElementById('staffPinModal');
+        if (modal) modal.classList.add('hidden');
+        input.value = '';
+        
+        let targetTab = window.location.hash.replace('#', '').trim();
+        if (!targetTab || targetTab === 'display') {
+          targetTab = localStorage.getItem('phm_active_tab') || 'register';
+        }
+        switchTab(targetTab, true);
+      } else {
+        alert("❌ Incorrect PIN. Access denied.");
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      }
+    }
 
     // Modal Control Functions
     function openChangelog() {
@@ -524,6 +580,10 @@
 
     // TAB SWITCHING FUNCTION WITH URL HASH SUPPORT
     function switchTab(tabName, save = true) {
+      if (!checkStaffAuth(tabName)) {
+        return; // Halts tab switching until PIN is verified
+      }
+
       const regScreen = document.getElementById('screen-register');
       const nurseScreen = document.getElementById('screen-nurse');
       const displayScreen = document.getElementById('screen-display');
@@ -594,17 +654,20 @@
         if (stationEl) stationEl.value = savedStation;
       }
 
-      // 2. Determine initial tab: URL Hash takes priority, falling back to localStorage, defaulting to 'register'
+      // 2. Determine initial tab
       let initialTab = window.location.hash.replace('#', '').trim();
       
-      // Safety fix: If someone gets stuck on 'display' via localStorage without a hash, 
-      // fallback to 'register' so they don't get trapped.
       if (!initialTab || initialTab === 'display') {
         const savedTab = localStorage.getItem('phm_active_tab');
         initialTab = (savedTab && savedTab !== 'display') ? savedTab : 'register';
       }
 
-      switchTab(initialTab, true);
+      // Allow display screen to open without auth prompt
+      if (window.location.hash.trim() === '#display') {
+        switchTab('display', true);
+      } else if (checkStaffAuth(initialTab)) {
+        switchTab(initialTab, true);
+      }
     });
 
     // Emergency Escape Hatch for Display Screen: Press 'Esc' to go back to Registration
@@ -1296,8 +1359,18 @@
         if (stationEl) stationEl.value = savedStation;
       }
 
-      const savedTab = localStorage.getItem('phm_active_tab') || 'register';
-      switchTab(savedTab, false);
+      let initialTab = window.location.hash.replace('#', '').trim();
+      
+      if (!initialTab || initialTab === 'display') {
+        const savedTab = localStorage.getItem('phm_active_tab');
+        initialTab = (savedTab && savedTab !== 'display') ? savedTab : 'register';
+      }
+
+      if (window.location.hash.trim() === '#display') {
+        switchTab('display', true);
+      } else if (checkStaffAuth(initialTab)) {
+        switchTab(initialTab, true);
+      }
     });
 
     setInterval(fetchQueue, 3000);
