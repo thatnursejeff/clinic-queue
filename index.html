@@ -8,17 +8,20 @@
 </head>
 <body class="bg-gray-100 font-sans min-h-screen text-gray-900">
 
-  <!-- TOP NAVIGATION HEADER -->
-  <div class="flex flex-col items-start">
-  <!-- LOGO IMAGE WITH RESPONSIVE SIZING -->
-  <a href="#register" onclick="switchTab('register')" class="focus:outline-none">
-    <img src="evo.svg" alt="EvoQueue Logo" class="h-8 md:h-10 w-auto object-contain transition-all" />
-  </a>
-  
-  <button type="button" onclick="openChangelog()" class="text-[10px] font-mono text-gray-400 hover:text-white transition hover:underline focus:outline-none -mt-0.5">
-    v1.2.0 (Release Notes)
-  </button>
-</div>
+    <!-- TOP NAVIGATION HEADER -->
+  <header id="top-nav-header" class="bg-black text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
+    
+    <!-- LEFT GROUP: LOGO & VERSION -->
+    <div class="flex items-center space-x-3">
+      <a href="#register" onclick="switchTab('register')" class="focus:outline-none flex items-center">
+        <!-- Replace 'logo.svg' with your actual image path or base64 if using the PNG -->
+        <img src="logo.svg" alt="EvoQueue" class="h-7 md:h-8 w-auto object-contain" />
+      </a>
+      <button type="button" onclick="openChangelog()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white text-xs font-mono rounded border border-gray-700 transition" title="Click to view recent changes">
+        v1.2.0
+      </button>
+    </div>
+    
     <!-- NAVIGATION TABS -->
     <nav class="flex space-x-2 bg-gray-900 p-1 rounded-xl border border-gray-800">
       <button type="button" onclick="switchTab('register')" id="tab-register" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow">
@@ -35,6 +38,7 @@
       </button>
     </nav>
   </header>
+
 
   <main class="p-4 md:p-8 max-w-6xl mx-auto">
 
