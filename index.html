@@ -18,7 +18,7 @@
         <img src="evo.svg" alt="EvoQueue" class="h-10 md:h-11 w-auto object-contain" />
       </a>
       <button type="button" onclick="openChangelog()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white text-xs font-mono rounded border border-gray-700 transition" title="Click to view recent changes">
-        v1.3.0
+        v1.3.1
       </button>
     </div>
     
@@ -240,35 +240,56 @@
 
     <!-- ==================== SCREEN 3: RECOVERY STATION (HSA INTERFACE) ==================== -->
     <section id="screen-recovery" class="hidden space-y-6">
-      <!-- Top Summary & Filter Bar -->
+      <!-- Top Summary & Layout Configuration Bar -->
       <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl font-black text-black">Recovery Station Monitor</h2>
-          <p class="text-xs text-gray-500">Assign post-vaccination clients to open seats. Timers run from nurse release time.</p>
+          <p class="text-xs text-gray-500">Configure layout, assign post-vaccination clients to open seats, and monitor timers.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
+          <!-- Grid Layout Configuration Dropdowns -->
+          <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
+            <span class="text-[10px] font-bold uppercase text-gray-500">Rows:</span>
+            <select id="recoveryRowsConfig" onchange="saveRecoveryLayoutConfig()" class="bg-transparent font-black text-xs focus:outline-none cursor-pointer">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6" selected>6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+
+          <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
+            <span class="text-[10px] font-bold uppercase text-gray-500">Seats/Row:</span>
+            <select id="recoverySeatsConfig" onchange="saveRecoveryLayoutConfig()" class="bg-transparent font-black text-xs focus:outline-none cursor-pointer">
+              <option value="4">4</option>
+              <option value="6">6</option>
+              <option value="8">8</option>
+              <option value="10">10</option>
+              <option value="12" selected>12</option>
+              <option value="16">16</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+
           <!-- Unassigned Recovery Queue Badge -->
-          <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl flex items-center space-x-2">
-            <span class="text-xs font-bold uppercase text-amber-800">Awaiting Seat:</span>
-            <span id="recovery-unassigned-count" class="text-lg font-black text-amber-900">0</span>
+          <div class="bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-xl flex items-center space-x-2">
+            <span class="text-[10px] font-bold uppercase text-amber-800">Awaiting:</span>
+            <span id="recovery-unassigned-count" class="text-base font-black text-amber-900">0</span>
           </div>
 
           <!-- Occupied Seats Badge -->
-          <div class="bg-sky-50 border border-sky-200 px-4 py-2 rounded-xl flex items-center space-x-2">
-            <span class="text-xs font-bold uppercase text-sky-800">Seated:</span>
-            <span id="recovery-seated-count" class="text-lg font-black text-sky-900">0 / 72</span>
+          <div class="bg-sky-50 border border-sky-200 px-3.5 py-1.5 rounded-xl flex items-center space-x-2">
+            <span class="text-[10px] font-bold uppercase text-sky-800">Seated:</span>
+            <span id="recovery-seated-count" class="text-base font-black text-sky-900">0 / 72</span>
           </div>
 
           <!-- Row Filter -->
-          <select id="recoveryRowFilter" onchange="renderRecoveryGrid()" class="bg-gray-100 border text-black font-bold text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-black">
-            <option value="ALL">All Rows (1–6)</option>
-            <option value="1">Row 1 (Seats 1–12)</option>
-            <option value="2">Row 2 (Seats 1–12)</option>
-            <option value="3">Row 3 (Seats 1–12)</option>
-            <option value="4">Row 4 (Seats 1–12)</option>
-            <option value="5">Row 5 (Seats 1–12)</option>
-            <option value="6">Row 6 (Seats 1–12)</option>
+          <select id="recoveryRowFilter" onchange="renderRecoveryGrid()" class="bg-gray-100 border text-black font-bold text-xs px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-black">
+            <option value="ALL">All Rows</option>
           </select>
         </div>
       </div>
@@ -279,7 +300,7 @@
         <div id="unassigned-recovery-pills" class="flex flex-wrap gap-2"></div>
       </div>
 
-      <!-- 6 Rows x 12 Seats Grid Container -->
+      <!-- Dynamic Rows x Seats Grid Container -->
       <div id="recovery-rows-container" class="space-y-6">
         <!-- Dynamically populated via JS -->
       </div>
@@ -457,8 +478,24 @@
       <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="font-black text-black text-sm">Version 1.3.0</span>
+            <span class="font-black text-black text-sm">Version 1.3.1</span>
             <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Current</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-600 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Added dynamic Recovery grid layout configuration (selectable rows and seats per row) persisted locally.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Fixed dropdown interruption bug: background polling now safely defers re-rendering when a staff member has a seat dropdown open.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-black text-black text-sm">Version 1.3.0</span>
           </div>
           <ul class="space-y-1.5 text-gray-600 text-xs">
             <li class="flex items-start space-x-2">
@@ -467,11 +504,7 @@
             </li>
             <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
-              <span>Added Recovery Station screen with 6x12 interactive seating grid, live countdown timers from nurse release, early exit clearing, and automatic timeout discharge.</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Expanded backend logging to track nurse call time, nurse release time, recovery seat assignment, and recovery discharge time.</span>
+              <span>Added Recovery Station screen with live countdown timers from nurse release, early exit clearing, and automatic timeout discharge.</span>
             </li>
           </ul>
         </div>
@@ -480,56 +513,14 @@
           <div class="flex items-center justify-between mb-1">
             <span class="font-bold text-gray-800 text-xs">Version 1.2.0</span>
           </div>
-          
-          <!-- Indented / Hanging indent bullet list -->
           <ul class="space-y-1.5 text-gray-600 text-xs">
             <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
-              <span>Added Return to Queue functionality at Nurse Stations with confirmation popup to avoid returning client to queue by accident.</span>
+              <span>Added Return to Queue functionality at Nurse Stations with confirmation popup.</span>
             </li>
             <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
-              <span>Added terminal authorization pin to prevent unauthorized access.</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Updated service type descriptions on registration screen.</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Added EvoQueue branding and clickable version release notes popup viewer.</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Changed active call colouring on public display screen to avoid staff outing themselves when pointing out visual similarities to a popular adult site that Sonja has never visited.</span>
-            </li>
-             <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Increased station font and overall scale of public display screen for increased visibility *feedback from team ❤️</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Optimized responsive layout and multi-device scalability.</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
-              <span>Gave up on solving the speech synthesis bug resulting in Station E being called out as Station "East". Station E will henceforth be known as "Station STFU".</span>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="border-t pt-3">
-          <div class="flex items-center justify-between mb-1">
-            <span class="font-bold text-gray-700 text-xs">Version 1.1.0</span>
-          </div>
-          <ul class="space-y-1.5 text-gray-500 text-xs">
-            <li class="flex items-start space-x-2">
-              <span class="text-gray-400 font-bold">•</span>
-              <span>Adjusted appointment timing logic and added overdue indicators for booked appointments.</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-gray-400 font-bold">•</span>
-              <span>Introduced real-time "last 10" scrollable registration verification feed at bottom of registration screen.</span>
+              <span>Added terminal authorization PIN to prevent unauthorized access.</span>
             </li>
           </ul>
         </div>
@@ -553,11 +544,11 @@
     let autoDischargedTickets = new Set(); // Prevents duplicate auto-discharge calls
 
     const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
-    const STAFF_PIN = "5050"; // Default PIN for Staff Session Access (Change as needed)
+    const STAFF_PIN = "5050"; // Default PIN for Staff Session Access
 
     // STAFF SESSION AUTHORIZATION
     function checkStaffAuth(targetTab) {
-      if (targetTab === 'display') return true; // Public display bypasses PIN check completely
+      if (targetTab === 'display') return true;
       
       const isAuthed = sessionStorage.getItem('evo_staff_authed') === 'true';
       if (!isAuthed) {
@@ -603,7 +594,6 @@
       if (modal) modal.classList.add('hidden');
     }
 
-    // Close modal when clicking outside of the content container
     window.addEventListener('click', (e) => {
       const modal = document.getElementById('changelogModal');
       if (e.target === modal) {
@@ -611,7 +601,6 @@
       }
     });
 
-    // Format timestamps or time strings to 24-hour format (HH:mm)
     function formatTo24HourTime(timeStr) {
       if (!timeStr) return '';
       const str = String(timeStr).trim();
@@ -667,7 +656,6 @@
       }
     }
 
-    // Helper to convert time strings (e.g. "14:30" or "2:30 PM") into total minutes from midnight
     function parseTimeToMinutes(timeStr) {
       const formatted = formatTo24HourTime(timeStr);
       if (!formatted || !formatted.includes(':')) return -1;
@@ -688,7 +676,7 @@
     // TAB SWITCHING FUNCTION WITH URL HASH SUPPORT
     function switchTab(tabName, save = true) {
       if (!checkStaffAuth(tabName)) {
-        return; // Halts tab switching until PIN is verified
+        return;
       }
 
       const regScreen = document.getElementById('screen-register');
@@ -742,11 +730,12 @@
         if (recoveryScreen) recoveryScreen.classList.remove('hidden');
         if (tabRecovery) tabRecovery.className = activeStyle;
         if (topHeader) topHeader.classList.remove('hidden');
+        initRecoveryLayoutControls();
         fetchQueue();
       } else if (tabName === 'display') {
         displayScreen.classList.remove('hidden');
         tabDisplay.className = activeStyle;
-        if (topHeader) topHeader.classList.add('hidden'); // Hide menu on Public Display
+        if (topHeader) topHeader.classList.add('hidden');
         fetchQueue();
       } else if (tabName === 'admin') {
         if (adminScreen) adminScreen.classList.remove('hidden');
@@ -757,18 +746,16 @@
 
       if (save) {
         localStorage.setItem('phm_active_tab', tabName);
-        window.location.hash = tabName; // Updates URL hash for bookmarking
+        window.location.hash = tabName;
       }
     }
 
-    // Emergency Escape Hatch for Display Screen: Press 'Esc' to go back to Registration
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         switchTab('register');
       }
     });
 
-    // Audio chime and voice synthesis - Triggered ONLY on Public Display Screen
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -856,7 +843,7 @@
         setSafeText('count-recovery-reg', recoveryCount);
         setSafeText('count-completed-reg', completedCount);
 
-        // Calculate Last Number Issued across active/completed queue records
+        // Calculate Last Number Issued
         const allValidTickets = data
           .filter(r => r && (r.TicketNumber || r.Ticketnumber || r.ticketNum))
           .map(r => String(r.TicketNumber || r.Ticketnumber || r.ticketNum).trim());
@@ -864,14 +851,13 @@
         const lastIssued = allValidTickets.length > 0 ? allValidTickets[allValidTickets.length - 1] : '--';
         setSafeText('last-issued-num', lastIssued);
 
-        // Render Recent Registrations Feed (Last 10 entries) on Registration Screen
+        // Render Recent Registrations Feed (Last 10 entries)
         const recentRegsList = document.getElementById('recent-regs-list');
         if (recentRegsList) {
           const validRecords = data.filter(r => r && (r.TicketNumber || r.Ticketnumber || r.ticketNum));
           if (validRecords.length === 0) {
             recentRegsList.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-3">No registrations logged yet.</p>';
           } else {
-            // Take the last 10 entries in reverse chronological order (newest first)
             const last10 = [...validRecords].reverse().slice(0, 10);
             recentRegsList.innerHTML = last10.map(r => {
               const ticket = r.TicketNumber || r.Ticketnumber || r.ticketNum || '--';
@@ -898,6 +884,7 @@
           }
         }
 
+        // Nurse Station Active Client Card
         const stationEl = document.getElementById('stationSelect');
         const currentStation = stationEl ? stationEl.value : 'Station A';
         
@@ -932,7 +919,6 @@
           if (recoverySelectorBox) {
             if (isVaccination) {
               recoverySelectorBox.classList.remove('hidden');
-              // Default to 15m only when a new patient is loaded into the card
               if (activePatientTicket !== ticket && recoveryTimeSelect) {
                 recoveryTimeSelect.value = '15m';
               }
@@ -949,7 +935,7 @@
           if (activeBox) activeBox.classList.add('hidden');
         }
 
-        // Render Waiting Queue List with Priority Sorting & Overdue Highlighting
+        // Render Waiting Queue List
         const queueList = document.getElementById('queue-list');
         if (queueList) {
           queueList.innerHTML = '';
@@ -958,11 +944,9 @@
           } else {
             const waitingList = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting');
 
-            // Get current local time in total minutes from midnight
             const now = new Date();
             const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-            // SORTING LOGIC: Prioritize booked appointments starting 15 mins before scheduled time
             waitingList.sort((a, b) => {
               const typeA = String(a.ApptType || a.appType || '').toLowerCase();
               const typeB = String(b.ApptType || b.appType || '').toLowerCase();
@@ -975,25 +959,18 @@
               const minsA = timeStrA ? parseTimeToMinutes(timeStrA) : -1;
               const minsB = timeStrB ? parseTimeToMinutes(timeStrB) : -1;
 
-              // Priority condition: Booked appointment and current time >= (apptTime - 15 minutes)
               const isPriorityA = isBookedA && minsA !== -1 && (nowMinutes >= minsA - 15);
               const isPriorityB = isBookedB && minsB !== -1 && (nowMinutes >= minsB - 15);
 
               if (isPriorityA && !isPriorityB) return -1;
               if (!isPriorityA && isPriorityB) return 1;
+              if (isPriorityA && isPriorityB) return minsA - minsB;
 
-              // If both have priority, sort chronologically by appointment time
-              if (isPriorityA && isPriorityB) {
-                return minsA - minsB;
-              }
-
-              // Fallback for drop-ins / unprioritized items: sort by registration timestamp
               const timeA = new Date(a.Timestamp || 0).getTime();
               const timeB = new Date(b.Timestamp || 0).getTime();
               return timeA - timeB;
             });
 
-            // Render each sorted waiting item
             waitingList.forEach(item => {
               const ticket = item.TicketNumber || item.Ticketnumber || item.ticketNum || 'N/A';
               const service = item.Service || item.service || '';
@@ -1003,7 +980,6 @@
 
               const timeSummary = buildTimeDisplay(apptType, rawApptTime, rawRegTime);
 
-              // OVERDUE CHECK: Highlight red if booked, has valid time, and current time > appt time
               const timeStr = formatTo24HourTime(rawApptTime);
               const itemMins = timeStr ? parseTimeToMinutes(timeStr) : -1;
               const isBooked = !String(apptType).toLowerCase().includes('drop');
@@ -1040,10 +1016,10 @@
           }
         }
 
-        // Render Recovery Station Grid
+        // Render Recovery Grid
         renderRecoveryGrid();
 
-        // Render Public Display Screen (FULL-SCREEN OPTIMIZED RENDERING)
+        // Render Public Display Screen
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
           .sort((a, b) => new Date(b.Timestamp || 0) - new Date(a.Timestamp || 0));
@@ -1075,7 +1051,6 @@
               </div>
             `;
 
-            // Audio plays strictly on Public Display
             if (lastProcessedCallId !== callId && isDisplayActive) {
               lastProcessedCallId = callId;
               playChimeAndAnnounce(t0, s0);
@@ -1140,7 +1115,6 @@
           }
         }
 
-        // Calculate Analytics for Admin Screen
         calculateAdminAnalytics(data);
 
       } catch (err) {
@@ -1150,12 +1124,54 @@
 
     // ==================== RECOVERY STATION LOGIC ====================
 
+    function getRecoveryConfig() {
+      const rows = parseInt(localStorage.getItem('evo_recovery_rows') || '6', 10);
+      const seats = parseInt(localStorage.getItem('evo_recovery_seats') || '12', 10);
+      return { rows, seats };
+    }
+
+    function initRecoveryLayoutControls() {
+      const config = getRecoveryConfig();
+      const rowsEl = document.getElementById('recoveryRowsConfig');
+      const seatsEl = document.getElementById('recoverySeatsConfig');
+      if (rowsEl) rowsEl.value = config.rows;
+      if (seatsEl) seatsEl.value = config.seats;
+      updateRowFilterOptions(config.rows);
+    }
+
+    function saveRecoveryLayoutConfig() {
+      const rows = document.getElementById('recoveryRowsConfig').value;
+      const seats = document.getElementById('recoverySeatsConfig').value;
+      localStorage.setItem('evo_recovery_rows', rows);
+      localStorage.setItem('evo_recovery_seats', seats);
+
+      updateRowFilterOptions(parseInt(rows, 10));
+      renderRecoveryGrid();
+    }
+
+    function updateRowFilterOptions(maxRows) {
+      const filterEl = document.getElementById('recoveryRowFilter');
+      if (!filterEl) return;
+      const currentVal = filterEl.value;
+      
+      let html = `<option value="ALL">All Rows (1–${maxRows})</option>`;
+      for (let r = 1; r <= maxRows; r++) {
+        html += `<option value="${r}">Row ${r}</option>`;
+      }
+      filterEl.innerHTML = html;
+      
+      if (currentVal === 'ALL' || (parseInt(currentVal, 10) <= maxRows)) {
+        filterEl.value = currentVal;
+      } else {
+        filterEl.value = 'ALL';
+      }
+    }
+
     function getRemainingRecoveryMs(record) {
       const reqStr = String(record.RecoveryRequired || '').trim();
       const mins = parseInt(reqStr.replace('m', ''), 10);
       if (isNaN(mins) || mins <= 0) return 0;
 
-      // Countdown starts from NurseCompleteTime (when nurse released the client)
       const startTimestamp = record.NurseCompleteTime || record.Timestamp;
       if (!startTimestamp) return mins * 60 * 1000;
 
@@ -1178,20 +1194,29 @@
       const container = document.getElementById('recovery-rows-container');
       if (!container) return;
 
+      // 🛡️ DROPDOWN INTERRUPTION FIX: Do not re-render grid if staff is actively interacting with a select dropdown
+      const activeEl = document.activeElement;
+      if (activeEl && activeEl.tagName === 'SELECT' && container.contains(activeEl)) {
+        return; 
+      }
+
+      const config = getRecoveryConfig();
+      const maxRows = config.rows;
+      const maxSeats = config.seats;
+      const totalCapacity = maxRows * maxSeats;
+
       const inRecovery = latestQueueData.filter(r => r && String(r.Status || r.status || '').trim() === 'In Recovery');
       const unassigned = inRecovery.filter(r => !String(r.RecoverySeat || '').trim());
       const seated = inRecovery.filter(r => String(r.RecoverySeat || '').trim() !== '');
 
-      // Map occupied seats: "R1-S1" -> record
       const seatMap = {};
       seated.forEach(r => {
         seatMap[String(r.RecoverySeat).trim()] = r;
       });
 
       setSafeText('recovery-unassigned-count', unassigned.length);
-      setSafeText('recovery-seated-count', `${seated.length} / 72`);
+      setSafeText('recovery-seated-count', `${seated.length} / ${totalCapacity}`);
 
-      // Update Unassigned Banner
       const banner = document.getElementById('unassigned-recovery-banner');
       const pillsContainer = document.getElementById('unassigned-recovery-pills');
       if (banner && pillsContainer) {
@@ -1208,7 +1233,6 @@
         }
       }
 
-      // Build dropdown options HTML for vacant seats
       let optionsHtml = `<option value="">-- Assign Client --</option>`;
       unassigned.forEach(r => {
         const t = r.TicketNumber || r.Ticketnumber || r.ticketNum;
@@ -1220,11 +1244,11 @@
       const rowFilter = document.getElementById('recoveryRowFilter')?.value || 'ALL';
       let gridHtml = '';
 
-      for (let row = 1; row <= 6; row++) {
+      for (let row = 1; row <= maxRows; row++) {
         if (rowFilter !== 'ALL' && String(row) !== rowFilter) continue;
 
         let seatsHtml = '';
-        for (let seat = 1; seat <= 12; seat++) {
+        for (let seat = 1; seat <= maxSeats; seat++) {
           const seatId = `R${row}-S${seat}`;
           const occupant = seatMap[seatId];
 
@@ -1282,7 +1306,7 @@
           <div class="bg-gray-50/70 p-4 rounded-2xl border border-gray-200">
             <div class="flex items-center justify-between mb-3">
               <h3 class="text-sm font-black uppercase tracking-wider text-gray-700">Row ${row}</h3>
-              <span class="text-[11px] font-semibold text-gray-400">Seats 1 – 12</span>
+              <span class="text-[11px] font-semibold text-gray-400">Seats 1 – ${maxSeats}</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               ${seatsHtml}
@@ -1305,13 +1329,11 @@
 
         const remMs = getRemainingRecoveryMs(r);
         
-        // Update live countdown display if element is currently rendered
         const timerEl = document.querySelector(`[data-recovery-ticket="${ticket}"]`);
         if (timerEl) {
           timerEl.innerText = formatCountdown(remMs);
         }
 
-        // Auto-release when recovery duration expires
         if (remMs <= 0 && !autoDischargedTickets.has(ticket)) {
           autoDischargedTickets.add(ticket);
           dischargeRecoveryClient(ticket, false);
@@ -1436,7 +1458,6 @@
           </div>
         `).join('');
 
-        // Append Appointment Type Tally underneath Service Breakdown
         serviceHtml += `
           <div class="mt-4 pt-3 border-t border-gray-200">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Appointment Type Tally</p>
@@ -1524,7 +1545,7 @@
       }
 
       const ticketVal = document.getElementById('ticketNum').value.trim();
-      autoDischargedTickets.delete(ticketVal); // Clear auto-discharge lock if ticket number is reused
+      autoDischargedTickets.delete(ticketVal);
 
       const payload = {
         action: 'add',
@@ -1650,7 +1671,6 @@
 
       if (!ticket) return;
 
-      // Capture recovery selection if Vaccination
       let recoveryTime = 'N/A';
       if (service.toLowerCase().includes('vaccination')) {
         const recSelect = document.getElementById('recoveryTimeSelect');
