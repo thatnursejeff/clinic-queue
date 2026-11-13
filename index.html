@@ -9,7 +9,7 @@
 <body class="bg-gray-100 font-sans min-h-screen text-gray-900">
 
     <!-- TOP NAVIGATION HEADER -->
-  <header id="top-nav-header" class="bg-black text-white px-6 py-4 flex flex-col md:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
+  <header id="top-nav-header" class="bg-black text-white px-6 py-4 flex flex-col lg:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
     
     <!-- LEFT GROUP: LOGO & VERSION -->
     <div class="flex items-center space-x-3">
@@ -18,29 +18,32 @@
         <img src="evo.svg" alt="EvoQueue" class="h-10 md:h-11 w-auto object-contain" />
       </a>
       <button type="button" onclick="openChangelog()" class="px-2 py-0.5 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white text-xs font-mono rounded border border-gray-700 transition" title="Click to view recent changes">
-        v1.2.0
+        v1.3.0
       </button>
     </div>
     
     <!-- NAVIGATION TABS -->
-    <nav class="flex space-x-2 bg-gray-900 p-1 rounded-xl border border-gray-800">
-      <button type="button" onclick="switchTab('register')" id="tab-register" class="px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow">
+    <nav class="flex flex-wrap justify-center gap-1.5 bg-gray-900 p-1 rounded-xl border border-gray-800">
+      <button type="button" onclick="switchTab('register')" id="tab-register" class="px-3.5 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow">
         Register Client
       </button>
-      <button type="button" onclick="switchTab('nurse')" id="tab-nurse" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+      <button type="button" onclick="switchTab('nurse')" id="tab-nurse" class="px-3.5 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
         Nurse Station
       </button>
-      <button type="button" onclick="switchTab('display')" id="tab-display" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+      <button type="button" onclick="switchTab('recovery')" id="tab-recovery" class="px-3.5 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+        Recovery Station
+      </button>
+      <button type="button" onclick="switchTab('display')" id="tab-display" class="px-3.5 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
         Public Display
       </button>
-      <button type="button" onclick="switchTab('admin')" id="tab-admin" class="px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
+      <button type="button" onclick="switchTab('admin')" id="tab-admin" class="px-3.5 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white">
         Admin
       </button>
     </nav>
   </header>
 
 
-  <main class="p-4 md:p-8 max-w-6xl mx-auto">
+  <main class="p-4 md:p-8 max-w-7xl mx-auto">
 
     <!-- ==================== SCREEN 1: REGISTRATION ==================== -->
     <section id="screen-register" class="block">
@@ -115,18 +118,22 @@
         <!-- OVERALL CLINIC STATUS -->
         <div class="mt-8 pt-6 border-t border-gray-200">
           <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Overall Clinic Status</h3>
-          <div class="grid grid-cols-3 gap-4">
-            <div class="bg-gray-50 border rounded-2xl p-4 text-center">
-              <p class="text-xs font-semibold text-gray-500 uppercase">Waiting Area</p>
-              <p id="count-waiting-reg" class="text-3xl font-black text-black mt-1">0</p>
+          <div class="grid grid-cols-4 gap-2.5">
+            <div class="bg-gray-50 border rounded-2xl p-3 text-center">
+              <p class="text-[10px] font-semibold text-gray-500 uppercase">Waiting</p>
+              <p id="count-waiting-reg" class="text-2xl font-black text-black mt-1">0</p>
             </div>
-            <div class="bg-gray-50 border rounded-2xl p-4 text-center">
-              <p class="text-xs font-semibold text-gray-500 uppercase">With Nurse</p>
-              <p id="count-nurse-reg" class="text-3xl font-black text-black mt-1">0</p>
+            <div class="bg-gray-50 border rounded-2xl p-3 text-center">
+              <p class="text-[10px] font-semibold text-gray-500 uppercase">With Nurse</p>
+              <p id="count-nurse-reg" class="text-2xl font-black text-black mt-1">0</p>
             </div>
-            <div class="bg-gray-50 border rounded-2xl p-4 text-center">
-              <p class="text-xs font-semibold text-gray-500 uppercase">Completed</p>
-              <p id="count-completed-reg" class="text-3xl font-black text-black mt-1">0</p>
+            <div class="bg-gray-50 border rounded-2xl p-3 text-center">
+              <p class="text-[10px] font-semibold text-gray-500 uppercase">Recovery</p>
+              <p id="count-recovery-reg" class="text-2xl font-black text-black mt-1">0</p>
+            </div>
+            <div class="bg-gray-50 border rounded-2xl p-3 text-center">
+              <p class="text-[10px] font-semibold text-gray-500 uppercase">Completed</p>
+              <p id="count-completed-reg" class="text-2xl font-black text-black mt-1">0</p>
             </div>
           </div>
         </div>
@@ -151,14 +158,17 @@
         </div>
 
         <!-- Counts -->
-        <div class="flex items-center space-x-4 text-sm font-bold">
-          <div class="bg-amber-50 text-amber-900 border border-amber-200 px-4 py-2 rounded-xl">
+        <div class="flex flex-wrap items-center gap-2 text-sm font-bold">
+          <div class="bg-amber-50 text-amber-900 border border-amber-200 px-3.5 py-2 rounded-xl">
             Waiting: <span id="count-waiting">0</span>
           </div>
-          <div class="bg-blue-50 text-blue-900 border border-blue-200 px-4 py-2 rounded-xl">
+          <div class="bg-blue-50 text-blue-900 border border-blue-200 px-3.5 py-2 rounded-xl">
             With Nurse: <span id="count-nurse">0</span>
           </div>
-          <div class="bg-emerald-50 text-emerald-900 border border-emerald-200 px-4 py-2 rounded-xl">
+          <div class="bg-purple-50 text-purple-900 border border-purple-200 px-3.5 py-2 rounded-xl">
+            In Recovery: <span id="count-recovery">0</span>
+          </div>
+          <div class="bg-emerald-50 text-emerald-900 border border-emerald-200 px-3.5 py-2 rounded-xl">
             Completed: <span id="count-completed">0</span>
           </div>
         </div>
@@ -171,7 +181,7 @@
             <span class="text-xs font-bold uppercase tracking-wider text-gray-400 block mb-1" id="active-station-label">Currently Serving</span>
             <div class="text-6xl font-black mb-4 tracking-tight" id="active-ticket-num">--</div>
 
-            <div class="space-y-2 mb-6 border-t border-gray-800 pt-4">
+            <div class="space-y-2 mb-5 border-t border-gray-800 pt-4">
               <div>
                 <span class="text-xs text-gray-500 uppercase font-bold block">Service</span>
                 <span class="font-bold text-lg text-white" id="active-service">--</span>
@@ -180,6 +190,19 @@
                 <span class="text-xs text-gray-500 uppercase font-bold block">Booking Details</span>
                 <span class="font-semibold text-sm text-gray-300" id="active-appt-info">--</span>
               </div>
+            </div>
+
+            <!-- VACCINATION RECOVERY TIME SELECTOR (SHOWN ONLY FOR VACCINATIONS) -->
+            <div id="recovery-selector-box" class="mb-5 bg-gray-900 p-3.5 rounded-xl border border-gray-800 hidden">
+              <label for="recoveryTimeSelect" class="block text-[11px] font-bold uppercase tracking-wider text-sky-400 mb-1.5">
+                ⏱ Recovery Time Required
+              </label>
+              <select id="recoveryTimeSelect" class="w-full bg-gray-800 text-white font-bold text-sm px-3 py-2.5 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                <option value="15m" selected>15m (Standard)</option>
+                <option value="30m">30m</option>
+                <option value="45m">45m</option>
+                <option value="Declined">Declined</option>
+              </select>
             </div>
 
             <!-- MAIN OPERATIONAL BUTTONS -->
@@ -215,7 +238,54 @@
       </div>
     </section>
 
-    <!-- ==================== SCREEN 3: PUBLIC DISPLAY (FULL-SCREEN OPTIMIZED) ==================== -->
+    <!-- ==================== SCREEN 3: RECOVERY STATION (HSA INTERFACE) ==================== -->
+    <section id="screen-recovery" class="hidden space-y-6">
+      <!-- Top Summary & Filter Bar -->
+      <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-black text-black">Recovery Station Monitor</h2>
+          <p class="text-xs text-gray-500">Assign post-vaccination clients to open seats. Timers run from nurse release time.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Unassigned Recovery Queue Badge -->
+          <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl flex items-center space-x-2">
+            <span class="text-xs font-bold uppercase text-amber-800">Awaiting Seat:</span>
+            <span id="recovery-unassigned-count" class="text-lg font-black text-amber-900">0</span>
+          </div>
+
+          <!-- Occupied Seats Badge -->
+          <div class="bg-sky-50 border border-sky-200 px-4 py-2 rounded-xl flex items-center space-x-2">
+            <span class="text-xs font-bold uppercase text-sky-800">Seated:</span>
+            <span id="recovery-seated-count" class="text-lg font-black text-sky-900">0 / 72</span>
+          </div>
+
+          <!-- Row Filter -->
+          <select id="recoveryRowFilter" onchange="renderRecoveryGrid()" class="bg-gray-100 border text-black font-bold text-sm px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-black">
+            <option value="ALL">All Rows (1–6)</option>
+            <option value="1">Row 1 (Seats 1–12)</option>
+            <option value="2">Row 2 (Seats 1–12)</option>
+            <option value="3">Row 3 (Seats 1–12)</option>
+            <option value="4">Row 4 (Seats 1–12)</option>
+            <option value="5">Row 5 (Seats 1–12)</option>
+            <option value="6">Row 6 (Seats 1–12)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Unassigned Clients Quick-Banner -->
+      <div id="unassigned-recovery-banner" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl flex flex-wrap items-center gap-2">
+        <span class="text-xs font-black uppercase tracking-wider text-amber-900 mr-2">Clients Ready for Seating:</span>
+        <div id="unassigned-recovery-pills" class="flex flex-wrap gap-2"></div>
+      </div>
+
+      <!-- 6 Rows x 12 Seats Grid Container -->
+      <div id="recovery-rows-container" class="space-y-6">
+        <!-- Dynamically populated via JS -->
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: PUBLIC DISPLAY (FULL-SCREEN OPTIMIZED) ==================== -->
     <section id="screen-display" class="hidden">
       <div class="w-full max-w-7xl mx-auto flex flex-col justify-between min-h-[calc(100vh-4rem)] py-4 gap-6">
         
@@ -262,7 +332,7 @@
       </div>
     </section>
 
-    <!-- ==================== SCREEN 4: CLINIC LEAD INTERFACE ==================== -->
+    <!-- ==================== SCREEN 5: CLINIC LEAD INTERFACE ==================== -->
     <section id="screen-admin" class="hidden space-y-8">
       <div class="flex items-center justify-between border-b pb-4">
         <div>
@@ -273,7 +343,7 @@
       </div>
 
       <!-- 1. PATIENT DISPOSITION & TIMING -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Waiting</span>
           <span id="admin-count-waiting" class="text-4xl font-black text-amber-600">0</span>
@@ -283,12 +353,16 @@
           <span id="admin-count-nurse" class="text-4xl font-black text-blue-600">0</span>
         </div>
         <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">In Recovery</span>
+          <span id="admin-count-recovery" class="text-4xl font-black text-purple-600">0</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Completed</span>
           <span id="admin-count-completed" class="text-4xl font-black text-emerald-600">0</span>
         </div>
         <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Avg Wait / Consult Time</span>
-          <div class="text-lg font-black text-gray-800 mt-1">
+          <div class="text-base font-black text-gray-800 mt-1">
             Wait: <span id="admin-avg-wait" class="text-black">0m</span> | Consult: <span id="admin-avg-consult" class="text-black">0m</span>
           </div>
         </div>
@@ -383,8 +457,28 @@
       <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="font-black text-black text-sm">Version 1.2.0</span>
+            <span class="font-black text-black text-sm">Version 1.3.0</span>
             <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Current</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-600 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Added Recovery Time selector (15m, 30m, 45m, Declined) on Nurse Station cards for Vaccination visits.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Added Recovery Station screen with 6x12 interactive seating grid, live countdown timers from nurse release, early exit clearing, and automatic timeout discharge.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-black font-bold">•</span>
+              <span>Expanded backend logging to track nurse call time, nurse release time, recovery seat assignment, and recovery discharge time.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-800 text-xs">Version 1.2.0</span>
           </div>
           
           <!-- Indented / Hanging indent bullet list -->
@@ -452,8 +546,12 @@
 <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
     let activePatient = null;
+    let activePatientTicket = null;
     let lastProcessedCallId = null; 
     let isAdminAuthenticated = false;
+    let latestQueueData = [];
+    let autoDischargedTickets = new Set(); // Prevents duplicate auto-discharge calls
+
     const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
     const STAFF_PIN = "5050"; // Default PIN for Staff Session Access (Change as needed)
 
@@ -583,6 +681,7 @@
       if (stationEl) {
         localStorage.setItem('phm_selected_station', stationEl.value);
       }
+      activePatientTicket = null;
       fetchQueue();
     }
 
@@ -594,12 +693,14 @@
 
       const regScreen = document.getElementById('screen-register');
       const nurseScreen = document.getElementById('screen-nurse');
+      const recoveryScreen = document.getElementById('screen-recovery');
       const displayScreen = document.getElementById('screen-display');
       const adminScreen = document.getElementById('screen-admin');
       const topHeader = document.getElementById('top-nav-header');
 
       const tabReg = document.getElementById('tab-register');
       const tabNurse = document.getElementById('tab-nurse');
+      const tabRecovery = document.getElementById('tab-recovery');
       const tabDisplay = document.getElementById('tab-display');
       const tabAdmin = document.getElementById('tab-admin');
 
@@ -615,14 +716,16 @@
 
       regScreen.classList.add('hidden');
       nurseScreen.classList.add('hidden');
+      if (recoveryScreen) recoveryScreen.classList.add('hidden');
       displayScreen.classList.add('hidden');
       if (adminScreen) adminScreen.classList.add('hidden');
 
-      const defaultStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
-      const activeStyle = "px-4 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
+      const defaultStyle = "px-3.5 py-2 rounded-lg text-sm font-semibold transition text-gray-400 hover:text-white";
+      const activeStyle = "px-3.5 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow";
 
       tabReg.className = defaultStyle;
       tabNurse.className = defaultStyle;
+      if (tabRecovery) tabRecovery.className = defaultStyle;
       tabDisplay.className = defaultStyle;
       if (tabAdmin) tabAdmin.className = defaultStyle;
 
@@ -633,6 +736,11 @@
       } else if (tabName === 'nurse') {
         nurseScreen.classList.remove('hidden');
         tabNurse.className = activeStyle;
+        if (topHeader) topHeader.classList.remove('hidden');
+        fetchQueue();
+      } else if (tabName === 'recovery') {
+        if (recoveryScreen) recoveryScreen.classList.remove('hidden');
+        if (tabRecovery) tabRecovery.className = activeStyle;
         if (topHeader) topHeader.classList.remove('hidden');
         fetchQueue();
       } else if (tabName === 'display') {
@@ -652,31 +760,6 @@
         window.location.hash = tabName; // Updates URL hash for bookmarking
       }
     }
-
-    // Restore saved user state on page load (with URL hash priority & Display trap escape)
-    window.addEventListener('DOMContentLoaded', () => {
-      // 1. Restore saved station selection
-      const savedStation = localStorage.getItem('phm_selected_station');
-      if (savedStation) {
-        const stationEl = document.getElementById('stationSelect');
-        if (stationEl) stationEl.value = savedStation;
-      }
-
-      // 2. Determine initial tab
-      let initialTab = window.location.hash.replace('#', '').trim();
-      
-      if (!initialTab || initialTab === 'display') {
-        const savedTab = localStorage.getItem('phm_active_tab');
-        initialTab = (savedTab && savedTab !== 'display') ? savedTab : 'register';
-      }
-
-      // Allow display screen to open without auth prompt
-      if (window.location.hash.trim() === '#display') {
-        switchTab('display', true);
-      } else if (checkStaffAuth(initialTab)) {
-        switchTab(initialTab, true);
-      }
-    });
 
     // Emergency Escape Hatch for Display Screen: Press 'Esc' to go back to Registration
     document.addEventListener('keydown', (e) => {
@@ -755,18 +838,22 @@
       try {
         const res = await fetch(API_URL);
         const data = await res.json();
+        latestQueueData = data;
 
         const waitingCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting').length;
         const nurseCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse').length;
+        const recoveryCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'In Recovery').length;
         const completedCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Completed').length;
 
         // Update Counts
         setSafeText('count-waiting', waitingCount);
         setSafeText('count-nurse', nurseCount);
+        setSafeText('count-recovery', recoveryCount);
         setSafeText('count-completed', completedCount);
 
         setSafeText('count-waiting-reg', waitingCount);
         setSafeText('count-nurse-reg', nurseCount);
+        setSafeText('count-recovery-reg', recoveryCount);
         setSafeText('count-completed-reg', completedCount);
 
         // Calculate Last Number Issued across active/completed queue records
@@ -793,6 +880,7 @@
               
               let statusBadgeColor = 'bg-amber-100 text-amber-800';
               if (status === 'With Nurse') statusBadgeColor = 'bg-blue-100 text-blue-800';
+              if (status === 'In Recovery') statusBadgeColor = 'bg-purple-100 text-purple-800';
               if (status === 'Completed') statusBadgeColor = 'bg-emerald-100 text-emerald-800';
 
               return `
@@ -821,10 +909,13 @@
         });
 
         const activeBox = document.getElementById('active-client-box');
+        const recoverySelectorBox = document.getElementById('recovery-selector-box');
+        const recoveryTimeSelect = document.getElementById('recoveryTimeSelect');
+
         if (myActive) {
           activePatient = myActive;
-          const ticket = myActive.TicketNumber || myActive.Ticketnumber || myActive.ticketNum || 'N/A';
-          const service = myActive.Service || myActive.service || '';
+          const ticket = String(myActive.TicketNumber || myActive.Ticketnumber || myActive.ticketNum || 'N/A').trim();
+          const service = String(myActive.Service || myActive.service || '').trim();
           const apptType = myActive.ApptType || myActive.appType || '';
           const rawApptTime = myActive.ApptTime || myActive.appTime || '';
           const rawRegTime = myActive.Timestamp || myActive.timestamp || '';
@@ -835,9 +926,26 @@
           setSafeText('active-ticket-num', ticket);
           setSafeText('active-service', service);
           setSafeText('active-appt-info', timeSummary);
+
+          // Show Recovery Dropdown ONLY if Service is Vaccination
+          const isVaccination = service.toLowerCase().includes('vaccination');
+          if (recoverySelectorBox) {
+            if (isVaccination) {
+              recoverySelectorBox.classList.remove('hidden');
+              // Default to 15m only when a new patient is loaded into the card
+              if (activePatientTicket !== ticket && recoveryTimeSelect) {
+                recoveryTimeSelect.value = '15m';
+              }
+            } else {
+              recoverySelectorBox.classList.add('hidden');
+            }
+          }
+          activePatientTicket = ticket;
+
           if (activeBox) activeBox.classList.remove('hidden');
         } else {
           activePatient = null;
+          activePatientTicket = null;
           if (activeBox) activeBox.classList.add('hidden');
         }
 
@@ -931,6 +1039,9 @@
             });
           }
         }
+
+        // Render Recovery Station Grid
+        renderRecoveryGrid();
 
         // Render Public Display Screen (FULL-SCREEN OPTIMIZED RENDERING)
         const calledPatients = data
@@ -1037,15 +1148,236 @@
       }
     }
 
+    // ==================== RECOVERY STATION LOGIC ====================
+
+    function getRemainingRecoveryMs(record) {
+      const reqStr = String(record.RecoveryRequired || '').trim();
+      const mins = parseInt(reqStr.replace('m', ''), 10);
+      if (isNaN(mins) || mins <= 0) return 0;
+
+      // Countdown starts from NurseCompleteTime (when nurse released the client)
+      const startTimestamp = record.NurseCompleteTime || record.Timestamp;
+      if (!startTimestamp) return mins * 60 * 1000;
+
+      const startTime = new Date(startTimestamp).getTime();
+      if (isNaN(startTime)) return mins * 60 * 1000;
+
+      const endTime = startTime + (mins * 60 * 1000);
+      return endTime - Date.now();
+    }
+
+    function formatCountdown(ms) {
+      if (ms <= 0) return "00:00";
+      const totalSeconds = Math.ceil(ms / 1000);
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function renderRecoveryGrid() {
+      const container = document.getElementById('recovery-rows-container');
+      if (!container) return;
+
+      const inRecovery = latestQueueData.filter(r => r && String(r.Status || r.status || '').trim() === 'In Recovery');
+      const unassigned = inRecovery.filter(r => !String(r.RecoverySeat || '').trim());
+      const seated = inRecovery.filter(r => String(r.RecoverySeat || '').trim() !== '');
+
+      // Map occupied seats: "R1-S1" -> record
+      const seatMap = {};
+      seated.forEach(r => {
+        seatMap[String(r.RecoverySeat).trim()] = r;
+      });
+
+      setSafeText('recovery-unassigned-count', unassigned.length);
+      setSafeText('recovery-seated-count', `${seated.length} / 72`);
+
+      // Update Unassigned Banner
+      const banner = document.getElementById('unassigned-recovery-banner');
+      const pillsContainer = document.getElementById('unassigned-recovery-pills');
+      if (banner && pillsContainer) {
+        if (unassigned.length > 0) {
+          banner.classList.remove('hidden');
+          pillsContainer.innerHTML = unassigned.map(r => {
+            const t = r.TicketNumber || r.Ticketnumber || r.ticketNum;
+            const dur = r.RecoveryRequired || '15m';
+            const rem = formatCountdown(getRemainingRecoveryMs(r));
+            return `<span class="px-3 py-1 bg-white border border-amber-300 rounded-lg text-xs font-black text-amber-950 shadow-sm">#${t} • ${dur} (${rem} left)</span>`;
+          }).join('');
+        } else {
+          banner.classList.add('hidden');
+        }
+      }
+
+      // Build dropdown options HTML for vacant seats
+      let optionsHtml = `<option value="">-- Assign Client --</option>`;
+      unassigned.forEach(r => {
+        const t = r.TicketNumber || r.Ticketnumber || r.ticketNum;
+        const dur = r.RecoveryRequired || '15m';
+        const rem = formatCountdown(getRemainingRecoveryMs(r));
+        optionsHtml += `<option value="${t}">#${t} (${dur} - ${rem} left)</option>`;
+      });
+
+      const rowFilter = document.getElementById('recoveryRowFilter')?.value || 'ALL';
+      let gridHtml = '';
+
+      for (let row = 1; row <= 6; row++) {
+        if (rowFilter !== 'ALL' && String(row) !== rowFilter) continue;
+
+        let seatsHtml = '';
+        for (let seat = 1; seat <= 12; seat++) {
+          const seatId = `R${row}-S${seat}`;
+          const occupant = seatMap[seatId];
+
+          if (occupant) {
+            const ticket = occupant.TicketNumber || occupant.Ticketnumber || occupant.ticketNum;
+            const duration = occupant.RecoveryRequired || '15m';
+            const remMs = getRemainingRecoveryMs(occupant);
+            const remStr = formatCountdown(remMs);
+            const isExpiringSoon = remMs > 0 && remMs <= 60000;
+
+            const cardBg = isExpiringSoon
+              ? "bg-amber-50 border-amber-400 text-amber-950"
+              : "bg-sky-50 border-sky-300 text-sky-950";
+
+            seatsHtml += `
+              <div class="${cardBg} border-2 rounded-xl p-3 flex flex-col justify-between shadow-sm min-h-[128px] transition-all">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-black uppercase tracking-wider opacity-60">Seat ${seat}</span>
+                  <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/80">${duration}</span>
+                </div>
+                
+                <div class="text-center my-1.5">
+                  <span class="text-2xl font-black block leading-none">#${ticket}</span>
+                  <span data-recovery-ticket="${ticket}" class="text-sm font-mono font-black mt-1 block ${isExpiringSoon ? 'text-rose-600 animate-pulse' : 'text-sky-700'}">
+                    ${remStr}
+                  </span>
+                </div>
+
+                <button type="button" onclick="dischargeRecoveryClient('${ticket}', true)" class="w-full py-1.5 bg-white hover:bg-rose-600 text-gray-700 hover:text-white border border-gray-200 hover:border-rose-600 rounded-lg text-[11px] font-bold transition">
+                  Clear Seat
+                </button>
+              </div>
+            `;
+          } else {
+            seatsHtml += `
+              <div class="bg-white border border-gray-200 rounded-xl p-3 flex flex-col justify-between min-h-[128px] hover:border-gray-300 transition">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Seat ${seat}</span>
+                  <span class="text-[10px] font-semibold text-emerald-600">Vacant</span>
+                </div>
+                
+                <div class="my-2">
+                  <select onchange="assignSeatToClient('${seatId}', this.value)" class="w-full bg-gray-50 border border-gray-200 text-gray-800 text-xs font-bold rounded-lg px-2 py-2 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer">
+                    ${optionsHtml}
+                  </select>
+                </div>
+
+                <div class="text-[10px] text-center text-gray-300 font-medium">Available</div>
+              </div>
+            `;
+          }
+        }
+
+        gridHtml += `
+          <div class="bg-gray-50/70 p-4 rounded-2xl border border-gray-200">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-black uppercase tracking-wider text-gray-700">Row ${row}</h3>
+              <span class="text-[11px] font-semibold text-gray-400">Seats 1 – 12</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              ${seatsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = gridHtml;
+    }
+
+    // Live 1-second ticker for Recovery timers & Automatic Release when expired
+    setInterval(() => {
+      const inRecovery = latestQueueData.filter(r => r && String(r.Status || r.status || '').trim() === 'In Recovery');
+      if (inRecovery.length === 0) return;
+
+      inRecovery.forEach(r => {
+        const ticket = String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim();
+        if (!ticket) return;
+
+        const remMs = getRemainingRecoveryMs(r);
+        
+        // Update live countdown display if element is currently rendered
+        const timerEl = document.querySelector(`[data-recovery-ticket="${ticket}"]`);
+        if (timerEl) {
+          timerEl.innerText = formatCountdown(remMs);
+        }
+
+        // Auto-release when recovery duration expires
+        if (remMs <= 0 && !autoDischargedTickets.has(ticket)) {
+          autoDischargedTickets.add(ticket);
+          dischargeRecoveryClient(ticket, false);
+        }
+      });
+    }, 1000);
+
+    async function assignSeatToClient(seatId, ticketNum) {
+      if (!ticketNum) return;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'assign_seat',
+            ticketNum: ticketNum,
+            seatId: seatId
+          })
+        });
+      } catch (err) {
+        console.error("Seat assignment error:", err);
+      }
+
+      setTimeout(fetchQueue, 400);
+    }
+
+    async function dischargeRecoveryClient(ticketNum, isManual = false) {
+      if (!ticketNum) return;
+
+      if (isManual) {
+        const confirmed = confirm(`Clear seat and discharge Client #${ticketNum} from recovery?`);
+        if (!confirmed) return;
+      }
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'discharge_recovery',
+            ticketNum: ticketNum
+          })
+        });
+      } catch (err) {
+        console.error("Recovery discharge error:", err);
+      }
+
+      setTimeout(fetchQueue, 400);
+    }
+
+    // ==================== ANALYTICS & FORM ACTIONS ====================
+
     function calculateAdminAnalytics(data) {
       if (!data || !Array.isArray(data)) return;
 
       const waiting = data.filter(r => String(r.Status || r.status || '').trim() === 'Waiting');
       const nurse = data.filter(r => String(r.Status || r.status || '').trim() === 'With Nurse');
+      const recovery = data.filter(r => String(r.Status || r.status || '').trim() === 'In Recovery');
       const completed = data.filter(r => String(r.Status || r.status || '').trim() === 'Completed');
 
       setSafeText('admin-count-waiting', waiting.length);
       setSafeText('admin-count-nurse', nurse.length);
+      setSafeText('admin-count-recovery', recovery.length);
       setSafeText('admin-count-completed', completed.length);
 
       let totalWaitMs = 0, waitCount = 0;
@@ -1053,15 +1385,23 @@
 
       data.forEach(r => {
         const regTime = new Date(r.Timestamp || 0).getTime();
-        if (regTime > 0) {
-          if (r.Status === 'With Nurse' || r.Status === 'Completed') {
-            waitCount++;
-            totalWaitMs += (10 * 60 * 1000);
-          }
-          if (r.Status === 'Completed') {
-            consultCount++;
-            totalConsultMs += (12 * 60 * 1000);
-          }
+        const callTime = new Date(r.CalledTime || 0).getTime();
+        const compTime = new Date(r.NurseCompleteTime || 0).getTime();
+
+        if (regTime > 0 && callTime > regTime) {
+          waitCount++;
+          totalWaitMs += (callTime - regTime);
+        } else if (regTime > 0 && (r.Status === 'With Nurse' || r.Status === 'In Recovery' || r.Status === 'Completed')) {
+          waitCount++;
+          totalWaitMs += (10 * 60 * 1000);
+        }
+
+        if (callTime > 0 && compTime > callTime) {
+          consultCount++;
+          totalConsultMs += (compTime - callTime);
+        } else if (regTime > 0 && (r.Status === 'In Recovery' || r.Status === 'Completed')) {
+          consultCount++;
+          totalConsultMs += (12 * 60 * 1000);
         }
       });
 
@@ -1157,7 +1497,7 @@
               <td class="py-3">${info.count}</td>
               <td class="py-3">${(info.count / 4).toFixed(1)} / hr</td>
               <td class="py-3 text-xs text-gray-600">${srvList}</td>
-              <td class="py-3">~12m</td>
+              <td class="py-3">${avgConsultMin > 0 ? avgConsultMin + 'm' : '~12m'}</td>
             </tr>
           `;
         }).join('');
@@ -1183,9 +1523,12 @@
         finalAppTime = getCurrent24HourTime();
       }
 
+      const ticketVal = document.getElementById('ticketNum').value.trim();
+      autoDischargedTickets.delete(ticketVal); // Clear auto-discharge lock if ticket number is reused
+
       const payload = {
         action: 'add',
-        ticketNum: document.getElementById('ticketNum').value,
+        ticketNum: ticketVal,
         service: document.getElementById('service').value,
         appType: selectedAppType,
         appTime: finalAppTime
@@ -1281,6 +1624,7 @@
       const activeBox = document.getElementById('active-client-box');
       if (activeBox) activeBox.classList.add('hidden');
       activePatient = null;
+      activePatientTicket = null;
 
       try {
         await fetch(API_URL, {
@@ -1297,24 +1641,37 @@
 
     async function completeCurrentPatient() {
       let ticket = activePatient ? (activePatient.TicketNumber || activePatient.Ticketnumber || activePatient.ticketNum) : null;
+      const service = activePatient ? String(activePatient.Service || activePatient.service || '') : '';
       
       if (!ticket) {
         const domTicket = document.getElementById('active-ticket-num');
         if (domTicket) ticket = domTicket.innerText.trim();
       }
 
+      if (!ticket) return;
+
+      // Capture recovery selection if Vaccination
+      let recoveryTime = 'N/A';
+      if (service.toLowerCase().includes('vaccination')) {
+        const recSelect = document.getElementById('recoveryTimeSelect');
+        recoveryTime = recSelect ? recSelect.value : '15m';
+      }
+
       const activeBox = document.getElementById('active-client-box');
       if (activeBox) activeBox.classList.add('hidden');
       activePatient = null;
-
-      if (!ticket) return;
+      activePatientTicket = null;
 
       try {
         await fetch(API_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'text/plain' },
-          body: JSON.stringify({ action: 'complete', ticketNum: ticket })
+          body: JSON.stringify({ 
+            action: 'complete', 
+            ticketNum: ticket,
+            recoveryTime: recoveryTime
+          })
         });
       } catch (err) {
         console.error("Completion error:", err);
@@ -1334,6 +1691,7 @@
           body: JSON.stringify({ action: 'archive_and_reset' })
         });
         alert("✓ Clinic data archived successfully! Queue has been reset for the next operational day.");
+        autoDischargedTickets.clear();
         fetchQueue();
       } catch (err) {
         console.error("Archive error:", err);
@@ -1353,6 +1711,7 @@
           body: JSON.stringify({ action: 'clear' })
         });
         alert("✓ Queue sheet reset successfully.");
+        autoDischargedTickets.clear();
         fetchQueue();
       } catch (err) {
         console.error("Reset error:", err);
