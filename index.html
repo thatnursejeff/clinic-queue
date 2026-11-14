@@ -366,8 +366,8 @@
         <span class="px-3 py-1 bg-black text-white text-xs font-bold rounded-full">Protected Access</span>
       </div>
 
-      <!-- 1. PATIENT DISPOSITION & TIMING -->
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- 1. PATIENT DISPOSITION COUNTS -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Waiting</span>
           <span id="admin-count-waiting" class="text-4xl font-black text-amber-600">0</span>
@@ -384,10 +384,31 @@
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Completed</span>
           <span id="admin-count-completed" class="text-4xl font-black text-emerald-600">0</span>
         </div>
-        <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Avg Wait / Consult Time</span>
-          <div class="text-base font-black text-gray-800 mt-1">
-            Wait: <span id="admin-avg-wait" class="text-black">0m</span> | Consult: <span id="admin-avg-consult" class="text-black">0m</span>
+      </div>
+
+      <!-- 1B. AVERAGE PATIENT FLOW & TIMING METRICS -->
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Average Patient Flow & Timing</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Time in Queue</span>
+            <span id="admin-avg-queue" class="text-3xl font-black text-black">0m</span>
+            <span class="text-[10px] text-gray-400 block mt-1">Reg &rarr; Nurse Call</span>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Time with Nurse</span>
+            <span id="admin-avg-nurse" class="text-3xl font-black text-black">0m</span>
+            <span class="text-[10px] text-gray-400 block mt-1">Call &rarr; Nurse Release</span>
+          </div>
+          <div class="bg-white p-5 rounded-2xl border shadow-sm text-center">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Recovery Time</span>
+            <span id="admin-avg-recovery" class="text-3xl font-black text-black">0m</span>
+            <span class="text-[10px] text-gray-400 block mt-1">Release &rarr; Discharge</span>
+          </div>
+          <div class="bg-gray-900 text-white p-5 rounded-2xl border border-gray-800 shadow-sm text-center">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Total Clinic Time</span>
+            <span id="admin-avg-total" class="text-3xl font-black text-sky-400">0m</span>
+            <span class="text-[10px] text-gray-400 block mt-1">Reg &rarr; Final Exit</span>
           </div>
         </div>
       </div>
@@ -422,7 +443,7 @@
                 <th class="pb-3">Total Clients</th>
                 <th class="pb-3">Clients / Hour</th>
                 <th class="pb-3">Services Handled</th>
-                <th class="pb-3">Avg Consult Time</th>
+                <th class="pb-3">Avg Time with Nurse</th>
               </tr>
             </thead>
             <tbody id="admin-station-table" class="divide-y font-medium">
@@ -741,6 +762,7 @@
       const displayScreen = document.getElementById('screen-display');
       const adminScreen = document.getElementById('screen-admin');
       const topHeader = document.getElementById('top-nav-header');
+      const appFooter = document.getElementById('app-footer');
 
       const tabReg = document.getElementById('tab-register');
       const tabNurse = document.getElementById('tab-nurse');
@@ -777,26 +799,31 @@
         regScreen.classList.remove('hidden');
         tabReg.className = activeStyle;
         if (topHeader) topHeader.classList.remove('hidden');
+        if (appFooter) appFooter.classList.remove('hidden');
       } else if (tabName === 'nurse') {
         nurseScreen.classList.remove('hidden');
         tabNurse.className = activeStyle;
         if (topHeader) topHeader.classList.remove('hidden');
+        if (appFooter) appFooter.classList.remove('hidden');
         fetchQueue();
       } else if (tabName === 'recovery') {
         if (recoveryScreen) recoveryScreen.classList.remove('hidden');
         if (tabRecovery) tabRecovery.className = activeStyle;
         if (topHeader) topHeader.classList.remove('hidden');
+        if (appFooter) appFooter.classList.remove('hidden');
         initRecoveryLayoutControls();
         fetchQueue();
       } else if (tabName === 'display') {
         displayScreen.classList.remove('hidden');
         tabDisplay.className = activeStyle;
         if (topHeader) topHeader.classList.add('hidden');
+        if (appFooter) appFooter.classList.add('hidden');
         fetchQueue();
       } else if (tabName === 'admin') {
         if (adminScreen) adminScreen.classList.remove('hidden');
         if (tabAdmin) tabAdmin.className = activeStyle;
         if (topHeader) topHeader.classList.remove('hidden');
+        if (appFooter) appFooter.classList.remove('hidden');
         fetchQueue();
       }
 
@@ -1458,36 +1485,79 @@
       setSafeText('admin-count-recovery', recovery.length);
       setSafeText('admin-count-completed', completed.length);
 
-      let totalWaitMs = 0, waitCount = 0;
-      let totalConsultMs = 0, consultCount = 0;
+      let totalQueueMs = 0, queueCount = 0;
+      let totalNurseMs = 0, nurseCount = 0;
+      let totalRecoveryMs = 0, recoveryCount = 0;
+      let totalClinicMs = 0, clinicCount = 0;
+
+      const stationNurseStats = {};
 
       data.forEach(r => {
-        const regTime = new Date(r.Timestamp || 0).getTime();
-        const callTime = new Date(r.CalledTime || 0).getTime();
-        const compTime = new Date(r.NurseCompleteTime || 0).getTime();
+        if (!r) return;
+        const regTime = new Date(r.Timestamp || r.timestamp || 0).getTime();
+        const callTime = new Date(r.CalledTime || r.calledTime || 0).getTime();
+        const nurseCompTime = new Date(r.NurseCompleteTime || r.nurseCompleteTime || 0).getTime();
+        const recDischargeRaw = r.RecoveryDischargeTime || r.recoveryDischargeTime || 0;
+        let recDischargeTime = new Date(recDischargeRaw).getTime();
 
+        const status = String(r.Status || r.status || '').trim();
+        const recReq = String(r.RecoveryRequired || '').trim();
+        const recMins = parseInt(recReq.replace('m', ''), 10);
+        const hadRecovery = !isNaN(recMins) && recMins > 0;
+
+        // 1. Time in Queue: Registration -> Nurse Call
         if (regTime > 0 && callTime > regTime) {
-          waitCount++;
-          totalWaitMs += (callTime - regTime);
-        } else if (regTime > 0 && (r.Status === 'With Nurse' || r.Status === 'In Recovery' || r.Status === 'Completed')) {
-          waitCount++;
-          totalWaitMs += (10 * 60 * 1000);
+          queueCount++;
+          totalQueueMs += (callTime - regTime);
         }
 
-        if (callTime > 0 && compTime > callTime) {
-          consultCount++;
-          totalConsultMs += (compTime - callTime);
-        } else if (regTime > 0 && (r.Status === 'In Recovery' || r.Status === 'Completed')) {
-          consultCount++;
-          totalConsultMs += (12 * 60 * 1000);
+        // 2. Time with Nurse: Nurse Call -> Nurse Release
+        if (callTime > 0 && nurseCompTime > callTime) {
+          const duration = nurseCompTime - callTime;
+          nurseCount++;
+          totalNurseMs += duration;
+
+          const st = r.StationID || r.stationId;
+          if (st) {
+            if (!stationNurseStats[st]) stationNurseStats[st] = { totalMs: 0, count: 0 };
+            stationNurseStats[st].totalMs += duration;
+            stationNurseStats[st].count++;
+          }
+        }
+
+        // 3. Recovery Time: Nurse Release -> RecoveryDischargeTime
+        if (nurseCompTime > 0 && recDischargeTime > nurseCompTime) {
+          recoveryCount++;
+          totalRecoveryMs += (recDischargeTime - nurseCompTime);
+        } else if (nurseCompTime > 0 && hadRecovery && status === 'Completed') {
+          const fallbackDuration = recMins * 60 * 1000;
+          recoveryCount++;
+          totalRecoveryMs += fallbackDuration;
+          recDischargeTime = nurseCompTime + fallbackDuration;
+        }
+
+        // 4. Total Clinic Time: Registration -> RecoveryDischargeTime (or NurseCompleteTime if no recovery)
+        if (regTime > 0 && status === 'Completed') {
+          const finalExitTime = (recDischargeTime > regTime)
+            ? recDischargeTime
+            : (nurseCompTime > regTime ? nurseCompTime : 0);
+          if (finalExitTime > regTime) {
+            clinicCount++;
+            totalClinicMs += (finalExitTime - regTime);
+          }
         }
       });
 
-      const avgWaitMin = waitCount > 0 ? Math.round((totalWaitMs / waitCount) / 60000) : 0;
-      const avgConsultMin = consultCount > 0 ? Math.round((totalConsultMs / consultCount) / 60000) : 0;
+      const formatAvgMinutes = (totalMs, count) => {
+        if (count === 0) return '--';
+        const mins = Math.round((totalMs / count) / 60000);
+        return `${mins}m`;
+      };
 
-      setSafeText('admin-avg-wait', `${avgWaitMin}m`);
-      setSafeText('admin-avg-consult', `${avgConsultMin}m`);
+      setSafeText('admin-avg-queue', formatAvgMinutes(totalQueueMs, queueCount));
+      setSafeText('admin-avg-nurse', formatAvgMinutes(totalNurseMs, nurseCount));
+      setSafeText('admin-avg-recovery', formatAvgMinutes(totalRecoveryMs, recoveryCount));
+      setSafeText('admin-avg-total', formatAvgMinutes(totalClinicMs, clinicCount));
 
       const services = {};
       let dropInCount = 0;
@@ -1568,13 +1638,18 @@
       if (stationTable) {
         const rows = Object.entries(stations).map(([st, info]) => {
           const srvList = Object.entries(info.services).map(([s, c]) => `${s}: ${c}`).join(', ');
+          const stStat = stationNurseStats[st];
+          const stAvgNurse = stStat && stStat.count > 0
+            ? `${Math.round((stStat.totalMs / stStat.count) / 60000)}m`
+            : '--';
+
           return `
             <tr class="hover:bg-gray-50">
               <td class="py-3 font-bold">${st}</td>
               <td class="py-3">${info.count}</td>
               <td class="py-3">${(info.count / 4).toFixed(1)} / hr</td>
               <td class="py-3 text-xs text-gray-600">${srvList}</td>
-              <td class="py-3">${avgConsultMin > 0 ? avgConsultMin + 'm' : '~12m'}</td>
+              <td class="py-3">${stAvgNurse}</td>
             </tr>
           `;
         }).join('');
