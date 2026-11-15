@@ -310,8 +310,15 @@
     </section>
 
     <!-- ==================== SCREEN 4: PUBLIC DISPLAY (FULL-SCREEN OPTIMIZED) ==================== -->
-    <section id="screen-display" class="hidden">
-      <div class="w-full max-w-7xl mx-auto flex flex-col justify-between min-h-[calc(100vh-4rem)] py-4 gap-6">
+    <section id="screen-display" class="hidden space-y-4">
+      
+      <!-- USER INTERACTION AUDIO UNLOCK NOTICE -->
+      <div id="audio-unlock-banner" onclick="unlockAudioManually()" class="bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold text-center py-3 px-4 rounded-xl shadow cursor-pointer transition flex items-center justify-center space-x-2">
+        <span>🔊</span>
+        <span>Click anywhere on this screen once to activate audio chimes and voice announcements for the shift.</span>
+      </div>
+
+      <div class="w-full max-w-7xl mx-auto flex flex-col justify-between min-h-[calc(100vh-6rem)] py-2 gap-6">
         
         <!-- NOW SERVING MAIN SECTION -->
         <div class="flex flex-col flex-grow justify-center">
@@ -348,7 +355,7 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
                 <span class="text-5xl md:text-6xl font-black text-gray-800">--</span>
               </div>
-              <span class="px-8 py-4 bg-gray-100 text-gray-800 text-2xl md:text-3xl font-black rounded-2xl uppercase">--</span>
+              <span class="px-8 py-4 bg-gray-100 text-gray-400 text-2xl md:text-3xl font-black rounded-2xl uppercase">--</span>
             </div>
           </div>
         </div>
@@ -843,9 +850,24 @@
       }
     });
 
+    function unlockAudioManually() {
+      const banner = document.getElementById('audio-unlock-banner');
+      if (banner) banner.classList.add('hidden');
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+      } catch (e) {}
+    }
+
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
         const playTone = (freq, start, duration) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -873,6 +895,9 @@
             ) || voices.find(v => v.lang.startsWith('en'));
 
             if (femaleVoice) utterance.voice = femaleVoice;
+            
+            // Keep global reference to prevent garbage collection silencing speech
+            window.activeUtterance = utterance;
             window.speechSynthesis.speak(utterance);
           }
         }, 1000);
