@@ -1053,8 +1053,8 @@
               if (!isPriorityA && isPriorityB) return 1;
               if (isPriorityA && isPriorityB) return minsA - minsB;
 
-              const timeA = new Date(a.Timestamp || 0).getTime();
-              const timeB = new Date(b.Timestamp || 0).getTime();
+              const timeA = parseSheetTime(a.Timestamp || 0);
+              const timeB = parseSheetTime(b.Timestamp || 0);
               return timeA - timeB;
             });
 
@@ -1110,8 +1110,8 @@
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
           .sort((a, b) => {
-            const timeA = new Date(a.CalledTime || a.calledTime || a.Timestamp || 0).getTime();
-            const timeB = new Date(b.CalledTime || b.calledTime || b.Timestamp || 0).getTime();
+            const timeA = parseSheetTime(a.CalledTime || a.calledTime || a.Timestamp);
+            const timeB = parseSheetTime(b.CalledTime || b.calledTime || b.Timestamp);
             return timeB - timeA;
           });
 
@@ -1126,9 +1126,8 @@
           if (calledPatients[0]) {
             const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
             const s0 = calledPatients[0].StationID || calledPatients[0].stationId || 'Station A';
-            const time0 = new Date(calledPatients[0].CalledTime || calledPatients[0].calledTime || calledPatients[0].Timestamp || 0).getTime();
+            const time0 = parseSheetTime(calledPatients[0].CalledTime || calledPatients[0].calledTime || calledPatients[0].Timestamp);
             const callId = `${t0}_${time0}`;
-
 
             primaryBox.innerHTML = `
               <div class="flex flex-col items-center">
