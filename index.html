@@ -1109,7 +1109,11 @@
         // Render Public Display Screen
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
-          .sort((a, b) => new Date(b.Timestamp || 0) - new Date(a.Timestamp || 0));
+          .sort((a, b) => {
+            const timeA = new Date(a.CalledTime || a.calledTime || a.Timestamp || 0).getTime();
+            const timeB = new Date(b.CalledTime || b.calledTime || b.Timestamp || 0).getTime();
+            return timeB - timeA;
+          });
 
         const primaryBox = document.getElementById('display-primary');
         const sec1 = document.getElementById('display-secondary-1');
@@ -1122,8 +1126,9 @@
           if (calledPatients[0]) {
             const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
             const s0 = calledPatients[0].StationID || calledPatients[0].stationId || 'Station A';
-            const time0 = new Date(calledPatients[0].Timestamp || 0).getTime();
+            const time0 = new Date(calledPatients[0].CalledTime || calledPatients[0].calledTime || calledPatients[0].Timestamp || 0).getTime();
             const callId = `${t0}_${time0}`;
+
 
             primaryBox.innerHTML = `
               <div class="flex flex-col items-center">
