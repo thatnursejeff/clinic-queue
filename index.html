@@ -312,7 +312,7 @@
     <!-- ==================== SCREEN 4: PUBLIC DISPLAY (FULL-SCREEN OPTIMIZED) ==================== -->
     <section id="screen-display" class="hidden space-y-4">
       
-      <!-- USER INTERACTION AUDIO UNLOCK NOTICE -->
+      <!-- USER INTERACTION AUDIO UNLOCK BANNER -->
       <div id="audio-unlock-banner" onclick="unlockAudioManually()" class="bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold text-center py-3 px-4 rounded-xl shadow cursor-pointer transition flex items-center justify-center space-x-2">
         <span>🔊</span>
         <span>Click anywhere on this screen once to activate audio chimes and voice announcements for the shift.</span>
@@ -355,7 +355,7 @@
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TICKET</p>
                 <span class="text-5xl md:text-6xl font-black text-gray-800">--</span>
               </div>
-              <span class="px-8 py-4 bg-gray-100 text-gray-400 text-2xl md:text-3xl font-black rounded-2xl uppercase">--</span>
+              <span class="px-8 py-4 bg-gray-100 text-gray-800 text-2xl md:text-3xl font-black rounded-2xl uppercase">--</span>
             </div>
           </div>
         </div>
@@ -850,33 +850,43 @@
       }
     });
 
+    let sharedAudioCtx = null;
+
     function unlockAudioManually() {
       const banner = document.getElementById('audio-unlock-banner');
       if (banner) banner.classList.add('hidden');
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioContext();
-        if (ctx.state === 'suspended') ctx.resume();
-      } catch (e) {}
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new AudioContext();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
+        }
+      } catch (e) {
+        console.error("Audio unlock error:", e);
+      }
     }
 
     function playChimeAndAnnounce(ticketNum, stationId) {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioContext();
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
+        if (!sharedAudioCtx) {
+          sharedAudioCtx = new AudioContext();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+          sharedAudioCtx.resume();
         }
 
         const playTone = (freq, start, duration) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
+          const osc = sharedAudioCtx.createOscillator();
+          const gain = sharedAudioCtx.createGain();
           osc.frequency.value = freq;
           osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(audioCtx.currentTime + start);
-          gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + start + duration);
-          osc.stop(audioCtx.currentTime + start + duration);
+          gain.connect(sharedAudioCtx.destination);
+          osc.start(sharedAudioCtx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.00001, sharedAudioCtx.currentTime + start + duration);
+          osc.stop(sharedAudioCtx.currentTime + start + duration);
         };
         playTone(523.25, 0, 0.6);
         playTone(659.25, 0.3, 0.8);
@@ -896,7 +906,6 @@
 
             if (femaleVoice) utterance.voice = femaleVoice;
             
-            // Keep global reference to prevent garbage collection silencing speech
             window.activeUtterance = utterance;
             window.speechSynthesis.speak(utterance);
           }
