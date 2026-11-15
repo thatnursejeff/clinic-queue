@@ -992,7 +992,7 @@
           const service = String(myActive.Service || myActive.service || '').trim();
           const apptType = myActive.ApptType || myActive.appType || '';
           const rawApptTime = myActive.ApptTime || myActive.appTime || '';
-          const rawRegTime = MyActive.Timestamp || myActive.timestamp || '';
+          const rawRegTime = myActive.Timestamp || myActive.timestamp || '';
           
           const timeSummary = buildTimeDisplay(apptType, rawApptTime, rawRegTime);
 
@@ -1414,7 +1414,7 @@
       const inRecovery = latestQueueData.filter(r => r && String(r.Status || r.status || '').trim() === 'In Recovery');
       if (inRecovery.length === 0) return;
 
-      InRecovery.forEach(r => {
+      inRecovery.forEach(r => {
         const ticket = String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim();
         if (!ticket) return;
 
@@ -1697,7 +1697,7 @@
       const payload = {
         action: 'add',
         ticketNum: ticketVal,
-        service: document.getElementById('service'].value,
+        service: document.getElementById('service').value,
         appType: selectedAppType,
         appTime: finalAppTime
       };
@@ -1786,7 +1786,7 @@
 
       if (!ticket || ticket === 'N/A' || ticket === '--') return;
 
-      const confirmReturn = confirm(`↩ RETURN CLIENT TO QUEUNE:\n\nAre you sure you want to return Client #${ticket} back to the waiting queue?`);
+      const confirmReturn = confirm(`↩ RETURN CLIENT TO QUEUE:\n\nAre you sure you want to return Client #${ticket} back to the waiting queue?`);
       if (!confirmReturn) return;
 
       const activeBox = document.getElementById('active-client-box');
@@ -1877,7 +1877,7 @@
           headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({ action: 'clear' })
         });
-        alert("✓Queue sheet reset successfully.");
+        alert("✓ Queue sheet reset successfully.");
         autoDischargedTickets.clear();
         fetchQueue();
       } catch (err) {
