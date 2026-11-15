@@ -1262,8 +1262,8 @@
       const startTimestamp = record.NurseCompleteTime || record.Timestamp;
       if (!startTimestamp) return mins * 60 * 1000;
 
-      const startTime = new Date(startTimestamp).getTime();
-      if (isNaN(startTime)) return mins * 60 * 1000;
+      const startTime = parseSheetTime(startTimestamp);
+      if (!startTime) return mins * 60 * 1000;
 
       const endTime = startTime + (mins * 60 * 1000);
       return endTime - Date.now();
@@ -1476,6 +1476,14 @@
 
     // ==================== ANALYTICS & FORM ACTIONS ====================
 
+    function parseSheetTime(val) {
+      if (!val) return 0;
+      const str = String(val).trim();
+      const isoStr = str.includes(' ') && !str.includes('T') ? str.replace(' ', 'T') : str;
+      const ms = new Date(isoStr).getTime();
+      return isNaN(ms) ? 0 : ms;
+    }
+
     function calculateAdminAnalytics(data) {
       if (!data || !Array.isArray(data)) return;
 
@@ -1498,11 +1506,11 @@
 
       data.forEach(r => {
         if (!r) return;
-        const regTime = new Date(r.Timestamp || r.timestamp || 0).getTime();
-        const callTime = new Date(r.CalledTime || r.calledTime || 0).getTime();
-        const nurseCompTime = new Date(r.NurseCompleteTime || r.nurseCompleteTime || 0).getTime();
+        const regTime = parseSheetTime(r.Timestamp || r.timestamp);
+        const callTime = parseSheetTime(r.CalledTime || r.calledTime);
+        const nurseCompTime = parseSheetTime(r.NurseCompleteTime || r.nurseCompleteTime);
         const recDischargeRaw = r.RecoveryDischargeTime || r.recoveryDischargeTime || 0;
-        let recDischargeTime = new Date(recDischargeRaw).getTime();
+        let recDischargeTime = parseSheetTime(recDischargeRaw);
 
         const status = String(r.Status || r.status || '').trim();
         const recReq = String(r.RecoveryRequired || '').trim();
@@ -1510,13 +1518,13 @@
         const hadRecovery = !isNaN(recMins) && recMins > 0;
 
         // 1. Time in Queue: Registration -> Nurse Call
-        if (regTime > 0 && callTime > regTime) {
+        if (regTime > 0 && callTime >= regTime) {
           queueCount++;
           totalQueueMs += (callTime - regTime);
         }
 
         // 2. Time with Nurse: Nurse Call -> Nurse Release
-        if (callTime > 0 && nurseCompTime > callTime) {
+        if (callTime > 0 && nurseCompTime >= callTime) {
           const duration = nurseCompTime - callTime;
           nurseCount++;
           totalNurseMs += duration;
@@ -1530,7 +1538,7 @@
         }
 
         // 3. Recovery Time: Nurse Release -> RecoveryDischargeTime
-        if (nurseCompTime > 0 && recDischargeTime > nurseCompTime) {
+        if (nurseCompTime > 0 && recDischargeTime >= nurseCompTime) {
           recoveryCount++;
           totalRecoveryMs += (recDischargeTime - nurseCompTime);
         } else if (nurseCompTime > 0 && hadRecovery && status === 'Completed') {
@@ -1542,10 +1550,10 @@
 
         // 4. Total Clinic Time: Registration -> RecoveryDischargeTime (or NurseCompleteTime if no recovery)
         if (regTime > 0 && status === 'Completed') {
-          const finalExitTime = (recDischargeTime > regTime)
+          const finalExitTime = (recDischargeTime >= regTime)
             ? recDischargeTime
-            : (nurseCompTime > regTime ? nurseCompTime : 0);
-          if (finalExitTime > regTime) {
+            : (nurseCompTime >= regTime ? nurseCompTime : 0);
+          if (finalExitTime >= regTime) {
             clinicCount++;
             totalClinicMs += (finalExitTime - regTime);
           }
