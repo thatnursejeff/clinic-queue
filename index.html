@@ -1110,8 +1110,8 @@
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
           .sort((a, b) => {
-            const timeA = parseSheetTime(a.CalledTime || a.calledTime || a.Timestamp);
-            const timeB = parseSheetTime(b.CalledTime || b.calledTime || b.Timestamp);
+            const timeA = parseSheetTime(a.LastCalledTime || a.lastCalledTime || a.CalledTime || a.calledTime || a.Timestamp);
+            const timeB = parseSheetTime(b.LastCalledTime || b.lastCalledTime || b.CalledTime || b.calledTime || b.Timestamp);
             return timeB - timeA;
           });
 
@@ -1126,7 +1126,7 @@
           if (calledPatients[0]) {
             const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
             const s0 = calledPatients[0].StationID || calledPatients[0].stationId || 'Station A';
-            const time0 = parseSheetTime(calledPatients[0].CalledTime || calledPatients[0].calledTime || calledPatients[0].Timestamp);
+            const time0 = parseSheetTime(calledPatients[0].LastCalledTime || calledPatients[0].lastCalledTime || calledPatients[0].CalledTime || calledPatients[0].calledTime || calledPatients[0].Timestamp);
             const callId = `${t0}_${time0}`;
 
             primaryBox.innerHTML = `
