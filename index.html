@@ -8,23 +8,26 @@
 </head>
 <body class="bg-gray-100 font-sans min-h-screen text-gray-900">
 
-    <!-- TOP NAVIGATION HEADER -->
+  <!-- TOP NAVIGATION HEADER -->
   <header id="top-nav-header" class="bg-black text-white px-6 py-4 flex flex-col lg:flex-row items-center justify-between border-b border-gray-800 shadow-md gap-4">
     
-               <!-- LEFT GROUP: LOGO & VERSION -->
-    <div class="flex flex-col items-center gap-.05">
+    <!-- LEFT GROUP: LOGO & VERSION -->
+    <div class="flex flex-col items-center gap-0.5">
       <a href="#register" onclick="switchTab('register')" class="focus:outline-none flex items-center justify-center">
-        <!-- logo here -->
         <img src="evoqueue_logo.svg" alt="EvoQueue" class="h-[60px] md:h-[66px] w-auto object-contain" />
       </a>
-      <button type="button" onclick="openChangelog()" style="font-size: 10px;" class="text-gray-400 hover:text-white font-mono leading-none transition focus:outline-none" title="Click to view recent changes">
-        v1.3.1 - Click for Changelog
-      </button>
+      <div class="flex items-center gap-2 mt-0.5">
+        <button type="button" onclick="openChangelog()" style="font-size: 10px;" class="text-gray-400 hover:text-white font-mono leading-none transition focus:outline-none" title="Click to view recent changes">
+          v1.3.6 - Changelog
+        </button>
+        <span class="text-gray-700 text-[10px]">•</span>
+        <span id="sync-status-badge" class="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400">
+          <span id="sync-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="sync-status-text">Live</span>
+        </span>
+      </div>
     </div>
 
-
-
-    
     <!-- NAVIGATION TABS -->
     <nav class="flex flex-wrap justify-center gap-1.5 bg-gray-900 p-1 rounded-xl border border-gray-800">
       <button type="button" onclick="switchTab('register')" id="tab-register" class="px-3.5 py-2 rounded-lg text-sm font-semibold transition bg-white text-black shadow">
@@ -62,6 +65,21 @@
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Last Issued</span>
             <span id="last-issued-num" class="text-2xl font-black text-black">--</span>
           </div>
+        </div>
+
+        <!-- MISSING SEQUENCE NUMBER ALERT BANNER -->
+        <div id="missing-tickets-banner" class="hidden mb-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl shadow-sm space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h3 class="text-xs font-black uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                <span>⚠️ Missing Sequence Number(s)</span>
+              </h3>
+              <p class="text-xs text-amber-800 mt-0.5">
+                A higher ticket has been in the queue for 5+ minutes without these numbers logged:
+              </p>
+            </div>
+          </div>
+          <div id="missing-tickets-list" class="space-y-2"></div>
         </div>
 
         <div id="alertMsg" class="hidden mb-6 p-4 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 text-sm font-bold">
@@ -247,35 +265,19 @@
       <div class="bg-white p-5 rounded-2xl border shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h2 class="text-2xl font-black text-black">Recovery Station Monitor</h2>
-          <p class="text-xs text-gray-500">Configure layout, assign post-vaccination clients to open seats, and monitor timers.</p>
+          <p class="text-xs text-gray-500">Tap a waiting client pill (or Move on an occupied chair), then tap any vacant chair to seat.</p>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <!-- Grid Layout Configuration Dropdowns -->
+          <!-- Flexible Grid Layout Configuration Inputs -->
           <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
-            <span class="text-[10px] font-bold uppercase text-gray-500">Rows:</span>
-            <select id="recoveryRowsConfig" onchange="saveRecoveryLayoutConfig()" class="bg-transparent font-black text-xs focus:outline-none cursor-pointer">
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6" selected>6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
+            <label for="recoveryRowsConfig" class="text-[10px] font-bold uppercase text-gray-500">Rows:</label>
+            <input type="number" id="recoveryRowsConfig" min="1" max="50" value="6" onchange="saveRecoveryLayoutConfig()" class="w-12 bg-white border border-gray-200 rounded-md px-1.5 py-0.5 text-center font-black text-xs focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
 
           <div class="flex items-center space-x-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-xl">
-            <span class="text-[10px] font-bold uppercase text-gray-500">Seats/Row:</span>
-            <select id="recoverySeatsConfig" onchange="saveRecoveryLayoutConfig()" class="bg-transparent font-black text-xs focus:outline-none cursor-pointer">
-              <option value="4">4</option>
-              <option value="6">6</option>
-              <option value="8">8</option>
-              <option value="10">10</option>
-              <option value="12" selected>12</option>
-              <option value="16">16</option>
-              <option value="20">20</option>
-            </select>
+            <label for="recoverySeatsConfig" class="text-[10px] font-bold uppercase text-gray-500">Seats/Row:</label>
+            <input type="number" id="recoverySeatsConfig" min="1" max="100" value="12" onchange="saveRecoveryLayoutConfig()" class="w-14 bg-white border border-gray-200 rounded-md px-1.5 py-0.5 text-center font-black text-xs focus:outline-none focus:ring-2 focus:ring-black" />
           </div>
 
           <!-- Unassigned Recovery Queue Badge -->
@@ -297,10 +299,31 @@
         </div>
       </div>
 
-      <!-- Unassigned Clients Quick-Banner -->
-      <div id="unassigned-recovery-banner" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl flex flex-wrap items-center gap-2">
-        <span class="text-xs font-black uppercase tracking-wider text-amber-900 mr-2">Clients Ready for Seating:</span>
-        <div id="unassigned-recovery-pills" class="flex flex-wrap gap-2"></div>
+      <!-- Active Seat-Move Banner (Shown when moving an already-seated client) -->
+      <div id="moving-client-banner" class="hidden bg-sky-950 text-white border border-sky-800 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center gap-3">
+          <span class="px-2.5 py-1 bg-sky-400 text-black text-xs font-black rounded-lg uppercase">Moving</span>
+          <span id="moving-client-label" class="text-sm font-bold">Client #-- — tap any vacant chair to relocate</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="unseatMovingClient()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black text-xs font-black rounded-lg transition">
+            Return to Awaiting
+          </button>
+          <button type="button" onclick="cancelRecoverySelection()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-bold rounded-lg transition">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Unassigned Clients Quick-Banner (Tap-to-Select) -->
+      <div id="unassigned-recovery-banner" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-black uppercase tracking-wider text-amber-900 mr-1">Clients Ready for Seating:</span>
+          <div id="unassigned-recovery-pills" class="flex flex-wrap gap-2"></div>
+        </div>
+        <span id="tap-to-seat-hint" class="text-[11px] font-semibold text-amber-800">
+          Tap a client pill, then tap any vacant chair
+        </span>
       </div>
 
       <!-- Dynamic Rows x Seats Grid Container -->
@@ -475,6 +498,7 @@
       <p class="text-[10px] text-gray-400">Authorized personnel only.</p>
     </div>
   </div>
+
   <!-- VERSION HISTORY MODAL -->
   <div id="changelogModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white text-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 space-y-4">
@@ -484,20 +508,97 @@
       </div>
       
       <div class="space-y-4 text-sm max-h-72 overflow-y-auto pr-1">
-        
-        <!-- VERSION 1.3.1 -->
+
+        <!-- VERSION 1.3.6 -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="font-black text-black text-sm">Version 1.3.1</span>
+            <span class="font-black text-black text-sm">Version 1.3.6</span>
             <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full uppercase">Current</span>
           </div>
           <ul class="space-y-1.5 text-gray-600 text-xs">
             <li class="flex items-start space-x-2">
               <span class="text-black font-bold">•</span>
+              <span>Added 5-minute neighbor-anchored sequence gap detector on the Registration screen with one-click pre-fill or skip/dismiss controls.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- VERSION 1.3.5 -->
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-700 text-xs">Version 1.3.5</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-500 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Fixed Public Display audio repeat bug: when a client finishes with their nurse and a previously called client moves up into the primary NOW SERVING box, the display updates visually without re-chiming or re-announcing them.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- VERSION 1.3.4 -->
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-700 text-xs">Version 1.3.4</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-500 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Added seat-to-seat client relocation on the Recovery screen: tap "Move" on any occupied chair and tap any vacant chair to transfer while keeping their active countdown timer intact. *Feedback from team ❤️ </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- VERSION 1.3.3 -->
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-700 text-xs">Version 1.3.3</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-500 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Added one-tap Recovery seating: tap a client pill in the ready banner, then tap any vacant chair to assign immediately.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Replaced fixed Recovery grid dropdowns with flexible numeric inputs supporting any number of rows and seats per row.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- VERSION 1.3.2 -->
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-700 text-xs">Version 1.3.2</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-500 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Solved the speech synthesis bug—Station E is now properly pronounced as "Station E" instead of "Station East". Station E has been officially reinstated.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Fixed "Call Patient Again" recall audio and Public Display ordering using LastCalledTime instead of initial registration Timestamp.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
+              <span>Prevented duplicate recovery auto-discharge calls across multiple open terminals and added a live connection status badge.</span>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- VERSION 1.3.1 -->
+        <div class="border-t pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-gray-700 text-xs">Version 1.3.1</span>
+          </div>
+          <ul class="space-y-1.5 text-gray-500 text-xs">
+            <li class="flex items-start space-x-2">
+              <span class="text-gray-400 font-bold">•</span>
               <span>Added dynamic Recovery grid layout configuration (selectable rows and seats per row) persisted locally.</span>
             </li>
             <li class="flex items-start space-x-2">
-              <span class="text-black font-bold">•</span>
+              <span class="text-gray-400 font-bold">•</span>
               <span>Fixed dropdown interruption bug: background polling now safely defers re-rendering when a staff member has a seat dropdown open.</span>
             </li>
           </ul>
@@ -546,7 +647,7 @@
               <span class="text-gray-400 font-bold">•</span>
               <span>Changed active call colouring on public display screen to avoid staff outing themselves when pointing out visual similarities to a popular adult site that Sonja has never visited.</span>
             </li>
-             <li class="flex items-start space-x-2">
+            <li class="flex items-start space-x-2">
               <span class="text-gray-400 font-bold">•</span>
               <span>Increased station font and overall scale of public display screen for increased visibility *feedback from team ❤️</span>
             </li>
@@ -591,16 +692,146 @@
 
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwsU1GoD9WgQPojsyK2TWua7H9DbfMvnFC-VXi3xqGCnwg1yuowdTJtpuT3A1_Xud1TYA/exec"; // Keep your active deployment URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbyg0stdr4Ce5Ehw5s0P-pA_lpvtOHQ1O3ziQesJj4YKjgdeKxVk0UsXb5sHWnCPlN4k/exec"; 
+
     let activePatient = null;
     let activePatientTicket = null;
-    let lastProcessedCallId = null; 
+    let announcedCallIds = new Set(); // Tracks every call/recall ID already announced so bumped cards stay silent
+    let hasInitializedDisplayCalls = false; // Prevents re-announcing existing calls when opening/refreshing display
     let isAdminAuthenticated = false;
     let latestQueueData = [];
     let autoDischargedTickets = new Set(); // Prevents duplicate auto-discharge calls
+    let selectedRecoveryTicket = null; // Holds ticket selected via tap-to-seat pill or Move button
 
     const ADMIN_PIN = "9999"; // Default PIN for Clinic Lead Interface
     const STAFF_PIN = "5050"; // Default PIN for Staff Session Access
+    const GAP_GRACE_PERIOD_MS = 5 * 60 * 1000; // 5-minute buffer before flagging a missing number
+
+    function updateSyncStatus(isOnline) {
+      const badge = document.getElementById('sync-status-badge');
+      const dot = document.getElementById('sync-status-dot');
+      const text = document.getElementById('sync-status-text');
+      if (!badge || !dot || !text) return;
+
+      if (isOnline) {
+        badge.className = "inline-flex items-center gap-1 text-[10px] font-mono text-emerald-400";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
+        text.innerText = "Live";
+      } else {
+        badge.className = "inline-flex items-center gap-1 text-[10px] font-mono text-rose-400";
+        dot.className = "w-1.5 h-1.5 rounded-full bg-rose-500";
+        text.innerText = "Offline";
+      }
+    }
+
+    // ==================== MISSING SEQUENCE GAP DETECTOR ====================
+
+    function getDismissedMissingTickets() {
+      try {
+        const raw = localStorage.getItem('evo_dismissed_missing_tickets');
+        return new Set(raw ? JSON.parse(raw) : []);
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    function dismissMissingTicket(ticketNum) {
+      const dismissed = getDismissedMissingTickets();
+      dismissed.add(Number(ticketNum));
+      localStorage.setItem('evo_dismissed_missing_tickets', JSON.stringify([...dismissed]));
+      checkMissingSequenceNumbers(latestQueueData);
+    }
+
+    function prefillMissingTicket(ticketNum) {
+      const input = document.getElementById('ticketNum');
+      if (input) {
+        input.value = String(ticketNum);
+        input.focus();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function checkMissingSequenceNumbers(data) {
+      const banner = document.getElementById('missing-tickets-banner');
+      const listEl = document.getElementById('missing-tickets-list');
+      if (!banner || !listEl || !Array.isArray(data)) return;
+
+      // Extract purely numeric tickets along with their registration timestamp
+      const numericEntries = data
+        .map(r => {
+          if (!r) return null;
+          const rawTicket = String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim();
+          if (!/^\d+$/.test(rawTicket)) return null;
+          const num = parseInt(rawTicket, 10);
+          const regMs = new Date(r.Timestamp || r.timestamp || 0).getTime();
+          return { num, regMs: isNaN(regMs) ? 0 : regMs };
+        })
+        .filter(Boolean);
+
+      if (numericEntries.length < 2) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      const presentSet = new Set(numericEntries.map(e => e.num));
+      const dismissedSet = getDismissedMissingTickets();
+      const sortedNums = [...presentSet].sort((a, b) => a - b);
+      const minNum = sortedNums[0];
+      const maxNum = sortedNums[sortedNums.length - 1];
+      const now = Date.now();
+
+      // Map each existing ticket number to its earliest logged timestamp
+      const earliestTimeByNum = {};
+      numericEntries.forEach(e => {
+        if (!earliestTimeByNum[e.num] || e.regMs < earliestTimeByNum[e.num]) {
+          earliestTimeByNum[e.num] = e.regMs;
+        }
+      });
+
+      const missingCandidates = [];
+      for (let n = minNum; n < maxNum; n++) {
+        if (presentSet.has(n) || dismissedSet.has(n)) continue;
+
+        // Find the earliest registration time among any logged ticket AFTER n
+        let anchorTime = Infinity;
+        let anchorTicket = null;
+        for (let m = n + 1; m <= maxNum; m++) {
+          if (earliestTimeByNum[m] && earliestTimeByNum[m] < anchorTime) {
+            anchorTime = earliestTimeByNum[m];
+            anchorTicket = m;
+          }
+        }
+
+        // Only alert once the subsequent ticket has been in the queue for >= 5 minutes
+        if (anchorTicket !== null && anchorTime > 0 && (now - anchorTime) >= GAP_GRACE_PERIOD_MS) {
+          const minsAgo = Math.floor((now - anchorTime) / 60000);
+          missingCandidates.push({ num: n, anchorTicket, minsAgo });
+        }
+      }
+
+      if (missingCandidates.length === 0) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      listEl.innerHTML = missingCandidates.map(item => `
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-white border border-amber-200 px-3 py-2 rounded-xl">
+          <div class="text-xs">
+            <span class="font-black text-black text-sm mr-1.5">#${item.num}</span>
+            <span class="text-gray-600">(#${item.anchorTicket} logged ${item.minsAgo}m ago)</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button type="button" onclick="prefillMissingTicket(${item.num})" class="px-2.5 py-1 bg-black hover:bg-gray-800 text-white text-[11px] font-bold rounded-lg transition">
+              + Fill #${item.num}
+            </button>
+            <button type="button" onclick="dismissMissingTicket(${item.num})" class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-semibold rounded-lg transition" title="Ignore if slip was skipped or voided">
+              Skip
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
 
     // STAFF SESSION AUTHORIZATION
     function checkStaffAuth(targetTab) {
@@ -808,6 +1039,10 @@
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        if (selectedRecoveryTicket) {
+          cancelRecoverySelection();
+          return;
+        }
         switchTab('register');
       }
     });
@@ -831,7 +1066,8 @@
         setTimeout(() => {
           if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            const text = `Now serving number ${ticketNum} at ${stationId}`;
+            const spokenStation = String(stationId).replace(/\bStation\s+E\b/i, 'Station "e".');
+            const text = `Now serving number ${ticketNum} at ${spokenStation}`;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.9;
 
@@ -876,12 +1112,23 @@
       }
     }
 
+    function getCallTimestampMs(record) {
+      const raw = record.LastCalledTime || record.lastCalledTime || record.CalledTime || record.calledTime || record.Timestamp || record.timestamp || 0;
+      const ms = new Date(raw).getTime();
+      return isNaN(ms) ? 0 : ms;
+    }
+
     async function fetchQueue() {
       if (!API_URL) return;
       try {
         const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         latestQueueData = data;
+        updateSyncStatus(true);
+
+        // Check for missing sequence numbers (5-minute grace window)
+        checkMissingSequenceNumbers(data);
 
         const waitingCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'Waiting').length;
         const nurseCount = data.filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse').length;
@@ -1075,10 +1322,10 @@
         // Render Recovery Grid
         renderRecoveryGrid();
 
-        // Render Public Display Screen
+        // Render Public Display Screen (sorted by LastCalledTime)
         const calledPatients = data
           .filter(r => r && String(r.Status || r.status || '').trim() === 'With Nurse')
-          .sort((a, b) => new Date(b.Timestamp || 0) - new Date(a.Timestamp || 0));
+          .sort((a, b) => getCallTimestampMs(b) - getCallTimestampMs(a));
 
         const primaryBox = document.getElementById('display-primary');
         const sec1 = document.getElementById('display-secondary-1');
@@ -1087,12 +1334,23 @@
         const displayScreen = document.getElementById('screen-display');
         const isDisplayActive = displayScreen && !displayScreen.classList.contains('hidden');
 
+        // Seed already-active calls on first fetch so opening/refreshing #display doesn't re-announce existing patients
+        if (!hasInitializedDisplayCalls) {
+          calledPatients.forEach(p => {
+            const t = p.TicketNumber || p.Ticketnumber || p.ticketNum || '';
+            const s = p.StationID || p.stationId || 'Station A';
+            const ct = getCallTimestampMs(p);
+            announcedCallIds.add(`${t}_${s}_${ct}`);
+          });
+          hasInitializedDisplayCalls = true;
+        }
+
         if (primaryBox) {
           if (calledPatients[0]) {
             const t0 = calledPatients[0].TicketNumber || calledPatients[0].Ticketnumber || calledPatients[0].ticketNum || '';
             const s0 = calledPatients[0].StationID || calledPatients[0].stationId || 'Station A';
-            const time0 = new Date(calledPatients[0].Timestamp || 0).getTime();
-            const callId = `${t0}_${time0}`;
+            const callTime0 = getCallTimestampMs(calledPatients[0]);
+            const callId = `${t0}_${s0}_${callTime0}`;
 
             primaryBox.innerHTML = `
               <div class="flex flex-col items-center">
@@ -1107,9 +1365,11 @@
               </div>
             `;
 
-            if (lastProcessedCallId !== callId && isDisplayActive) {
-              lastProcessedCallId = callId;
-              playChimeAndAnnounce(t0, s0);
+            if (!announcedCallIds.has(callId)) {
+              announcedCallIds.add(callId);
+              if (isDisplayActive) {
+                playChimeAndAnnounce(t0, s0);
+              }
             }
           } else {
             primaryBox.innerHTML = `
@@ -1175,14 +1435,21 @@
 
       } catch (err) {
         console.error("Fetch error:", err);
+        updateSyncStatus(false);
       }
     }
 
     // ==================== RECOVERY STATION LOGIC ====================
 
+    function clampRecoveryDim(val, min, max, fallback) {
+      const parsed = parseInt(val, 10);
+      if (isNaN(parsed)) return fallback;
+      return Math.min(max, Math.max(min, parsed));
+    }
+
     function getRecoveryConfig() {
-      const rows = parseInt(localStorage.getItem('evo_recovery_rows') || '6', 10);
-      const seats = parseInt(localStorage.getItem('evo_recovery_seats') || '12', 10);
+      const rows = clampRecoveryDim(localStorage.getItem('evo_recovery_rows'), 1, 50, 6);
+      const seats = clampRecoveryDim(localStorage.getItem('evo_recovery_seats'), 1, 100, 12);
       return { rows, seats };
     }
 
@@ -1196,12 +1463,18 @@
     }
 
     function saveRecoveryLayoutConfig() {
-      const rows = document.getElementById('recoveryRowsConfig').value;
-      const seats = document.getElementById('recoverySeatsConfig').value;
-      localStorage.setItem('evo_recovery_rows', rows);
-      localStorage.setItem('evo_recovery_seats', seats);
+      const rowsEl = document.getElementById('recoveryRowsConfig');
+      const seatsEl = document.getElementById('recoverySeatsConfig');
+      const rows = clampRecoveryDim(rowsEl?.value, 1, 50, 6);
+      const seats = clampRecoveryDim(seatsEl?.value, 1, 100, 12);
 
-      updateRowFilterOptions(parseInt(rows, 10));
+      if (rowsEl) rowsEl.value = rows;
+      if (seatsEl) seatsEl.value = seats;
+
+      localStorage.setItem('evo_recovery_rows', String(rows));
+      localStorage.setItem('evo_recovery_seats', String(seats));
+
+      updateRowFilterOptions(rows);
       renderRecoveryGrid();
     }
 
@@ -1221,6 +1494,25 @@
       } else {
         filterEl.value = 'ALL';
       }
+    }
+
+    function selectRecoveryClient(ticketNum) {
+      const target = String(ticketNum || '').trim();
+      if (!target) return;
+      selectedRecoveryTicket = (selectedRecoveryTicket === target) ? null : target;
+      renderRecoveryGrid();
+    }
+
+    function cancelRecoverySelection() {
+      selectedRecoveryTicket = null;
+      renderRecoveryGrid();
+    }
+
+    function unseatMovingClient() {
+      if (!selectedRecoveryTicket) return;
+      const ticketToUnseat = selectedRecoveryTicket;
+      selectedRecoveryTicket = null;
+      assignSeatToClient('', ticketToUnseat);
     }
 
     function getRemainingRecoveryMs(record) {
@@ -1250,7 +1542,7 @@
       const container = document.getElementById('recovery-rows-container');
       if (!container) return;
 
-      // 🛡️ DROPDOWN INTERRUPTION FIX: Do not re-render grid if staff is actively interacting with a select dropdown
+      // DROPDOWN INTERRUPTION FIX: Do not re-render grid if staff is actively interacting with a select dropdown
       const activeEl = document.activeElement;
       if (activeEl && activeEl.tagName === 'SELECT' && container.contains(activeEl)) {
         return; 
@@ -1265,6 +1557,15 @@
       const unassigned = inRecovery.filter(r => !String(r.RecoverySeat || '').trim());
       const seated = inRecovery.filter(r => String(r.RecoverySeat || '').trim() !== '');
 
+      // Clear selectedRecoveryTicket if that client was already discharged
+      let selectedRecord = null;
+      if (selectedRecoveryTicket) {
+        selectedRecord = inRecovery.find(r => String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim() === selectedRecoveryTicket) || null;
+        if (!selectedRecord) {
+          selectedRecoveryTicket = null;
+        }
+      }
+
       const seatMap = {};
       seated.forEach(r => {
         seatMap[String(r.RecoverySeat).trim()] = r;
@@ -1273,17 +1574,44 @@
       setSafeText('recovery-unassigned-count', unassigned.length);
       setSafeText('recovery-seated-count', `${seated.length} / ${totalCapacity}`);
 
+      // Moving-client banner (when a currently seated client is selected via "Move")
+      const movingBanner = document.getElementById('moving-client-banner');
+      const movingLabel = document.getElementById('moving-client-label');
+      const selectedCurrentSeat = selectedRecord ? String(selectedRecord.RecoverySeat || '').trim() : '';
+      if (movingBanner && movingLabel) {
+        if (selectedRecoveryTicket && selectedCurrentSeat) {
+          movingBanner.classList.remove('hidden');
+          movingLabel.innerText = `Relocating Client #${selectedRecoveryTicket} (currently in ${selectedCurrentSeat}) — tap any vacant chair below`;
+        } else {
+          movingBanner.classList.add('hidden');
+        }
+      }
+
       const banner = document.getElementById('unassigned-recovery-banner');
       const pillsContainer = document.getElementById('unassigned-recovery-pills');
+      const hintEl = document.getElementById('tap-to-seat-hint');
       if (banner && pillsContainer) {
         if (unassigned.length > 0) {
           banner.classList.remove('hidden');
           pillsContainer.innerHTML = unassigned.map(r => {
-            const t = r.TicketNumber || r.Ticketnumber || r.ticketNum;
+            const t = String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim();
             const dur = r.RecoveryRequired || '15m';
             const rem = formatCountdown(getRemainingRecoveryMs(r));
-            return `<span class="px-3 py-1 bg-white border border-amber-300 rounded-lg text-xs font-black text-amber-950 shadow-sm">#${t} • ${dur} (${rem} left)</span>`;
+            const isSelected = selectedRecoveryTicket === t;
+            const pillStyle = isSelected
+              ? 'bg-black text-white border-black ring-2 ring-amber-500 scale-105'
+              : 'bg-white text-amber-950 border-amber-300 hover:bg-amber-100';
+            return `
+              <button type="button" onclick="selectRecoveryClient('${t}')" class="px-3.5 py-1.5 border rounded-xl text-xs font-black shadow-sm transition cursor-pointer ${pillStyle}">
+                #${t} • ${dur} (${rem} left)${isSelected ? ' ✓' : ''}
+              </button>
+            `;
           }).join('');
+          if (hintEl) {
+            hintEl.innerText = (selectedRecoveryTicket && !selectedCurrentSeat)
+              ? `Selected #${selectedRecoveryTicket} — tap any vacant chair below to seat (or Esc to cancel)`
+              : 'Tap a client pill, then tap any vacant chair';
+          }
         } else {
           banner.classList.add('hidden');
         }
@@ -1309,15 +1637,19 @@
           const occupant = seatMap[seatId];
 
           if (occupant) {
-            const ticket = occupant.TicketNumber || occupant.Ticketnumber || occupant.ticketNum;
+            const ticket = String(occupant.TicketNumber || occupant.Ticketnumber || occupant.ticketNum || '').trim();
             const duration = occupant.RecoveryRequired || '15m';
             const remMs = getRemainingRecoveryMs(occupant);
             const remStr = formatCountdown(remMs);
             const isExpiringSoon = remMs > 0 && remMs <= 60000;
+            const isBeingMoved = selectedRecoveryTicket === ticket;
 
-            const cardBg = isExpiringSoon
+            let cardBg = isExpiringSoon
               ? "bg-amber-50 border-amber-400 text-amber-950"
               : "bg-sky-50 border-sky-300 text-sky-950";
+            if (isBeingMoved) {
+              cardBg = "bg-sky-100 border-black text-sky-950 ring-2 ring-sky-500";
+            }
 
             seatsHtml += `
               <div class="${cardBg} border-2 rounded-xl p-3 flex flex-col justify-between shadow-sm min-h-[128px] transition-all">
@@ -1333,10 +1665,32 @@
                   </span>
                 </div>
 
-                <button type="button" onclick="dischargeRecoveryClient('${ticket}', true)" class="w-full py-1.5 bg-white hover:bg-rose-600 text-gray-700 hover:text-white border border-gray-200 hover:border-rose-600 rounded-lg text-[11px] font-bold transition">
-                  Clear Seat
-                </button>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button type="button" onclick="selectRecoveryClient('${ticket}')" class="py-1.5 ${isBeingMoved ? 'bg-black text-white border-black' : 'bg-white hover:bg-sky-600 text-sky-900 hover:text-white border-gray-200 hover:border-sky-600'} border rounded-lg text-[11px] font-bold transition">
+                    ${isBeingMoved ? 'Moving…' : 'Move'}
+                  </button>
+                  <button type="button" onclick="dischargeRecoveryClient('${ticket}', true)" class="py-1.5 bg-white hover:bg-rose-600 text-gray-700 hover:text-white border border-gray-200 hover:border-rose-600 rounded-lg text-[11px] font-bold transition">
+                    Clear
+                  </button>
+                </div>
               </div>
+            `;
+          } else if (selectedRecoveryTicket) {
+            seatsHtml += `
+              <button type="button" onclick="assignSeatToClient('${seatId}', '${selectedRecoveryTicket}')" class="bg-amber-50/70 hover:bg-amber-100 border-2 border-dashed border-amber-400 rounded-xl p-3 flex flex-col justify-between min-h-[128px] text-left transition cursor-pointer shadow-sm">
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-[10px] font-black uppercase tracking-wider text-amber-900">Seat ${seat}</span>
+                  <span class="text-[10px] font-bold text-amber-700">${selectedCurrentSeat ? 'Move Here' : 'Tap to Seat'}</span>
+                </div>
+                
+                <div class="my-2 text-center w-full">
+                  <span class="inline-block px-2.5 py-1 bg-black text-white rounded-lg text-xs font-black">
+                    ${selectedCurrentSeat ? `Move #${selectedRecoveryTicket}` : `+ Seat #${selectedRecoveryTicket}`}
+                  </span>
+                </div>
+
+                <div class="text-[10px] text-center text-amber-800 font-semibold w-full">Vacant</div>
+              </button>
             `;
           } else {
             seatsHtml += `
@@ -1379,6 +1733,11 @@
       const inRecovery = latestQueueData.filter(r => r && String(r.Status || r.status || '').trim() === 'In Recovery');
       if (inRecovery.length === 0) return;
 
+      const recoveryScreen = document.getElementById('screen-recovery');
+      const adminScreen = document.getElementById('screen-admin');
+      const canAutoDischarge = (recoveryScreen && !recoveryScreen.classList.contains('hidden')) ||
+                               (adminScreen && !adminScreen.classList.contains('hidden'));
+
       inRecovery.forEach(r => {
         const ticket = String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim();
         if (!ticket) return;
@@ -1390,7 +1749,7 @@
           timerEl.innerText = formatCountdown(remMs);
         }
 
-        if (remMs <= 0 && !autoDischargedTickets.has(ticket)) {
+        if (canAutoDischarge && remMs <= 0 && !autoDischargedTickets.has(ticket)) {
           autoDischargedTickets.add(ticket);
           dischargeRecoveryClient(ticket, false);
         }
@@ -1399,6 +1758,17 @@
 
     async function assignSeatToClient(seatId, ticketNum) {
       if (!ticketNum) return;
+
+      if (selectedRecoveryTicket === String(ticketNum).trim()) {
+        selectedRecoveryTicket = null;
+      }
+
+      // Optimistic local UI update for instant feedback when seating or moving
+      const targetRecord = latestQueueData.find(r => r && String(r.TicketNumber || r.Ticketnumber || r.ticketNum || '').trim() === String(ticketNum).trim());
+      if (targetRecord) {
+        targetRecord.RecoverySeat = seatId;
+        renderRecoveryGrid();
+      }
 
       try {
         await fetch(API_URL, {
@@ -1424,6 +1794,10 @@
       if (isManual) {
         const confirmed = confirm(`Clear seat and discharge Client #${ticketNum} from recovery?`);
         if (!confirmed) return;
+      }
+
+      if (selectedRecoveryTicket === String(ticketNum).trim()) {
+        selectedRecoveryTicket = null;
       }
 
       try {
@@ -1768,6 +2142,8 @@
         });
         alert("✓ Clinic data archived successfully! Queue has been reset for the next operational day.");
         autoDischargedTickets.clear();
+        announcedCallIds.clear();
+        localStorage.removeItem('evo_dismissed_missing_tickets');
         fetchQueue();
       } catch (err) {
         console.error("Archive error:", err);
@@ -1788,6 +2164,8 @@
         });
         alert("✓ Queue sheet reset successfully.");
         autoDischargedTickets.clear();
+        announcedCallIds.clear();
+        localStorage.removeItem('evo_dismissed_missing_tickets');
         fetchQueue();
       } catch (err) {
         console.error("Reset error:", err);
