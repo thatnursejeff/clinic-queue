@@ -75,7 +75,7 @@
                 <span>⚠️ Missing Sequence Number(s)</span>
               </h3>
               <p class="text-xs text-amber-800 mt-0.5">
-                A higher ticket has been in the queue for 5+ minutes without these numbers logged:
+                A client number may be missing from the queue:
               </p>
             </div>
           </div>
@@ -823,10 +823,10 @@
           </div>
           <div class="flex items-center gap-1.5">
             <button type="button" onclick="prefillMissingTicket(${item.num})" class="px-2.5 py-1 bg-black hover:bg-gray-800 text-white text-[11px] font-bold rounded-lg transition">
-              + Fill #${item.num}
+              + Add to queue #${item.num}
             </button>
             <button type="button" onclick="dismissMissingTicket(${item.num})" class="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11px] font-semibold rounded-lg transition" title="Ignore if slip was skipped or voided">
-              Skip
+              Ignore
             </button>
           </div>
         </div>
